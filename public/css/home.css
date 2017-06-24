@@ -1,0 +1,752 @@
+.goods-item {
+    background: #fff;
+    border-bottom: solid 1px #F2F2F2;
+    padding: 0.5rem 5%;
+    width: 100%;
+}
+.goods-item-icon {
+    height: 3rem;
+    width: 3rem;
+    float:left;
+    border: solid 1px #C1C1C1;
+    margin-right: 0.5rem;
+    background-repeat: no-repeat;
+    background-size:100%;
+}
+.goods-price {
+    color: #C81E1E;
+}
+.goods-item-content {
+    float: left;
+    width: 70%;
+}
+.goods-item-content div {
+    height: 1rem;
+}
+.goods-name {
+    font-size: 0.8rem;
+    font-weight:bold;
+    overflow: hidden;
+    word-break: break-all;
+}
+
+/*goods.blade.php*/
+.goods-pic {
+    width: 100%;
+    height: 4rem;
+    background: #C1C1C1;
+}
+.goods table {
+    width: 100%;
+    font-size: 0.8rem;
+}
+.goods table td {
+    text-align: center;
+    height: 1.5rem;
+    border: solid 1px #C1C1C1;
+}
+
+.goods-content-header {
+    background: #fff;
+    border-bottom:solid 1px #C1C1C1;
+    padding: 0.5rem 5%;
+    width: 100%;
+}
+.goods-content-name {
+    font-weight: bold;
+    font-size: 0.8rem;
+    margin-bottom: 0.1rem;
+}
+.goods-content-price span {
+    color: red;
+    font-size: 1rem;
+}
+.goods-header {
+    margin-bottom: 0.5rem;
+}
+.goods-property {
+    background: #fff;
+    marign-bottom: 0.8rem 0;
+    padding: 0.2rem 5%;
+    width: 100%;
+}
+.goods-property div {
+    text-align:center;
+    font-size: 1rem;
+    line-height: 2rem;;
+    font-weight:bold;
+}
+.goods-select {
+    padding: 0.1rem 5%;
+    background: #fff;
+    font-size:0.7rem;
+    line-height: 1.2rem;
+    height: 1.5rem;
+}
+.goods-select div:first-child {
+    float:left;
+}
+.goods-select div:last-child {
+    float:right;
+}
+.goods-detail {
+    padding: 1rem 5%;
+    width: 100%;
+    background: #fff;
+    margin-top:0.5rem;
+}
+.goods-detail img {
+    max-width:100%;
+}
+.sku-property {
+    background: #C1C1C1;
+    opacity: 0.5;
+}
+
+.property-select-area {
+    background-color: #fff;
+    position:absolute;
+    bottom:0;
+    width: 100%;
+    z-index:10500;
+    opacity: 1;
+    display: none;
+}
+.goods-property-area, .goods_num {
+    padding: 0.2rem 4%;
+    width: 100%;
+}
+.goods-property-area .goods-property-key {
+    font-size: 0.7rem;
+    font-weight:600;
+}
+.goods-property-area .goods-property-value {
+    font-size: 0.7rem;
+    padding: 0 3%;
+    width:100%;
+}
+.goods-property-key-value {
+    width:40%;
+    border: solid 1px #C1C1C1;
+    line-height: 1.5rem;
+    text-align: center;
+    float:left;
+    margin-right: 10%;
+    overflow: hidden;
+    margin-bottom: 0.3rem;
+}
+.goods-property-item {
+    margin-bottom: 0.2rem;
+}
+.goods-property-key {
+    margin-bottom: 0.1rem;
+}
+.goods-property-value .active {
+    color: red;
+    border-color: red;
+}
+.goods_num_change {
+    float:left;
+    width: 100%;
+    padding:0.1rem 5%;
+}
+.goods_num_change div {
+    float: left;
+}
+.goods_reduce_num, .goods_add_num {
+    width: 16%;
+    line-height: 1.5rem;
+    text-align: center;
+    font-size: 1rem;
+    background: #F2F2F2;
+}
+.goods_input {
+    width: 50%;
+    margin: 0 5%;
+}
+.goods_input input {
+    width: 100%;
+    text-align: center;
+    line-height: 1.5rem;
+    border: solid 1px #C1C1C1;
+}
+.goods-detail-title {
+    text-align: center;
+    width: 80%;
+    margin: auto;
+    margin-bottom:0.2rem;
+    position: relative;
+}
+.goods-detail-title span {
+    z-index: 10;
+    background-color: #fff;
+    padding: 0 10%;
+    font-size: 0.8rem;
+    position: relative;
+}
+.goods-detail-title::after {
+    content: '';
+    height: 1px;
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    background: #000;
+    transform: scaleY(.5);
+}
+.goods-act {
+    background: #F2F2F2;
+    border-top: solid 1px red;
+    margin-top:0.5rem;
+}
+.goods-act div {
+    float:left;
+    width: 33%;
+    text-align:center;
+    line-height: 2rem;
+    font-size: 0.6rem;
+}
+.addcar {
+    border-left:1px solid red;
+    border-right: solid 1px red;
+}
+/*user\index.blade.php*/
+.user_index {
+    width: 100%;
+    height:100%;
+}
+.user_index div {
+    background: #FFFFFF;
+    margin-bottom:0.4rem;
+}
+.user_index .photo {
+    width: 10rem;
+    margin:0 auto;;
+}
+.user_index .icon {
+    width: 3rem;
+    height: 3rem;
+    background-repeat:no-repeat;
+    border-radius:3rem;
+    border: solid 1px #838588;
+    margin: 1rem auto;
+}
+.photo div:nth-child(2) {
+    text-align: center;
+}
+.user_index .address,.order,.aboutme{
+    line-height:2rem;
+    font-size:0.8rem;
+    color: #232323;
+    padding-left:6%;
+    width: 100%;
+}
+/*aboutme.blade.php*/
+.aboutme_content {
+    font-size:0.8rem;
+    width:80%;
+    margin:2rem auto;
+    word-wrap: break-word;
+}
+/*card.blade.php*/
+.card #card_recharge {
+    width:60%;
+    height: 1.5rem;
+    line-height: 1.5rem;
+    margin: auto;
+    background-color: #C81E1E;
+    border-color: #C81E1E;
+    color:#fff;
+    font-size: 0.8rem;
+}
+.card {
+    margin: 0;
+    border: none;
+    box-shadow: none;
+}
+.card .card_desc_title>div:nth-child(2) {
+    float:left;
+    width:50%;
+    text-align: center;
+    height: 1.5rem;
+    line-height: 1.5rem;
+}
+.card .line {
+    width: 25%;
+    padding:0.36rem 0;
+    border-bottom:solid 1px #000;
+    float:left;
+}
+.card .card_desc_title {
+    width: 70%;
+    margin: auto;
+}
+.card .card_desc_content {
+    width: 90%;
+    margin: 1rem auto;
+}
+.card .card_desc_content p {
+    margin: 0.5rem 0;
+}
+.card .popup {
+    background: #C1C1C1;
+}
+
+.card .card_pic {
+    width:90%;
+    margin:0.6rem auto;
+    height: 10rem;
+    border-radius:0.5rem;
+    background: #000;
+    position:relative;
+}
+
+.card .card_no, .level {
+    color:#fff;
+    position:absolute;
+}
+.card_no {
+    top:0.5rem; left: 5%;
+}
+.level {
+    bottom:0.5rem; right:5%;
+}
+
+.card-money-select {
+    background: #C1C1C1;
+    opacity: 0.5;
+}
+
+.card-select-area {
+    background-color: #fff;
+    position:absolute;
+    bottom:0;
+    width: 100%;
+    z-index:10500;
+    opacity: 1;
+    display: none;
+}
+.card-select-area .title {
+    margin: 0.1rem auto;
+    position: relative;
+}
+.title .cancel {
+    font-size: 1.5rem;
+    width:1.5rem;
+    line-height:1.5rem;
+    position: absolute;
+    top:0.1rem;
+    right:0.1rem;
+}
+.card-money>div {
+    width:90%;
+    margin: 0 auto;
+}
+.card-money-area div {
+    float: left;
+    width: 45%;
+    line-height: 1.5rem;
+    border: solid 1px #0c0c0c;
+    text-align: center;
+    margin-bottom: 0.4rem;
+}
+.card-money-area div:nth-child(even) {
+    margin-left: 10%;
+}
+.sure_recharge {
+    line-height: 2rem;
+    margin-top:1rem;
+    background:#F2F2F2;
+    text-align:center;
+}
+
+.card-money-area .active {
+    border-color:red;
+    color:red;
+}
+.pay-select {
+    border-bottom: solid 1px #F2F2F2;
+}
+
+
+/*addresss/create.blade.php*/
+.address-create li {
+    display: list-item;
+    list-style-type: none;
+    background:#fff;
+    margin: 0.5rem 0;
+    font-size:0.8rem;
+}
+.address-create-div div {
+    float:left;
+    line-height: 2rem;
+}
+.address-create-div div:nth-child(1) {
+    width:30%;
+}
+.address-create-div div:nth-child(2) {
+    width:70%;
+}
+.address-create-div {
+    padding: 0 5%;
+    width: 100%;
+}
+.address-create input {
+    height:100%;
+    width: 100%;
+    line-height:2rem;
+    text-align: right;;
+}
+.address-location {
+    padding:0 5%;
+    width:100%;
+}
+.address-location textarea {
+    width:100%;
+    height: 3.4rem;
+}
+.address-create-checkbox div {
+    float:left;
+    line-height: 2rem;
+    padding: 0 5%;
+}
+.address-create-checkbox div:nth-child(1) {
+    margin-right: 48%;
+}
+.address-add-btn {
+    background:#fff;
+    width: 80%;
+    margin: 2rem auto;
+    line-height: 2rem;
+    text-align: center;
+    border-radius: 0.3rem;
+    font-size: 0.8rem;
+}
+
+
+/*address/index.blade.php */
+.address-list {
+    overflow-y: scroll;
+}
+.address-list-ul li {
+    background: #fff;
+    margin: 1rem auto;
+    font-size: 0.8rem;
+}
+.address-list-ul .address-list-content {
+    width:100%;
+    margin: auto;
+    padding: 0 5%;
+    border-bottom: solid 1px #F2F2F2;
+}
+.address-list-li-title {
+    height: 2rem;
+}
+.address-list-li-title div {
+    line-height: 1.8rem;
+}
+.address-list-li-title div:first-child {
+    float: left;
+    width: 30%;
+    height: 2rem;
+    overflow: hidden;
+}
+.address-list-li-title div:nth-child(2) {
+    float:right;
+    width: 60%;
+    height: 2rem;
+    overflow: hidden;
+    text-align: right;
+}
+.address-list-location {
+    line-height: 1rem;
+    margin: 0 auto 0.3rem;
+    word-wrap: break-word;
+}
+.address-list-default {
+    width: 100%;
+    padding: 0 5%;
+}
+.address-list-default div {
+    float:left;
+    line-height: 2rem;
+}
+.address-list-default div:nth-of-type(2) {
+    line-height: 2rem;
+    margin-left: 0.4rem;
+}
+.address-list-default div:nth-of-type(1) {
+    margin-top: 0.6rem;
+}
+.address-list-select {
+    width: 1rem;
+    height: 1rem;
+    background: url('/images/address_no_selected.png') no-repeat;
+    background-size: 100%;
+}
+.address-list-default .active {
+    background-image: url('/images/address_selected.png');
+}
+
+/*car.blade.php*/
+.car-select, .car-item-icon, .car-item-content {
+    float: left;
+}
+.car-item-icon {
+    width:2.9rem;
+    height:2.9rem;
+    background-size: 100%;
+    float:left;
+    margin-top: 0.1rem;
+    border: solid 1px #C1C1C1;;
+}
+.car-property {
+    width: 40%;
+}
+.car-property, .car-num {
+    float: left;
+}
+.car-num {
+    width:60%;
+    text-align: right;
+}
+.car-num div {
+    float: left;
+}
+.car-num div:first-child {
+    background: #C1C1C1;
+    font-size:0.8rem;
+    text-align:center;
+    width:25%;
+    height: 1.5rem;
+    line-height: 1.5rem;
+}
+.car-num div:nth-child(2) {
+    width: 50%;
+}
+.car-num input {
+    width: 100%;
+    border:solid 1px #C1C1C1;
+    text-align: center;
+    height:auto;
+    height: 1.5rem;
+    line-height: 1.5rem;
+}
+.car-num div:last-child {
+    background: #C1C1C1;
+    font-size:0.8rem;
+    text-align:center;
+    width:25%;
+    height: 1.5rem;
+    line-height: 1.5rem;
+}
+.car-property div:last-child {
+    height: 1rem;
+    overflow: hidden;
+}
+.car-item {
+    margin-bottom: 0.5rem;
+    background: #fff;
+    padding:0.4rem 0 0.4rem 5%;
+}
+.car-price {
+    color: red;
+    font-weight: bold;
+}
+.car-name {
+    height: 1.5rem;
+    line-height:0.8rem;
+    font-weight:bold;
+    overflow: hidden;
+}
+.car-item-content {
+    width: 60%;
+    margin-left:5%;
+}
+.car-select {
+    width: 10%;
+}
+.car-select-type {
+    background:url('/images/address_no_selected.png') no-repeat;
+    width: 1rem;
+    height:1rem;
+    background-size:100%;
+    margin-top: 1.1rem;
+}
+.car-act,.car-act-del {
+    position: absolute;
+    bottom: 0;
+    width:100%;
+    border-top:solid 1px #0c0c0c;
+}
+.car-act-area, .car-count, .car-edit, .car-buy, .car-act-del-area,
+.car-sure, .car-del{
+    float:left;
+    background: #fff;
+    height: 2rem;
+}
+.car-act-area {
+    width: 30%;
+}
+.car-edit, .car-buy,.car-sure, .car-del {
+    width:20%;
+    text-align:center;
+    line-height: 2rem;
+}
+.car-count {
+    padding-right: 2%;
+    width: 30%;
+}
+.car-count div {
+    text-align: right;
+}
+.car-edit,.car-sure {
+    border-left: solid 1px #C1C1C1;
+    border-right: solid 1px #C1C1C1;
+}
+.car-act-select-pic,.car-act-del-select-pic {
+    background: url('/images/address_no_selected.png') no-repeat;
+    background-size: 100%;
+    width: 1rem;
+    height:1rem;
+    margin-right: 10%;
+}
+.car-act-del-select-pic {
+    margin-right: 5%;
+}
+.car-act-area, .car-act-del-area {
+    padding: 0.5rem 4%;
+}
+.car-act-area div,.car-act-del-area div {
+    float:left;
+}
+.car-select-type.active {
+    background-image: url('/images/address_selected.png');
+}
+.car-act-select-pic.isactive,.car-act-del-select-pic.isactive {
+    background-image: url('/images/address_selected.png');
+}
+
+.car-act-del {
+    display: none;
+}
+.car-act-del-area {
+    width:60%;
+}
+
+/*order/create.blade.php */
+.order-address-info {
+    float:left;
+    width: 80%;
+}
+.order-address-select {
+    float:left;
+    width: 20%;
+    text-align:center;
+    padding:0.6rem 1rem;
+}
+.order-address-info-title {
+    line-height: 1.5rem;
+    height: 1.5rem;
+    width:100%;
+}
+.order-address-info-title div:first-child {
+    float:left;
+}
+.order-address-info-title div:last-child {
+    float:right;
+}
+.order-address-info-location {
+    width: 100%;
+    line-height: 1rem;
+    height: 2rem;
+    overflow: hidden;
+}
+.order-act {
+    width: 100%;
+    position: absolute;
+    bottom:0;
+    height: 2rem;
+    background: #fff;
+}
+.order-act div {
+    float:left;
+    line-height: 2rem;
+}
+.order-count {
+    width: 50%;
+    padding-left:4%;
+}
+.order-total {
+    width:30%;
+}
+.order-buy {
+    width: 20%;
+    text-align: center;
+    border-left: solid 1px #C1C1C1;
+    border-right: solid 1px #C1C1C1;
+}
+.order-item {
+    width:100%;
+    padding: 0.4rem 5%;
+    background: #fff;
+    border-bottom: solid 1px #C1C1C1;
+}
+.order-address {
+    height:3.5rem;
+    background: #fff;
+    border-bottom:0.5rem;
+}
+.order-item-icon {
+    width: 3.4rem;
+    height:3.4rem;
+    margin-top: 0.2rem;
+    background-repeat:no-repeat;
+    background-size: 100%;
+}
+.order-item-icon, .order-item-content {
+    float:left;
+}
+.order-item-content {
+    width: 70%;
+    margin-left: 4%;
+}
+.order-item-num div {
+    float: left;
+    height: 1rem;
+}
+.order-price {
+    color: red;
+    font-weight:bold;
+}
+.order-item-name {
+    height:1.8rem;
+    font-weight:bold;
+    overflow: hidden;
+    word-break: break-all;
+}
+.order-item-num div:first-child {
+    width: 50%;
+    overflow: hidden;
+}
+.order-item-num div:last-child {
+    width:50%;
+    text-align: right;
+}
+.order-list {
+    margin-top:0.3rem;
+}
+.order-express, .order-discount {
+    background: #fff;
+    width: 100%;
+    padding: 0 5%;
+    line-height: 1.8rem;
+    height: 1.8rem;
+    border-bottom: solid 1px #C1C1C1;
+}
+.order-express div,.order-discount div {
+    float:left;
+}
+.order-express div:last-child,.order-discount div:last-child {
+    float:right;
+}
