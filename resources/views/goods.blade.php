@@ -48,7 +48,10 @@
     <input type="hidden" id="goodsid" name="goodsid" value="{{ $goods->goodsid }}"/>
     <div class="sku-property"></div>
     <div class="property-select-area">
-        <div class="goods-property-area"></div>
+        <div class="goods-property-icon" style="background-image:url('{{ $goods->goodsicon }}')"></div>
+        <div class="goods-property-area">
+            <div class="goods-property-icon" style="background-image:url('{{ $goods->goodsicon }}')"></div>
+        </div>
         <div class="goods_num">
             <div class="goods_num_title">选择数量</div>
             <div class="goods_num_change">

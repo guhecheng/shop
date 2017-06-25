@@ -25,7 +25,7 @@
             </div>
             <div class="swiper-container">
                 <div class="swiper-wrapper">
-                    <div class="swiper-slide">
+                    <div class="swiper-slide goods-slide" attr-is-add="0">
                         @foreach ($goods as $item)
                         <div class="goods-item" attr-id="{{ $item->goodsid }}">
                             <div class="goods-item-icon" style="background-image:url({{ $item->goodsicon }})"></div>
@@ -40,7 +40,7 @@
                         <br clear="all" />
                     </div>
                     @foreach ($types as $key=>$type)
-                    <div class="swiper-slide" attr-value="{{ $type->typeid }}"></div>
+                    <div class="swiper-slide goods-slide" attr-value="{{ $type->typeid }}" attr-is-add="0"></div>
                     @endforeach
                 </div>
             </div>
@@ -48,14 +48,16 @@
     </div>
     @include('layouts.footer')
     <style type="text/css">
-        .banner { position: relative; overflow: auto; }
-        .banner li { list-style: none;
-            height: 8rem;
-            background-size:100% 100%;
-            background-repeat:no-repeat;
-            position: relative;
+        .buttons-tab a {
+            display: block;
+            float: left;
+            width: {{ 100 / (count($types)+1) }}%;
+            line-height: 2rem;
+            text-align: center;
         }
-        .banner ul li { float: left; }
+        a.active {
+            border-bottom: solid 1px red;
+        }
         .goods-pic {
             background-repeat:no-repeat; background-size: 100% 100%;}
         .index-goods-name { z-index:100;background: #838079; opacity: 0.5;
@@ -82,10 +84,6 @@
         .swiper-slide,.swiper-container,.swiper-wrapper {  width: 100%; }
     </style>
     <script>
-        $(function() {
-            $('.banner').unslider({});
-        });
-
         $(document).on("click", ".goods-item", function() {
             location.href = "/goods?goodsid=" + $(this).attr("attr-id");
         });
@@ -96,18 +94,32 @@
         var mySwiper = new Swiper('.swiper-container',{
             fade:{crossFade:true},
             onSlideChangeStart: function(swiper){
-                console.log(swiper);
+                console.log(swiper.activeIndex);
+                var index = swiper.activeIndex;
+                $(".tab-link").removeClass("active");
+                $(".tab-link:eq("+index+")").addClass("active");
+                console.log($(".goods-slide:eq("+index+")").attr("attr-is-add"));
+                if ($(".goods-slide:eq("+index+")").attr("attr-is-add") == 1) return;
                 $.ajax({
                     url: '/goods/getgoods',
-                    data: {'typeid': 1},
+                    data: {'typeid': $(".tab-link:eq("+index+")").attr("attr-value")},
                     dataType: 'json',
                     type: 'get',
                     success: function(data) {
                         console.log(data);
                         if (data.goods) {
+                            var html = '';
                             for (var i in data.goods) {
-
+                                var goods = data.goods[i];
+                                html +=  '<div class="goods-item" attr-id="">';
+                                html += '<div class="goods-item-icon" style="background-image:url('+goods.goodsicon+')"></div>';
+                                html += '<div class="goods-item-content">';
+                                html += '<div class="goods-name">'+goods.goodsname+'</div>';
+                                html += '<div></div>';
+                                html += '<div class="goods-price">￥ '+goods.price / 100+' 元</div>';
+                                html += '</div><br clear="all" /></div>';
                             }
+                            $(".goods-slide:eq("+index+")").attr('attr-is-add', 1).append(html);
                         }
                     }
                 })

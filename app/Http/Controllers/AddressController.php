@@ -17,7 +17,7 @@ class AddressController extends Controller
     {
         $uid = $request->session()->get('uid');
         $addresses = DB::table('useraddress')->where('uid', $uid)->get();
-        return view('address.index', ['addresses' => $addresses]);
+        return view('address.index', ['addresses' => $addresses, 'from_order' => $request->input('from_order')]);
     }
 
     /**

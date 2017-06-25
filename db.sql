@@ -43,6 +43,7 @@ create table if not exists goods (
   is_ad tinyint not null default 0 comment '是否广告位,0:否，1:是',
   is_sale tinyint default 0 comment '是否上架，0:否，1:是',
   is_delete tinyint default 0 comment '是否删除,0:否，1:是',
+  is_discount tinyint default 0 comment '是否参与折扣, 0: 否， 1:是',
   create_time timestamp default current_timestamp comment '创建时间',
   primary key(goodsid)
 ) engine=innodb charset=utf8;

@@ -171,7 +171,7 @@
                 data: {'car_ids': car_ids},
                 dataType: 'json',
                 success: function(data) {
-                    //location.reload();
+                    location.reload();
                 }
             })
         });

@@ -132,6 +132,9 @@ body {
     padding: 0.2rem 4%;
     width: 100%;
 }
+.goods-property-area {
+    padding-top: 1rem;
+}
 .goods-property-area .goods-property-key {
     font-size: 0.7rem;
     font-weight:600;
@@ -225,6 +228,19 @@ body {
 .addcar {
     border-left:1px solid red;
     border-right: solid 1px red;
+}
+.goods-property-icon {
+    opacity: 1;
+}
+.goods-property-icon{
+    position: absolute;
+    top: -1rem;
+    left: 5%;
+    height:2rem;
+    width: 2rem;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    border: solid 1px #C1C1C1;
 }
 /*user\index.blade.php*/
 .user_index {
@@ -434,13 +450,19 @@ body {
     margin-right: 48%;
 }
 .address-add-btn {
-    background:#fff;
-    width: 80%;
-    margin: 2rem auto;
+    width: 100%;
+    margin: 0 auto;
     line-height: 2rem;
     text-align: center;
-    border-radius: 0.3rem;
     font-size: 0.8rem;
+    background: #000;
+    opacity: 0.5;
+    position: fixed;
+    width: 100%;
+    bottom:0;
+    padding: 0 10%;
+    color: #fff;
+
 }
 
 
@@ -658,6 +680,7 @@ body {
 .order-address-info {
     float:left;
     width: 80%;
+    padding-left:5%;
 }
 .order-address-select {
     float:left;
@@ -679,7 +702,8 @@ body {
 .order-address-info-location {
     width: 100%;
     line-height: 1rem;
-    height: 2rem;
+    max-height: 2rem;
+    min-height:1rem;
     overflow: hidden;
 }
 .order-act {

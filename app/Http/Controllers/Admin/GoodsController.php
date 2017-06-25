@@ -64,7 +64,8 @@ class GoodsController extends Controller {
             'is_hot' => $is_hot,
             'typeid' => $goodstype,
             'price' => $goodsprice * 100,
-            'goodsdesc' => $request->input('content')
+            'goodsdesc' => $request->input('content'),
+            'is_discount' => $request->input('discount')
         ]);
         if ($goodsid) {
             foreach ($request->input('common_attr') as $key=>$value) {
