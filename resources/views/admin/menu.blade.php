@@ -32,8 +32,8 @@
             </span>
                 </a>
                 <ul class="treeview-menu">
-                    <li class="active"><a href="goods"><i class="fa fa-circle-o"></i>商品列表</a></li>
-                    <li><a href="type"><i class="fa fa-circle-o"></i> 类目管理</a></li>
+                    <li class="active"><a href="/admin/goods"><i class="fa fa-circle-o"></i>商品列表</a></li>
+                    <li><a href="/admin/type"><i class="fa fa-circle-o"></i> 类目管理</a></li>
                 </ul>
             </li>
             <li class="treeview">
@@ -45,7 +45,7 @@
             </span>
                 </a>
                 <ul class="treeview-menu">
-                    <li><a href="card"><i class="fa fa-circle-o"></i>卡片列表</a></li>
+                    <li><a href="/admin/card"><i class="fa fa-circle-o"></i>卡片列表</a></li>
                 </ul>
             </li>
         </ul>
