@@ -1,5 +1,5 @@
-@extends('layouts.app')
-
+@extends('layouts.comm')
+@section('my-active', 'active')
 @section('content')
     <div class="user_index">
         <div class="photo">
@@ -13,4 +13,5 @@
         <div class="aboutme">关于我们</div>
         <br clear="all" />
     </div>
+    @include('layouts.footer')
 @endsection

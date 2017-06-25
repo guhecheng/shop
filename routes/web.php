@@ -18,26 +18,31 @@ Route::get('/', 'IndexController@index');
 Route::get('/aboutme', function() {
     return view('aboutme');
 });
+Route::group(['middleware' => 'userlogin'], function (){
+    Route::get('/my', 'UserController@index');
+    Route::get('/money', 'IndexController@money');
+    Route::get('/card', 'MemberController@card');
+    Route::resource('address', 'AddressController');
+    Route::post('/address/setdefault', 'AddressController@setdefault');
+
+    Route::post('/car/add', 'CarController@add');
+    Route::get('/car', 'CarController@index');
+    Route::post('/car/delcar', 'CarController@delcar');
+
+    Route::get('/order/create', 'OrderController@create');
+});
 Route::get('/goods', 'GoodsController@index');
 Route::get('/goods/property', 'GoodsController@property');
+Route::get('/goods/getgoods', 'GoodsController@getgoods');
 
-Route::get('/my', 'UserController@index');
-Route::get('/money', 'IndexController@money');
-Route::get('/card', 'MemberController@card');
-Route::resource('address', 'AddressController');
-Route::post('/address/setdefault', 'AddressController@setdefault');
 
-Route::post('/car/add', 'CarController@add');
-Route::get('/car', 'CarController@index');
-Route::post('/car/delcar', 'CarController@delcar');
-
-Route::get('/order/create', 'OrderController@create');
 
 Route::get('/admin/login', 'Admin\AdminController@login');
+Route::get('/admin', 'Admin\AdminController@index');
 Route::post('/admin/check', 'Admin\AdminController@check');
 
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => 'checklogin'], function() {
-    Route::get('/', 'IndexController@index');
+    Route::get('/', 'AdminController@index');
 
     Route::get('/manage', 'ManagerController@index');
 

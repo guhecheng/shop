@@ -1,14 +1,19 @@
-@extends('layouts.app')
+@extends('layouts.comm')
 
 @section('title', '商品详情')
 
 @section('content')
-    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm-extend.min.css">
-    <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm-extend.min.js' charset='utf-8'></script>
-
+    <script src="/js/swiper.min.js"></script>
+    <link rel="stylesheet" href="/css/swiper.min.css" />
     <div class="content goods">
-        <div class="goods-pic">
-
+        <div class="swiper-container pic-container">
+            <div class="swiper-wrapper">
+                @foreach(explode(',', $goods->goodspic) as $key=>$value)
+                    <div class="swiper-slide" style="background-image:url('{{ $value }}')">
+                        <div class="index-pic-num">{{ $key+1 }}/{{count(explode(',', $goods->goodspic))}}</div>
+                    </div>
+                @endforeach
+            </div>
         </div>
         <div class="goods-content">
             <div class="goods-header">
@@ -19,7 +24,7 @@
                 </div>
                 <div class="goods-select">
                     <div>购买</div>
-                    <div><span class="icon icon-right"></span></div>
+                    <div style=""></div>
                 </div>
             </div>
             <div class="goods-property">
@@ -41,9 +46,7 @@
         </div>
     </div>
     <input type="hidden" id="goodsid" name="goodsid" value="{{ $goods->goodsid }}"/>
-    <div class="popup sku-property">
-
-    </div>
+    <div class="sku-property"></div>
     <div class="property-select-area">
         <div class="goods-property-area"></div>
         <div class="goods_num">
@@ -63,7 +66,36 @@
             <br clear="all" />
         </div>
     </div>
+    <style type="text/css">
+        .swiper-slide {
+            height: 8rem;
+            width: 100%;
+            background-size:100% 100%;
+            background-repeat:no-repeat;
+            position: relative;
+            border-bottom: solid 1px #C1C1C1;
+        }
+        .index-pic-num {
+            background-color: #fff;
+            width: 2rem;
+            line-height: 1rem;
+            position: absolute;
+            bottom: 0.8rem;
+            right: 5%;
+            text-align:center;
+            overflow: hidden;
+        }
+        body {
+            position: relative;}
+    </style>
     <script>
+        $(function() {
+            $(".sku-property").height($(window).height());
+        });
+        var picSwiper = new Swiper('.pic-container', {
+            loop : true,
+            autoplay: 3000,
+        });
         $.ajaxSettings = $.extend($.ajaxSettings, {
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -111,7 +143,7 @@
                 }
             });
 
-            $.popup(".sku-property");
+            $(".sku-property").show();
             $(".property-select-area").show();
             $("#goods_num").val(1);
         });

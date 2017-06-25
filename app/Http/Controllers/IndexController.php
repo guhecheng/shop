@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class IndexController extends Controller {
-    public function index() {
+    public function index(Request $request) {
+        //@override 获取微信账号
+        $request->session()->put('uid', 1);
         $types = DB::table('goodstype')->where('is_delete', 0)
                             ->get();
         $goods = DB::table('goods')->where([
@@ -20,7 +22,13 @@ class IndexController extends Controller {
             ['is_sale', '=', 1]
         ])
             ->orderBy('create_time', 'desc')->get();
-        return view('index', ['types' => $types, 'goods' => $goods]);
+        $ads = DB::table('goods')->where([
+            ['is_delete', '=', 0],
+            ['is_ad', '=', 1]
+        ])->limit(5)->get();
+        return view('index',
+                    ['types' => $types, 'goods' => $goods,
+                              'ads'=>$ads, 'count'=>count($ads), 'index-active'=>'active']);
     }
 
     /**
@@ -37,4 +45,6 @@ class IndexController extends Controller {
                                             ->paginate($pagesize);
         return $request->has('page') ? response()->json(['money' => $money]) : view('money', ['money' => $money]);
     }
+
+
 }

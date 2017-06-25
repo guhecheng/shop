@@ -4,7 +4,6 @@
 @section('card-active', 'active')
 @section('content')
 
-    @include('footer')
     <div class="content card">
         <div class="card_pic">
             <div class="card_no">卡号:{{ $card_no }}</div>
@@ -68,9 +67,12 @@
         </div>
         <div id="sure_pay">确认付款</div>
     </div>
+    @include('layouts.footer')
+
     <style>
         .page {
             background-color: #fff;}
+        .footer { height:3rem;}
     </style>
     <script type="text/javascript">
         $(document).ready(function () {

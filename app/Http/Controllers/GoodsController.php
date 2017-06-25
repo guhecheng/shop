@@ -52,4 +52,15 @@ class GoodsController extends Controller {
         }
         return response()->json(['rs' => 0]);
     }
+
+    public function getgoods(Request $request) {
+        $typeid = $request->input('typeid');
+        $goods = DB::table('goods')->where([
+            ['is_delete', '=', 0],
+            ['typeid', '=', $typeid]
+        ])
+            ->limit(8)
+            ->get();
+        return response()->json(['goods' => $goods]);
+    }
 }
