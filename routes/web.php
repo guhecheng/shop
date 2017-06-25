@@ -30,6 +30,7 @@ Route::group(['middleware' => 'userlogin'], function (){
     Route::post('/car/delcar', 'CarController@delcar');
 
     Route::get('/order/create', 'OrderController@create');
+    Route::get('/order', 'OrderController@index');
 });
 Route::get('/goods', 'GoodsController@index');
 Route::get('/goods/property', 'GoodsController@property');

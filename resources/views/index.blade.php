@@ -9,7 +9,7 @@
         <div class="swiper-container pic-container">
             <div class="swiper-wrapper">
                 @foreach($ads as $key=>$ad)
-                <div class="swiper-slide goods-pic" style="background-image:url('{{ explode(',', $ad->goodspic)[0] }}')">
+                <div class="swiper-slide goods-pic" style="background-image:url('{{ explode(',', $ad->goodspic)[0] }}')" attr-id="{{ $ad->goodsid }}">
                     <div class="index-pic-num">{{ $key+1 }}/{{$count}}</div>
                     <div class="index-goods-name">{{ $ad->goodsname }}</div>
                 </div>
@@ -85,6 +85,9 @@
     </style>
     <script>
         $(document).on("click", ".goods-item", function() {
+            location.href = "/goods?goodsid=" + $(this).attr("attr-id");
+        });
+        $(document).on("click", ".goods-pic", function() {
             location.href = "/goods?goodsid=" + $(this).attr("attr-id");
         });
         var picSwiper = new Swiper('.pic-container', {

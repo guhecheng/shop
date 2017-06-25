@@ -20,7 +20,12 @@
                 <div class="goods-content-header">
                     <div class="goods-content-name">{{ $goods->goodsname }}</div>
                     <div class="goods-content-price"><span>￥ {{ $goods->price / 100 }}</span></div>
-                    <div class="goods-content-detail"></div>
+                    <div class="goods-content-detail">
+                        <div>满500包邮</div>
+                        <div></div>
+                        <div>库存 {{ $count }}</div>
+                        <br clear="both" />
+                    </div>
                 </div>
                 <div class="goods-select">
                     <div>购买</div>
@@ -44,13 +49,20 @@
                 </div>
             </div>
         </div>
+        <div class="goods-act">
+            <div class="lookcar">查看购物车</div>
+            <div class="addcar">加入购物车</div>
+            <div class="buy">立即购买</div>
+            <br clear="all" />
+        </div>
     </div>
     <input type="hidden" id="goodsid" name="goodsid" value="{{ $goods->goodsid }}"/>
+    <input type="hidden" id="act_type" name="act_type" value="" />
     <div class="sku-property"></div>
     <div class="property-select-area">
         <div class="goods-property-icon" style="background-image:url('{{ $goods->goodsicon }}')"></div>
+        <div class="goods-property-close"></div>
         <div class="goods-property-area">
-            <div class="goods-property-icon" style="background-image:url('{{ $goods->goodsicon }}')"></div>
         </div>
         <div class="goods_num">
             <div class="goods_num_title">选择数量</div>
@@ -62,19 +74,45 @@
             </div>
             <br clear="all" />
         </div>
-        <div class="goods-act">
-            <div class="lookcar">查看购物车</div>
-            <div class="addcar">加入购物车</div>
-            <div class="buy">立即购买</div>
-            <br clear="all" />
+        <div class="goods_sure">确认</div>
+        <div class="goods_sure_act">
+            <div class="goods_addcar">加入购物车</div>
+            <div class="goods_buy">立即购买</div>
         </div>
     </div>
     <style type="text/css">
+        .goods_sure_act {
+            width: 100%;
+            display: none;
+            border-top: solid 1px red;
+            margin-top: 0.5rem;
+        }
+        .goods_sure_act div {
+            float: left;
+            background: #F2F2F2;
+            line-height:2.4rem;
+            width: 50%;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        .goods_addcar {
+            border-right: solid 1px red;
+        }
+        .goods-property-close {
+            background: url('/images/close.png') no-repeat;
+            background-size: 100%;
+            position: absolute;
+            width: 1.5rem;
+            height: 1.5rem;
+            top: 0.5rem;
+            right: 1rem;
+        }
         .swiper-slide {
             height: 8rem;
             width: 100%;
-            background-size:100% 100%;
+            background-size: 100% 100%;
             background-repeat:no-repeat;
+            background-position: center center;
             position: relative;
             border-bottom: solid 1px #C1C1C1;
         }
@@ -90,6 +128,10 @@
         }
         body {
             position: relative;}
+        .goods-content-detail div {
+            float: left;
+            width: 33%;
+        }
     </style>
     <script>
         $(function() {
@@ -108,15 +150,66 @@
             location.href = "/goods";
         });
         $(".goods-select").on("click", function() {
+            getsku();
+            $(".goods_sure_act ").show();
+            $(".goods_sure").hide();
+        });
+        $(function() {
+            $(document).on("click", ".goods-property-key-value", function() {
+                $(this).parent().find(".active").removeClass("active");
+                $(this).addClass("active");
+            });
+        });
+        $(".goods_add_num").on('click', function () {
+            $("#goods_num").val(parseInt($("#goods_num").val()) + 1);
+        });
+        $(".goods_reduce_num").on("click", function() {
+            var num = parseInt($("#goods_num").val());
+            $("#goods_num").val( num > 1 ? num -1 : 1);
+        });
+        $(".goods_addcar").on("click", function() {
+            addcar();
+        });
+        $(".goods_buy").on("click", function() {
+
+        });
+        $(".lookcar").on("click", function() {
+            location.href = "/car";
+        });
+        $(".addcar").on("click", function() {
+            $("#act_type").val(1);
+            getsku();
+            $(".goods_sure").show();
+            $(".goods_sure_act").hide();
+        });
+        $(".buy").on("click", function() {
+            $("#act_type").val(2);
+            getsku();
+            $(".goods_sure").show();
+            $(".goods_sure_act").hide();
+        });
+        $(".goods-property-close").on("click", function() {
+            $(".goods-property-area").empty();
+            $(".sku-property,.property-select-area").hide();
+        });
+        $(".goods_sure").on("click", function() {
+            if ($("#act_type").val() == 1)
+                addcar();
+            else
+                buy();
+        });
+        function getsku() {
             $.ajax({
                 url: '/goods/property',
                 type: 'get',
                 data: { 'goodsid' : $("#goodsid").val()},
                 dataType: 'json',
+                async: false,
                 success: function(data) {
                     if (data.rs == 1) {
                         var html = '';
                         var key_id = 0;
+                        $(".goods-property-area").empty();
                         for (var i in data.propertys) {
                             var property = data.propertys[i];
                             if (key_id != property.key_id) {
@@ -145,25 +238,11 @@
                     }
                 }
             });
-
             $(".sku-property").show();
             $(".property-select-area").show();
             $("#goods_num").val(1);
-        });
-        $(function() {
-            $(document).on("click", ".goods-property-key-value", function() {
-                $(this).parent().find(".active").removeClass("active");
-                $(this).addClass("active");
-            });
-        });
-        $(".goods_add_num").on('click', function () {
-            $("#goods_num").val(parseInt($("#goods_num").val()) + 1);
-        });
-        $(".goods_reduce_num").on("click", function() {
-            var num = parseInt($("#goods_num").val());
-            $("#goods_num").val( num > 1 ? num -1 : 1);
-        });
-        $(".addcar").on("click", function() {
+        }
+        function addcar() {
             var attr = [];
             $(".active").each(function() {
                 attr[$(this).find(".keys").val()] = $(this).find(".values").val();
@@ -172,8 +251,8 @@
                 url: '/car/add',
                 type: 'post',
                 data: {'attr': attr,
-                        'goodsid': $("#goodsid").val(),
-                        'num': $("#goods_num").val()},
+                    'goodsid': $("#goodsid").val(),
+                    'num': $("#goods_num").val()},
                 dataType: 'json',
                 success: function(data) {
                     if (data.rs == 1) {
@@ -185,9 +264,9 @@
                     }
                 }
             });
-        });
-        $(".lookcar").on("click", function() {
-            location.href = "/car";
-        });
+        }
+        function buy() {
+
+        }
     </script>
 @endsection

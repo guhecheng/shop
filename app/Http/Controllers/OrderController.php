@@ -12,6 +12,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller {
+    private $state = [
+        'ORDER_CREATE' => 0 ,
+        'ORDER_WAIT_PATY' => 1,
+        'ORDER_HAS_PAY' => 2,
+        'ORDER_WAIT_SEND' => 3,
+        'ORDER_HAS_SEND' => 4,
+        'ORDER_HAS_RECV' => 5
+    ];
+    private $pay_type = [
+        'WX_PAY' => 0,
+    ];
+    public function index(Request $request) {
+        $uid = $request->session()->get("uid");
+        $state = $request->input('state');
+
+    }
 
     public function create(Request $request) {
         $uid = $request->session()->get("uid");

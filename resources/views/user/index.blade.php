@@ -6,12 +6,46 @@
             <div class="icon" style="background-image:url('{{ $user->icon }}')"></div>
             <div>{{ $user->uname }}</div>
         </div>
-        <div class=""></div>
-        <div class="order">全部订单</div>
-        <div class=""></div>
-        <div class="address">地址管理</div>
-        <div class="aboutme">关于我们</div>
+        <div class="user_info">
+            <div class="user_info_score">
+                <div>{{ $user->score }}</div>
+                <div>积分</div>
+            </div>
+            <div class="user_info_money">
+                <div>￥{{ $user->money }}</div>
+                <div>账户余额</div>
+            </div>
+            <div class="user_info_center"></div>
+            <br clear="all" />
+        </div>
+        <a href="/order"><div class="order">全部订单</div></a>
+        <div class="order-state-list">
+            <a href="/order?order_state=">
+                <div class="order-state-list-item">
+                    <div class="order-state-list-wait-pay"></div>
+                    <div>待付款</div>
+                </div>
+            </a>
+            <a href="/order?order_state=">
+                <div class="order-state-list-item">
+                    <div class="order-state-list-wait-send"></div>
+                    <div>待发货</div>
+                </div>
+            </a>
+            <a href="/order?order_state=">
+                <div class="order-state-list-item">
+                    <div class="order-state-list-wait-save"></div>
+                    <div>待收货</div>
+                </div>
+            </a>
+            <br clear="both" />
+        </div>
+        <a href="/address"><div class="address">地址管理</div></a>
+        <a href="/aboutme"><div class="aboutme">关于我们</div></a>
         <br clear="all" />
     </div>
     @include('layouts.footer')
+    <style type="text/css">
+
+    </style>
 @endsection

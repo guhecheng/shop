@@ -182,8 +182,8 @@ create table if not exists card (
 ) engine=innodb charset=utf8;
 
 /*订单表*/
-drop table if exists order;
-create table if not exists order (
+drop table if exists `order`;
+create table if not exists `order` (
   order_id int not null auto_increment,
   order_no char(50) not null default '' comment '订单号',
   recv_name varchar(100) not null default '' comment '收货人',
