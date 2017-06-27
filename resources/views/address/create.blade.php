@@ -104,7 +104,7 @@
                     success: function(data) {
                         if (data.rs == 1) {
                             alert("添加成功，返回列表页");
-                            location.href = '/address';
+                            history.back();
                         } else {
                             alert('添加失败');
                             if (data.num)

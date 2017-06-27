@@ -781,9 +781,7 @@ body {
 }
 .order-address-info-location {
     width: 100%;
-    line-height: 1rem;
-    max-height: 2rem;
-    min-height:1rem;
+    line-height: 0.8rem;
     overflow: hidden;
 }
 .order-act {
@@ -817,8 +815,8 @@ body {
     border-bottom: solid 1px #C1C1C1;
 }
 .order-address {
-    height:3.5rem;
     background: #fff;
+    min-height: 2.2rem;;
     border-bottom:0.5rem;
 }
 .order-item-icon {

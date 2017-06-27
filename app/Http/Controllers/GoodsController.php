@@ -7,6 +7,7 @@
  */
 namespace App\Http\Controllers;
 
+use Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -62,5 +63,47 @@ class GoodsController extends Controller {
             ->limit(8)
             ->get();
         return response()->json(['goods' => $goods]);
+    }
+
+    /**
+     * 根据商品列表页获取skuid
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getgoodssku(Request $request) {
+        $attr = $request->input('attr');
+        $goodsid = $request->input('goodsid');
+        $num = $request->input('num');
+        $validator = Validator::make($request->all(), [
+            'num' => 'required',
+            'attr' => 'required',
+            'goodsid' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()
+                ->json(['rs' => 0, 'msg' => '信息不全']);
+        }
+        $sql = 'select distinct(a.sku_id) from goodsproperty as a';
+        foreach ($attr as $key=>$value) {
+            if (empty($value)) continue;
+            $sql .= ' left join goodsproperty as p'.$key. ' on a.sku_id= p'.$key.'.sku_id';
+        }
+        $sql .= " where ";
+        foreach ($attr as $key=>$item) {
+            if (empty($item)) continue;
+            $sql .= " p".$key.".value_id=$item and";
+        }
+        $sql .=" a.goods_id=". $goodsid;
+        $rs = DB::select($sql);
+
+        if ($rs[0]->sku_id) {
+            $sku = DB::table('goodssku')->where('sku_id', $rs[0]->sku_id)
+                ->first();
+            if ($sku->num < $request->input('num'))
+                return response()->json(['rs'=>0,
+                    'msg'=>'商品仅剩'.$sku->num,
+                    'num' => $sku->num]);
+        }
+        return response()->json(['rs' => 1, 'sku_id' => $rs[0]->sku_id]);
     }
 }

@@ -17,13 +17,15 @@
             </div>
         </div>
         <div>
-            <div class="buttons-tab" id="index-tab">
-                <a href="#tab1" class="tab-link active button" attr-value="">推荐</a>
-                @foreach ($types as $key=>$type)
-                <a href="#tab{{ $key+2 }}" class="tab-link button" attr-value="{{ $type->typeid }}">{{ $type->typename }}</a>
-                @endforeach
-            </div>
+
             <div class="swiper-container">
+                <div class="buttons-tab" id="index-tab"></div>
+                {{--<div class="buttons-tab" id="index-tab">
+                    <a href="#tab1" class="tab-link active button" attr-value="">推荐</a>
+                    @foreach ($types as $key=>$type)
+                        <a href="#tab{{ $key+2 }}" class="tab-link button" attr-value="{{ $type->typeid }}">{{ $type->typename }}</a>
+                    @endforeach
+                </div>--}}
                 <div class="swiper-wrapper">
                     <div class="swiper-slide goods-slide" attr-is-add="0">
                         @foreach ($goods as $item)
@@ -95,40 +97,71 @@
             autoplay: 3000,
         });
         var mySwiper = new Swiper('.swiper-container',{
-            fade:{crossFade:true},
+            pagination: '.buttons-tab',
+            paginationClickable: true,
+            paginationBulletRender: function (index, className) {
+                var key;
+                switch (index) {
+                    case 0: name='推荐';break;
+                    @foreach ($types as $key=>$type)
+                    case {{ $key + 1 }}: name='{{ $type->typename }}'; key= {{$type->typeid}} ;break;
+                    @endforeach
+                    default: name='';
+                }
+                if (index == 0) {
+                    return '<a class="tab-link button active" attr-value="'+key+'">' + name + '</a>';
+                } else {
+                    return '<a class="tab-link button" attr-value="'+key+'">' + name + '</a>';
+                }
+            },
             onSlideChangeStart: function(swiper){
                 console.log(swiper.activeIndex);
                 var index = swiper.activeIndex;
                 $(".tab-link").removeClass("active");
                 $(".tab-link:eq("+index+")").addClass("active");
-                console.log($(".goods-slide:eq("+index+")").attr("attr-is-add"));
-                if ($(".goods-slide:eq("+index+")").attr("attr-is-add") == 1) return;
-                $.ajax({
-                    url: '/goods/getgoods',
-                    data: {'typeid': $(".tab-link:eq("+index+")").attr("attr-value")},
-                    dataType: 'json',
-                    type: 'get',
-                    success: function(data) {
-                        console.log(data);
-                        if (data.goods) {
-                            var html = '';
-                            for (var i in data.goods) {
-                                var goods = data.goods[i];
-                                html +=  '<div class="goods-item" attr-id="">';
-                                html += '<div class="goods-item-icon" style="background-image:url('+goods.goodsicon+')"></div>';
-                                html += '<div class="goods-item-content">';
-                                html += '<div class="goods-name">'+goods.goodsname+'</div>';
-                                html += '<div></div>';
-                                html += '<div class="goods-price">￥ '+goods.price / 100+' 元</div>';
-                                html += '</div><br clear="all" /></div>';
-                            }
-                            $(".goods-slide:eq("+index+")").attr('attr-is-add', 1).append(html);
-                        }
-                    }
-                })
+                getdata(index);
             },
             onSlideChangeEnd: function(){
             }
         });
+        /*$(".tab-link").on("click", function () {
+            $(".tab-link").removeClass("active");
+            $(this).addClass("active");
+            var index = $(this).index();
+            console.log(index);
+            if (index == 0) {
+                $(".goods-slide").removeClass("swiper-slide-active")
+                                .removeClass("swiper-slide-next")
+                                .removeClass("swiper-slide-prev");
+                $(".goods-slide:eq(0)").addClass("swiper-slide-active");
+            }
+            //getdata(index);
+        });*/
+        function getdata(index) {
+            if ($(".goods-slide:eq("+index+")").attr("attr-is-add") == 1) return;
+            $.ajax({
+                url: '/goods/getgoods',
+                data: {'typeid': $(".tab-link:eq("+index+")").attr("attr-value")},
+                dataType: 'json',
+                type: 'get',
+                success: function(data) {
+                    console.log(data);
+                    if (data.goods) {
+                        var html = '';
+                        for (var i in data.goods) {
+                            var goods = data.goods[i];
+                            html +=  '<div class="goods-item" attr-id="">';
+                            html += '<div class="goods-item-icon" style="background-image:url('+goods.goodsicon+')"></div>';
+                            html += '<div class="goods-item-content">';
+                            html += '<div class="goods-name">'+goods.goodsname+'</div>';
+                            html += '<div></div>';
+                            html += '<div class="goods-price">￥ '+goods.price / 100+' 元</div>';
+                            html += '</div><br clear="all" /></div>';
+                        }
+                        $(".goods-slide:eq("+index+")").attr('attr-is-add', 1).append(html);
+                    }
+                }
+            });
+        }
     </script>
 @endsection

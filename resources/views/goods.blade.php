@@ -266,7 +266,25 @@
             });
         }
         function buy() {
-
+            var attr = [];
+            $(".active").each(function() {
+                attr[$(this).find(".keys").val()] = $(this).find(".values").val();
+            });
+            $.ajax({
+                url: '/goods/getgoodssku',
+                type: 'post',
+                data: {'attr': attr,
+                    'goodsid': $("#goodsid").val(),
+                    'num': $("#goods_num").val()},
+                dataType: 'json',
+                success: function(data) {
+                    if (data.rs == 0) {
+                        alert('信息不完整');
+                        return false;
+                    }
+                    location.href = '/order/create?num=' + $("#goods_num").val() + "&goodsid=" + $("#goodsid").val() + "&skuid=" + data.sku_id;
+                }
+            });
         }
     </script>
 @endsection
