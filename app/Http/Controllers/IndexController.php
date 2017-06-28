@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 class IndexController extends Controller {
 
-    public function wxauth(Request $request) {
+    public function wx(Request $request) {
         echo $request->input('echostr');
         exit;
     }
