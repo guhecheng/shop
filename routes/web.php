@@ -18,6 +18,7 @@ Route::get('/', 'IndexController@index');
 Route::get('/aboutme', function() {
     return view('aboutme');
 });
+Route::get('/wxauth', 'IndexController@wxauth');
 Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/my', 'UserController@index');
     Route::get('/money', 'IndexController@money');

@@ -11,7 +11,7 @@ use Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use EasyWeChat\Payment\Order;
-
+use EasyWeChat\Foundation\Application;
 
 class OrderController extends Controller {
     private $state = [
@@ -29,7 +29,6 @@ class OrderController extends Controller {
     private $payment;
 
     public function __construct() {
-        parent::__construct();
         $options = [
             // 前面的appid什么的也得保留哦
             'app_id' => 'xxxx',

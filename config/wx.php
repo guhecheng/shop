@@ -16,10 +16,10 @@ return [
     /**
      * 账号基本信息，请从微信公众平台/开放平台获取
      */
-    'app_id'  => 'your-app-id',         // AppID
-    'secret'  => 'your-app-secret',     // AppSecret
-    'token'   => 'your-token',          // Token
-    'aes_key' => '',                    // EncodingAESKey，安全模式下请一定要填写！！！
+    'app_id'  => 'wxd8b6b83c91c44ac3',         // AppID
+    'secret'  => '220cf7d0f03a7d1384ce38fe8f121d39',     // AppSecret
+    'token'   => 'wjtmetgdfw',          // Token
+    'aes_key' => 'cAUCfrVJR32GhIcEwIGMyNOqWLsuRfj1WXgKlZK0AxM',                    // EncodingAESKey，安全模式下请一定要填写！！！
     /**
      * 日志配置
      *
@@ -47,7 +47,7 @@ return [
      * 微信支付
      */
     'payment' => [
-        'merchant_id'        => 'your-mch-id',
+        'merchant_id'        => '1481215322',
         'key'                => 'key-for-signature',
         'cert_path'          => 'path/to/your/cert.pem', // XXX: 绝对路径！！！！
         'key_path'           => 'path/to/your/key',      // XXX: 绝对路径！！！！

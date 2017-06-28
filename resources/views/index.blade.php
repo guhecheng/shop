@@ -19,13 +19,12 @@
         <div>
 
             <div class="swiper-container">
-                <div class="buttons-tab" id="index-tab"></div>
-                {{--<div class="buttons-tab" id="index-tab">
+                <div class="buttons-tab" id="index-tab">
                     <a href="#tab1" class="tab-link active button" attr-value="">推荐</a>
                     @foreach ($types as $key=>$type)
                         <a href="#tab{{ $key+2 }}" class="tab-link button" attr-value="{{ $type->typeid }}">{{ $type->typename }}</a>
                     @endforeach
-                </div>--}}
+                </div>
                 <div class="swiper-wrapper">
                     <div class="swiper-slide goods-slide" attr-is-add="0">
                         @foreach ($goods as $item)
@@ -96,24 +95,9 @@
             loop : true,
             autoplay: 3000,
         });
-        var mySwiper = new Swiper('.swiper-container',{
-            pagination: '.buttons-tab',
-            paginationClickable: true,
-            paginationBulletRender: function (index, className) {
-                var key;
-                switch (index) {
-                    case 0: name='推荐';break;
-                    @foreach ($types as $key=>$type)
-                    case {{ $key + 1 }}: name='{{ $type->typename }}'; key= {{$type->typeid}} ;break;
-                    @endforeach
-                    default: name='';
-                }
-                if (index == 0) {
-                    return '<a class="tab-link button active" attr-value="'+key+'">' + name + '</a>';
-                } else {
-                    return '<a class="tab-link button" attr-value="'+key+'">' + name + '</a>';
-                }
-            },
+        mySwiper = new Swiper('.swiper-container',{
+            speed: 500,
+            slideToClickedSlide: true,
             onSlideChangeStart: function(swiper){
                 console.log(swiper.activeIndex);
                 var index = swiper.activeIndex;
@@ -121,22 +105,22 @@
                 $(".tab-link:eq("+index+")").addClass("active");
                 getdata(index);
             },
-            onSlideChangeEnd: function(){
-            }
         });
-        /*$(".tab-link").on("click", function () {
+        $(".tab-link").on("click", function () {
             $(".tab-link").removeClass("active");
             $(this).addClass("active");
             var index = $(this).index();
-            console.log(index);
+            /*console.log(index);
             if (index == 0) {
                 $(".goods-slide").removeClass("swiper-slide-active")
                                 .removeClass("swiper-slide-next")
                                 .removeClass("swiper-slide-prev");
                 $(".goods-slide:eq(0)").addClass("swiper-slide-active");
-            }
+            }*/
+            console.log(mySwiper);
+            mySwiper.slideTo($(this).index());
             //getdata(index);
-        });*/
+        });
         function getdata(index) {
             if ($(".goods-slide:eq("+index+")").attr("attr-is-add") == 1) return;
             $.ajax({

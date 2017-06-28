@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class IndexController extends Controller {
+
+    public function wxauth(Request $request) {
+        echo $request->input('echostr');
+        exit;
+    }
+
     public function index(Request $request) {
         //@override 获取微信账号
         $request->session()->put('uid', 1);
