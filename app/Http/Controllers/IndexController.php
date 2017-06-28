@@ -7,14 +7,35 @@
  */
 namespace App\Http\Controllers;
 
+use EasyWeChat\Support\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use EasyWeChat\Foundation\Application;
+use Symfony\Component\Yaml\Tests\A;
 
 class IndexController extends Controller {
-
+    private $app;
     public function wx(Request $request) {
-        echo $request->input('echostr');
-        exit;
+        $this->app = new Application(config('wx'));
+        $server = $this->app->server;
+        $server->setMessageHandler(function ($message) {
+            switch ($message->MsgType) {
+                case 'event':
+                    switch ($message->Event) {
+                        case 'subscribe':
+                            Log::info($$message->FromUserName);
+                            break;
+                        case 'unsubscribe':
+                            Log::info('取消');
+                            break;
+                    }
+                    break;
+                case 'text': return '收到文字信息'; break;
+            }
+            return '您好，欢迎关注温江童马儿童高端服务';
+        });
+        $response = $server->serve();
+        return $response;
     }
 
     public function index(Request $request) {
