@@ -143,7 +143,7 @@ class OrderController extends Controller {
         $num = $request->input('num');
         $skuid = $request->input('skuid');
         $cartid =$request->input('cartid');
-        $addressid = $request->input('addressid');
+        $addressid = $request->input('address_id');
         if ($cartid) {
 
         }
@@ -151,34 +151,35 @@ class OrderController extends Controller {
                      ->count();
         $orderno = date("YmdHis") . mt_rand(100, 200) . ($count + 1);
         $level = DB::table('user')->where('userid', $uid)->select('level')->first();
-        $discount =  $level == 0 ? 0 : ($level == 1 ? 90 : ($level == 2 ? 85 : 80));
-        $sql = "select price,goods_id, sku_id from goodssku where skuid in (".implode(',', $skuid).")";
+        $discount =  $level->level == 0 ? 0 : ($level->level == 1 ? 90 : ($level->level == 2 ? 85 : 80));
+        $sql = "select price,goods_id, sku_id from goodssku where sku_id in (".implode(',', $skuid).")";
         $skus = DB::select($sql);
         $price = 0;
         foreach ($skus as $key=>$value) {
             $price += $value->price * $num[$key];
         }
+
+        $address = DB::table('useraddress')->where('address_id', $addressid)->first();
         DB::table("orderinfo")->insert([
             'order_no' => $orderno,
             'price' => $price,
             'discount' => $discount,
-            'discount_price' => $price * $discount / 100
+            'discount_price' => $price * $discount / 100,
+            'recv_name' => $address->name,
+            'phone' => $address->phone,
+            'location' => $address->address . $address->location
         ]);
 
-        $address = DB::table('useraddress')->where('address_id', $addressid)->first();
         foreach ($skus as $key=>$value) {
             DB::table('order')->insert([
                 'order_no' => $orderno,
-                'recv_name' => $address->name,
-                'phone' => $address->phone,
-                'location' => $address->address . $addressid->location,
                 'skuid' => $value->sku_id,
                 'count' => $num[$key],
                 'price' => $value->price
             ]);
         }
 
-        $attributes = [
+        /*$attributes = [
             'trade_type'       => 'JSAPI', // JSAPI，NATIVE，APP...
             'body'             => 'iPad mini 16G 白色',
             'detail'           => 'iPad mini 16G 白色',
@@ -193,7 +194,7 @@ class OrderController extends Controller {
         $result = $this->payment->prepare($order);
         if ($result->return_code == 'SUCCESS' && $result->result_code == 'SUCCESS'){
             $prepayId = $result->prepay_id;
-        }
+        }*/
     }
 
 
@@ -223,5 +224,51 @@ class OrderController extends Controller {
         return $response;
     }
 
+    public function show(Request $request) {
+        $orderno = $request->input('orderno');
+        if (empty($orderno)) {
+            exit('订单已失效');
+        }
+        $order = DB::table('orderinfo')->where('order_no', $orderno)->first();
+
+        $goods = DB::table('order')->where('order.order_no', $orderno)->get();
+        $skuids = '';
+        $skuids = [];
+        foreach ($goods as $item) {
+            $skuids[] = $item->skuid;
+        }
+        $sql = "select * from goodsproperty as gp
+                left join propertykey as pk on pk.key_id=gp.key_id
+                left join propertyvalue as pv on pv.value_id=gp.value_id
+                left join goods on goods.goodsid=gp.goods_id
+                where gp.sku_id in (".implode(',', $skuids).")";
+        $skus = DB::select($sql);
+        foreach ($goods as &$item) {
+            $item->property = '';
+            foreach ($skus as $value) {
+                if ($value->sku_id == $item->skuid) {
+                    $item->goodsicon = $value->goodsicon;
+                    $item->goodsname = $value->goodsname;
+                    $item->property .= $value->key_name . ':' . $value->value_name . " ";
+                }
+            }
+        }
+
+        $user = DB::table('user')->where('userid', $request->session()->get('uid'))->first();
+        return view('order.show', ['order'=>$order, 'goods'=>$goods, 'user'=>$user]);
+    }
+
+
+    /**
+     * 订单列表
+     */
+    public function listorder(Request $request) {
+        $uid = $request->session()->get('uid');
+        $orders = DB::table("orderinfo")->where("uid", $uid)->get();
+
+        foreach ($orders as $order) {
+
+        }
+    }
 
 }
