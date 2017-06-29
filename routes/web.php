@@ -35,6 +35,8 @@ Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/order/create', 'OrderController@create');
     Route::get('/order', 'OrderController@index');
     Route::post('/order/add', 'OrderController@add');
+    Route::get('/order/show', 'OrderController@show');
+    Route::get('/order/list', 'OrderController@list');
 });
 Route::get('/goods', 'GoodsController@index');
 Route::get('/goods/property', 'GoodsController@property');

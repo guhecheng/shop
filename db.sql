@@ -6,13 +6,22 @@ CREATE TABLE IF NOT EXISTS user (
   userid INT NOT NULL AUTO_INCREMENT COMMENT '用户id',
   openid varchar(50) not null default '' comment '用户openid',
   uname varchar(100) not null default '' comment '用户名',
-  icon varchar(255) not null default 0 comment '用户图片',
+  avatar varchar(255) not null default 0 comment '用户图片',
   money int not null default 0 comment '账户余额',
   phone varchar(15) not null default '' comment '手机号码',
+  email varchar(100) not null default '' comment '电子邮箱',
+  sex tinyint not null default 0 comment '性别，0：未知，1:男，2:女',
+  city varchar(100) not null default '' comment '城市',
+  province varchar(100) not null default '' comment '省份',
+  country varchar(100) not null default '' comment '国家',
+  location varchar(255) not null default '' comment '详细地址',
+  ip varchar(50) not null default '' comment 'ip地址',
   level tinyint not null default 0 comment '会员等级',
   score double not null default '0.0' comment '积分',
   is_delete tinyint not null default 0 comment '状态, 0: 正常, 1:禁用',
   create_time TIMESTAMP DEFAULT current_timestamp comment '创建时间',
+  update_time datetime comment '更新时间',
+  last_login_time datetime comment '最后登陆时间',
   primary key(userid)
 ) engine=innodb charset=utf8mb4;
 insert into user(openid, uname, icon, money, level, phone, score)
@@ -186,9 +195,6 @@ drop table if exists `order`;
 create table if not exists `order` (
   order_id int not null auto_increment,
   order_no char(50) not null default '' comment '订单号',
-  recv_name varchar(100) not null default '' comment '收货人',
-  phone varchar(20) not null default '' comment '电话',
-  location varchar(255) not null default '' comment '地址',
   goodsid int not null default 0 comment '商品id',
   skuid int not null default 0 comment 'skuid',
   count int not null default 0 comment '购买数量',
@@ -211,8 +217,18 @@ create table if not exists orderinfo (
   discount_price int not null default 0 comment '折扣价格',
   status tinyint default 0 comment '订单状态, 0: 创建，1:待支付，2:已支付,3:待发货，4:已发货，5:已收货',
   create_time timestamp default current_timestamp comment '创建时间',
-  pay_time date comment '支付时间',
-  send_time date comment '发货时间',
+  pay_time datetime comment '支付时间',
+  send_time datetime comment '发货时间',
   pay_type tinyint default 0 comment '支付方式,0:微信，1:支付宝， 2:其他',
+  cancel_time datetime comment '取消时间',
+  unique key(order_no),
   primary key(info_id)
 ) engine=innodb charset=utf8;
+
+/*Log日志*/
+drop table if exists log;
+create table if not exists log (
+  log_id int not null auto_increment,
+  reqest_url varchar(255) not null default '',
+  info varchar(255) not null default ''
+) ENGINE=innodb charset=utf8;
