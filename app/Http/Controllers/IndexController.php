@@ -7,16 +7,19 @@
  */
 namespace App\Http\Controllers;
 
-use EasyWeChat\Support\Log;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use EasyWeChat\Foundation\Application;
-use Symfony\Component\Yaml\Tests\A;
 
 class IndexController extends Controller {
     private $app;
-    public function wx(Request $request) {
+    private $url = "http://www.jingyuxuexiao.com";      // 菜单请求地址
+    public function __construct() {
         $this->app = new Application(config('wx'));
+    }
+    public function wx(Request $request) {
+        Log::info('jfklasdjfdaslfdsa');
         $server = $this->app->server;
         $server->setMessageHandler(function ($message) {
             switch ($message->MsgType) {
@@ -39,8 +42,23 @@ class IndexController extends Controller {
     }
 
     public function index(Request $request) {
+    	if (!$request->session()->has('uid')){
+        	$user = $this->app->oauth->user();
+        	if ($user->id) {
+        		$openid = $user->id;
+        		$name = $user->name;
+        		$uid = DB::table("user")->insertGetId([
+        			'openid'	=>  $user->id,
+        			'uname'		=>  $user->name,
+        			'avatar'	=>	$user->avatar,
+        			'sex'		=>  $user->original['sex']
+        		]);
+        		if ($uid) 
+        			$request->session()->put("uid", $uid);
+
+        	}
+    	}
         //@override 获取微信账号
-        $request->session()->put('uid', 1);
         $types = DB::table('goodstype')->where('is_delete', 0)
                             ->get();
         $goods = DB::table('goods')->where([
@@ -73,5 +91,31 @@ class IndexController extends Controller {
         return $request->has('page') ? response()->json(['money' => $money]) : view('money', ['money' => $money]);
     }
 
+
+    /**
+     * 添加菜单
+     */
+    public function addmenu(Request $request) {
+        $this->app = new Application(config('wx'));
+        $menu = $this->app->menu;
+        $buttons = [
+            [
+                "type" => "view",
+                "name" => "商城",
+                "url"  => $this->url . "/"
+            ],
+            [
+                "type"      => "view",
+                "name"      => "会员卡",
+                "url"       => $this->url . "/card"
+            ],
+            [
+                "type"      => "view",
+                "name"      => "我的",
+                "url"       => $this->url . "/my"
+            ],
+        ];
+        $menu->add($buttons);
+    }
 
 }

@@ -3,7 +3,7 @@
 @section('content')
     <div class="user_index">
         <div class="photo">
-            <div class="icon" style="background-image:url('{{ $user->icon }}')"></div>
+            <div class="icon" style="background-image:url('{{ $user->avatar }}')"></div>
             <div>{{ $user->uname }}</div>
         </div>
         <div class="user_info">
@@ -46,6 +46,14 @@
     </div>
     @include('layouts.footer')
     <style type="text/css">
-
+        .user_index .icon {
+            width: 3rem;
+            height: 3rem;
+            background-repeat:no-repeat;
+            border-radius:3rem;
+            border: solid 1px #838588;
+            margin: 0 auto;
+            background-size: 100% 100%;
+        }
     </style>
 @endsection
