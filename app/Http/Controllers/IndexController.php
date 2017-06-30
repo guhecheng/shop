@@ -42,23 +42,26 @@ class IndexController extends Controller {
     }
 
     public function index(Request $request) {
-    	if (!$request->session()->has('uid')){
+    	if (!$request->session()->has('uid') && empty($requset->input('code'))){
         	$user = $this->app->oauth->user();
-        	if ($user->id) {
-        		$openid = $user->id;
-        		$name = $user->name;
-        		$uid = DB::table("user")->insertGetId([
-        			'openid'	=>  $user->id,
-        			'uname'		=>  $user->name,
-        			'avatar'	=>	$user->avatar,
-        			'sex'		=>  $user->original['sex']
-        		]);
-        		if ($uid) 
-        			$request->session()->put("uid", $uid);
+        	if ($openid = $user->id) {
+        		$request->session()->put('openid', $openid);		
+        		$user = DB::table("user")->where('openid', $openid)->select('userid')->first();
+        		if ($user->userid) {
+        			$request->session()->put('uid', $uid);	
+        		} else {
+	        		$uid = DB::table("user")->insertGetId([
+	        			'openid'	=>  $user->id,
+	        			'uname'		=>  $user->name,
+	        			'avatar'	=>	$user->avatar,
+	        			'sex'		=>  $user->original['sex']
+	        		]);
+        			if ($uid) 
+        				$request->session()->put("uid", $uid);
+        		}
 
         	}
     	}
-        //@override 获取微信账号
         $types = DB::table('goodstype')->where('is_delete', 0)
                             ->get();
         $goods = DB::table('goods')->where([
@@ -73,7 +76,7 @@ class IndexController extends Controller {
         ])->limit(5)->get();
         return view('index',
                     ['types' => $types, 'goods' => $goods,
-                              'ads'=>$ads, 'count'=>count($ads), 'index-active'=>'active']);
+                      'ads'=>$ads, 'count'=>count($ads), 'index-active'=>'active']);
     }
 
     /**
@@ -102,7 +105,7 @@ class IndexController extends Controller {
             [
                 "type" => "view",
                 "name" => "商城",
-                "url"  => $this->url . "/"
+                "url"  => "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxd8b6b83c91c44ac3&redirect_uri=http%3A%2F%2Fwww.jingyuxuexiao.com%2F&response_type=code&scope=snsapi_userinfo&state=cd16a43a0a6e5b6d007c942c8850a111#wechat_redirect"
             ],
             [
                 "type"      => "view",
