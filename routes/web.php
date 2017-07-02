@@ -24,6 +24,7 @@ Route::get('/wx', 'IndexController@wx');
 Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/my', 'UserController@index');
     Route::get('/money', 'IndexController@money');
+    Route::get('/score', 'IndexController@score');
     Route::get('/card', 'MemberController@card');
     Route::resource('address', 'AddressController');
     Route::post('/address/setdefault', 'AddressController@setdefault');

@@ -94,6 +94,20 @@ class IndexController extends Controller {
         return $request->has('page') ? response()->json(['money' => $money]) : view('money', ['money' => $money]);
     }
 
+    /**
+     * 个人积分
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\JsonResponse|\Illuminate\View\View
+     */
+    public function score(Request $request) {
+        $page = $request->has('page') ? $request->input('page') : 0;
+        $pagesize = 10;
+        $pagenow = $page * $pagesize;
+        $scores = DB::table('scorechange')->where('uid', $request->session()->get('uid'))
+            ->orderBy('create_time', 'desc')
+            ->paginate($pagesize);
+        return $request->has('page') ? response()->json(['scores' => $scores]) : view('score', ['scores' => $scores]);
+    }
 
     /**
      * 添加菜单

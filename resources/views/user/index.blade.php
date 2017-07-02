@@ -8,14 +8,18 @@
             <div>{{ $user->uname }}</div>
         </div>
         <div class="user_info">
-            <div class="user_info_score">
-                <div>{{ $user->score }}</div>
-                <div>积分</div>
-            </div>
-            <div class="user_info_money">
-                <div>￥{{ $user->money }}</div>
-                <div>账户余额</div>
-            </div>
+            <a href="/score">
+                <div class="user_info_score">
+                    <div>{{ $user->score }}</div>
+                    <div>积分</div>
+                </div>
+            </a>
+            <a href="/money">
+                <div class="user_info_money">
+                    <div>￥{{ $user->money }}</div>
+                    <div>账户余额</div>
+                </div>
+            </a>
             <div class="user_info_center"></div>
             <br clear="all" />
         </div>

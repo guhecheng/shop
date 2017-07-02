@@ -59,16 +59,11 @@
             right: 1rem;
             background-color: red;
             border-radius: 3rem;
-        }
-        .index-car div {
             background-image: url('/images/car.png');
             background-repeat: no-repeat;
             background-size: 100% 100%;
-            width: 2rem;
-            height: 2rem;
-            margin-left:0.5rem;
-            margin-top:0.5rem;
         }
+
         .buttons-tab a {
             display: block;
             float: left;
@@ -80,14 +75,15 @@
             border-bottom: solid 1px red;
         }
         .goods-pic {
-            background-repeat:no-repeat; background-size: 100% 100%;}
+            background-repeat:no-repeat; background-size: 100% 100%;
+            height: 9rem;}
         .index-goods-name { z-index:100;background: #838079; opacity: 0.5;
             width: 100%;
             color: #fff;
             line-height:1.5rem;
             padding-left: 2%;
             overflow: hidden;
-            margin-top: 6.5rem;
+            margin-top: 7.5rem;
         }
         .index-pic-num {
             background-color: #fff;

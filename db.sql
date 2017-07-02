@@ -138,8 +138,10 @@ drop table if exists scorechange;
 create table if not exists scorechange (
   score_id int not null auto_increment,
   score int not null default 0 comment '积分',
-  uid int not null default 0 comment '用户id'
-  primary key(uid)
+  type tinyint not null default 0 comment '支付方式,0:其他，1 微信支付,2:会员卡支付',
+  uid int not null default 0 comment '用户id',
+  create_time timestamp default current_timestamp comment '创建时间',
+  primary key(score_id)
 ) engine=innodb charset=utf8;
 
 
@@ -159,6 +161,8 @@ create table if not exists useraddress (
   COMMENT '收货人',
   is_delete   TINYINT               DEFAULT 0
   COMMENT '是否删除，0:否，1:是',
+  create_time timestamp default current_timestamp comment '创建时间',
+  update_time timestamp comment '更新时间',
   PRIMARY KEY (address_id),
   INDEX uid(uid)
 ) engine=innodb charset=utf8;
@@ -207,6 +211,7 @@ create table if not exists `order` (
 drop table if exists orderinfo;
 create table if not exists orderinfo (
   info_id int not null auto_increment,
+  uid int not null default 0 comment '用户id',
   order_no char(50) not null default '' comment '订单号',
   express_no varchar(50) not null default '' comment '快递号',
   express_company varchar(50) not null default '' comment '快递公司',

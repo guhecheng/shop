@@ -70,7 +70,7 @@
             margin-bottom:0.4rem;
             border-bottom: 1px solid #ccc;
             border-top: 1px solid #fff;
-            background-color: #fafafa;
+            background-color: #fff;
             font-size: 1rem;
             height: 4.5rem;
         }

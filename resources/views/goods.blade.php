@@ -108,7 +108,7 @@
             right: 1rem;
         }
         .swiper-slide {
-            height: 8rem;
+            height: 9rem;
             width: 100%;
             background-size: 100% 100%;
             background-repeat:no-repeat;
