@@ -32,13 +32,12 @@
                     <div style=""></div>
                 </div>
             </div>
-            <div class="goods-property">
-                <div>规格参数</div>
-                <table >
+            <div class="goods-property-list">
+                <ul>
                     @foreach($property as $value)
-                        <tr><td>{{ $value->key_name }}</td><td>{{ $value->value_name }}</td></tr>
+                        <li class="goods-property-li"><div>{{ $value->key_name }}:</div><div>{{ $value->value_name }}</div></li>
                     @endforeach
-                </table>
+                </ul>
             </div>
             <div class="goods-detail">
                 <div class="goods-detail-title">
@@ -81,6 +80,21 @@
         </div>
     </div>
     <style type="text/css">
+        .goods-property-list { background: #fff;padding-left:5%;}
+        .goods-property-list:after {
+            display:block;clear:both;content:"";visibility:hidden;height:0
+        }
+        .goods-property-li div{
+            font-weight: 400; line-height: 1.6rem;}
+        .goods-property-li div:first-child {
+            float:left;
+            width: 50%;
+            text-align: left;
+            font-weight: bold;
+        }
+        .goods-property-li div:last-child {
+            float:left;
+        }
         .goods_sure_act {
             width: 100%;
             display: none;
@@ -155,7 +169,7 @@
             $(".goods_sure").hide();
         });
         $(function() {
-            $(document).on("click", ".goods-property-key-value", function() {
+            $(document).on("touchstart", ".goods-property-key-value", function() {
             	alert('测试号');
                 $(this).parent().find(".active").removeClass("active");
                 $(this).addClass("active");
