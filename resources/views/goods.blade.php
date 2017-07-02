@@ -183,7 +183,7 @@
             addcar();
         });
         $(".goods_buy").on("click", function() {
-
+            buy();
         });
         $(".lookcar").on("click", function() {
             location.href = "/car";
