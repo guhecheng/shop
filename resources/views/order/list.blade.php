@@ -8,10 +8,10 @@
     <div class="order-list">
         <div class="swiper-container">
             <div class="buttons-tab" id="index-tab">
-                <a class="tab-link {{ empty($status) ? 'active' : '' }} button" attr-value="">全部</a>
-                <a class="tab-link {{ ($status == 1) ? 'active' : '' }} button" attr-value="">待付款</a>
-                <a class="tab-link {{ ($status == 2) ? 'active' : '' }} button" attr-value="">已付款</a>
-                <a class="tab-link {{ ($status == 3) ? 'active' : '' }} button" attr-value="">已发货</a>
+                <a href="#tab1" class="tab-link {{ empty($status) ? 'active' : '' }} button" attr-value="">全部</a>
+                <a href="#tab1" class="tab-link {{ ($status == 1) ? 'active' : '' }} button" attr-value="">待付款</a>
+                <a href="#tab1" class="tab-link {{ ($status == 2) ? 'active' : '' }} button" attr-value="">已付款</a>
+                <a href="#tab1" class="tab-link {{ ($status == 3) ? 'active' : '' }} button" attr-value="">已发货</a>
             </div>
             <div class="swiper-wrapper">
                 @for($i = 0; $i < 4; $i++)
@@ -119,6 +119,7 @@
     <script type="text/javascript">
         $(function() {
             $(document).on("click", ".order-item", function () {
+                alert('jklfasdf');
                 location.href = "/order/show?orderno=" + $(this).attr("attr-id");
             });
         });

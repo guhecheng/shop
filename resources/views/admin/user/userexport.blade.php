@@ -5,9 +5,8 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            权限列表
+            导入用户信息
         </h1>
-        <button type="button" class="btn btn-primary add-btn">添加</button>
     </section>
 
     <!-- Main content -->
@@ -20,8 +19,18 @@
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
-                        <div>下载模板</div>
-                        <input type="file" id="upload" name="upload" />
+                        @if (!empty($error))
+                        <div class="alert alert-success" >
+                            {{ $error }}
+                        </div>
+                        @endif
+                        <div><a href="/excel/会员信息.xls"><button class="btn btn-primary">下载模板</button></a></div>
+                        <div style="margin-bottom:10px;">请按照下载的excel模板填写数据</div>
+                        <form enctype="multipart/form-data" method="post" action="/admin/user/upload">
+                            <input type="file" id="upload" name="upload" style="margin-bottom:10px;" />
+                            {{ csrf_field() }}
+                            <input type="submit" class="btn btn-default" value="提交" />
+                        </form>
                     </div>
                     <!-- /.box-body -->
                 </div>

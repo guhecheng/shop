@@ -7,7 +7,7 @@
         <h1>
             权限列表
         </h1>
-        <a href="/admin/goods/add"><button type="button" class="btn btn-primary add-btn">添加</button></a>
+        <button type="button" class="btn btn-primary add-btn">添加</button>
     </section>
 
     <!-- Main content -->
@@ -16,7 +16,7 @@
             <div class="col-xs-12">
                 <div class="box">
                     <div class="box-header">
-                        <h3 class="box-title">商品列表</h3>
+                        <h3 class="box-title">权限列表</h3>
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
@@ -69,6 +69,9 @@
 
 <script type="text/javascript">
     $(function() {
+
+    });
+    $(".add-btn").on("click", function() {
 
     });
 </script>

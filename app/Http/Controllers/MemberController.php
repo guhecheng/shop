@@ -10,9 +10,12 @@ namespace App\Http\Controllers;
 
 class MemberController extends Controller {
 
-    public function card() {
+    public function card(Request $request) {
+        $uid = $request->input("uid");
+        $user = DB::table("user")->where('userid', $uid)->first();
         $card_no = 123456789;
         $level = 1;
-        return view('card', ['card_no'=>$card_no, 'level' => $level]);
+        $pic = 'xx';
+        return view('card', ['card_no'=>$card_no, 'pic'=>$pic, 'level' => $level]);
     }
 }

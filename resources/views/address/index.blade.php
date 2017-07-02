@@ -43,7 +43,7 @@
                     url: '/address/setdefault',
                     type: 'post',
                     success: function(data) {
-                        if ($data == '') {
+                        if (data == '') {
 
                         }
                     }
@@ -52,7 +52,7 @@
             $(".address-list-ul").find("li").on("click", function() {
                 var address_id = $(this).find(".address_id").val();
                 @if ($from_order)
-                    location.href = "{{ $from_url }}&address_id="+address_id;
+                    location.href = "/order/orderpay?orderno={{ $orderno }}&address_id="+address_id;
                 @else
                     if (address_id)
                         location.href = "/address/"+ address_id +"/edit" ;

@@ -20,7 +20,7 @@
                 <div class="order-list">
                     <?php $total = $count = 0; ?>
                     @foreach ($goods as $item)
-                        <div class="order-item" attr-id="{{ $item->cartid }}">
+                        <div class="order-item" attr-id="">
                             <div class="order-item-icon" style="background-image:url({{ $item->goodsicon }})"></div>
                             <div class="order-item-content">
                                 <div class="order-item-name">{{ $item->goodsname }}</div>
@@ -29,15 +29,11 @@
                                 </div>
                                 <div class="order-item-num">
                                     <div>{{ $item->property }}</div>
-                                    <div>数量: <span class="order-item-count">{{ $item->goodscount }}</span></div>
+                                    <div>数量: <span class="order-item-count">{{ $item->count }}</span></div>
                                 </div>
-                                <?php $total += $item->price / 100 * $item->goodscount; $count += $item->goodscount;?>
+                                <?php $total += $item->price / 100 * $item->count; $count += $item->count;?>
                             </div>
                             <br clear="all" />
-                            <input type="hidden" name="goodsid[]" class="goodsid" value="{{ $item->goodsid }}" />
-                            <input type="hidden" name="cartid[]" class="cartid" value="{{ $item->cartid }}" />
-                            <input type="hidden" name="skuid[]" class="skuid" value="{{ $item->skuid }}" />
-                            <input type="hidden" name="num[]" class="num" value="{{ $item->goodscount }}" />
                         </div>
                     @endforeach
                 </div>
@@ -45,9 +41,9 @@
                     <div>运费</div>
                     <div>10元(全场满500元包邮)</div>
                 </div>
+                @if ($user->level >= 1)
                 <div class="order-discount">
                     <div>会员折扣</div>
-                    @if ($user->level >= 1)
                         <div>
                             @if ($user->level == 1)
                             金牌会员: 9折
@@ -58,10 +54,8 @@
                             @else
                             @endif
                         </div>
-                    @else
-                        <div></div>
-                    @endif
                 </div>
+                @endif
             </div>
             <div class="order-act">
                 <div class="order-count">
@@ -76,6 +70,7 @@
                             @elseif ($user->level == 3)
                                 <?php echo $total * 0.8; ?>
                             @else
+                                <?php echo $total; ?>
                             @endif
                         </span>元</div>
                 </div>
@@ -89,6 +84,7 @@
             font-size: 0.8rem;
             padding: 0.6rem 10%;
         }
+        #total_money { color: red; }
     </style>
     <script>
         $(function() {
@@ -107,7 +103,7 @@
             location.href = "/goods?goodsid=" + $(this).attr("attr-id");
         });
         $(".order-address-select").on("click", function() {
-            location.href = "/address?from_order=1";
+            location.href = "/address?from_order=1&orderno={{ $orderno }}";
         });
         $(".order-buy").on('click', function () {
             var address_id = $("#address_id").val();
@@ -115,27 +111,10 @@
                 alert('地址没有填写');
                 return false;
             }
-            var cartid = [], goodsid = [], skuid = [], num = [];
-            $(".skuid").each(function(item) {
-                skuid[item] = $(this).val();
-            });
-            $(".goodsid").each(function(item) {
-                goodsid[item] = $(this).val();
-            });
-            $(".cartid").each(function(item) {
-                cartid[item] = $(this).val();
-            });
-            $(".num").each(function(item) {
-                num[item] = $(this).val();
-            });
-            console.log(skuid);
             $.ajax({
                 type:'post',
                 data: {'address_id': address_id,
-                       'goodsid' : goodsid,
-                        'cartid': cartid,
-                        'num': num,
-                        'skuid': skuid
+                       'orderno' : {{ $orderno }}
                         },
                 dataType:'json',
                 url: '/order/add',

@@ -18,11 +18,11 @@ class AddressController extends Controller
         $uid = $request->session()->get('uid');
         $addresses = DB::table('useraddress')->where('uid', $uid)->get();
         if ($request->input('from_order')) {
-            $request->session()->put("referer", $request->header("referer"));
+            $request->session()->put('orderno', $request->input('orderno'));
         }
         return view('address.index', ['addresses' => $addresses,
                                     'from_order' => $request->input('from_order'),
-                                    'from_url' => $request->session()->get('referer')]);
+                                    'orderno' => $request->input('orderno')]);
     }
 
     /**
@@ -65,7 +65,7 @@ class AddressController extends Controller
                     'phone' => $request->input('phone'),
                     'address' => $request->input('address'),
                     'location' => $request->input('location'),
-                    'is_default' => intval($request->input('checked')),
+                    'is_default' => $request->input('checked') == 'true' ? 1 : 0,
                     'uid' => $uid
                 ]
             );
@@ -135,7 +135,7 @@ class AddressController extends Controller
                             'phone' => $request->input('phone'),
                             'address' => $request->input('address'),
                             'location' => $request->input('location'),
-                            'is_default' => intval($request->input('checked')),
+                            'is_default' => $request->input('checked') == 'true' ? 1 : 0,
                         ]
                     );
             DB::commit();

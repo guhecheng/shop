@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS user (
   userid INT NOT NULL AUTO_INCREMENT COMMENT '用户id',
   openid varchar(50) not null default '' comment '用户openid',
   uname varchar(100) not null default '' comment '用户名',
+  nickname varchar(100) not null default '' comment '真实姓名',
   avatar varchar(255) not null default 0 comment '用户图片',
   money int not null default 0 comment '账户余额',
   phone varchar(15) not null default '' comment '手机号码',
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS user (
   ip varchar(50) not null default '' comment 'ip地址',
   level tinyint not null default 0 comment '会员等级',
   score double not null default '0.0' comment '积分',
+  card_no varchar(20) not null default '' comment '会员卡号',
   is_delete tinyint not null default 0 comment '状态, 0: 正常, 1:禁用',
   create_time TIMESTAMP DEFAULT current_timestamp comment '创建时间',
   update_time datetime comment '更新时间',
@@ -52,6 +54,7 @@ create table if not exists goods (
   is_sale tinyint default 0 comment '是否上架，0:否，1:是',
   is_delete tinyint default 0 comment '是否删除,0:否，1:是',
   is_discount tinyint default 0 comment '是否参与折扣, 0: 否， 1:是',
+  score_award tinyint default 0 comment '积分奖励倍数, 0:无, 1:一倍，2:2倍..',
   create_time timestamp default current_timestamp comment '创建时间',
   primary key(goodsid)
 ) engine=innodb charset=utf8;
@@ -241,7 +244,7 @@ create table if not exists log (
 /*权限列表*/
 drop table if exists auth;
 create table if not exists auth (
-  auth_id int not null default 0 AUTO_INCREMENT,
+  auth_id int not null AUTO_INCREMENT,
   auth_name varchar(20) not null default '' comment '权限名称',
   auth_url varchar(50) not null default '' comment '权限列表对应url地址',
   is_show tinyint not null default 0  comment '是否展示在菜单项',
@@ -258,7 +261,16 @@ CREATE TABLE if NOT EXISTS admin_auth (
   PRIMARY KEY (id)
 ) engine=innodb charset=utf8;
 
-
+/*用户信息表*/
+drop table if exists olduser;
+create table if not exists olduser (
+  id int not null AUTO_INCREMENT,
+  name varchar(100) not null default '' comment '用户名',
+  phone varchar(20) not null default '' comment '电话',
+  password varchar(50) not null default '' comment '用户密码',
+  create_time TIMESTAMP DEFAULT current_timestamp COMMENT '创建时间',
+  PRIMARY KEY (id)
+) ENGINE=innodb charset=utf8;
 /*用户孩子表*/
 drop table if exists children;
 create table if not exists children(
@@ -268,6 +280,7 @@ create table if not exists children(
   sex tinyint not null default 0 comment '性别，0:未知，1:男,2:女',
   school varchar(100) not null default '' comment '学校',
   age tinyint not null default 0 comment '年龄',
+  parent_id int not null default 0 comment '父辈id关联olduer表的id',
   like_brands varchar(255) not null default '' comment '喜欢的品牌',
   relate tinyint DEFAULT 0 COMMENT '与用户关系,0:未知,1:儿,2:女，3:侄子',
   PRIMARY KEY (relate_id)

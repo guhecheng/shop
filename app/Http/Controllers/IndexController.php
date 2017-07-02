@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use EasyWeChat\Foundation\Application;
+use Illuminate\Support\Facades\Redis;
+
 
 class IndexController extends Controller {
     private $app;
@@ -77,36 +79,6 @@ class IndexController extends Controller {
         return view('index',
                     ['types' => $types, 'goods' => $goods,
                       'ads'=>$ads, 'count'=>count($ads), 'index-active'=>'active']);
-    }
-
-    /**
-     * 获取个人流水
-     * @param Request $request
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function money(Request $request) {
-        $page = $request->has('page') ? $request->input('page') : 0;
-        $pagesize = 10;
-        $pagenow = $page * $pagesize;
-        $money = DB::table('usertransmoney')->where('uid', $request->session()->get('uid'))
-                                            ->orderBy('create_time', 'desc')
-                                            ->paginate($pagesize);
-        return $request->has('page') ? response()->json(['money' => $money]) : view('money', ['money' => $money]);
-    }
-
-    /**
-     * 个人积分
-     * @param Request $request
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\JsonResponse|\Illuminate\View\View
-     */
-    public function score(Request $request) {
-        $page = $request->has('page') ? $request->input('page') : 0;
-        $pagesize = 10;
-        $pagenow = $page * $pagesize;
-        $scores = DB::table('scorechange')->where('uid', $request->session()->get('uid'))
-            ->orderBy('create_time', 'desc')
-            ->paginate($pagesize);
-        return $request->has('page') ? response()->json(['scores' => $scores]) : view('score', ['scores' => $scores]);
     }
 
     /**

@@ -4,7 +4,9 @@
     <div class="user_index">
         @if ($user)
         <div class="photo">
+            <a href="/info">
             <div class="icon" style="background-image:url('{{ $user->avatar }}')"></div>
+            </a>
             <div>{{ $user->uname }}</div>
         </div>
         <div class="user_info">

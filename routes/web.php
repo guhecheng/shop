@@ -23,8 +23,8 @@ Route::get('/addmenu', 'IndexController@addmenu');
 Route::get('/wx', 'IndexController@wx');
 Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/my', 'UserController@index');
-    Route::get('/money', 'IndexController@money');
-    Route::get('/score', 'IndexController@score');
+    Route::get('/money', 'UserController@money');
+    Route::get('/score', 'UserController@score');
     Route::get('/card', 'MemberController@card');
     Route::resource('address', 'AddressController');
     Route::post('/address/setdefault', 'AddressController@setdefault');
@@ -38,6 +38,9 @@ Route::group(['middleware' => 'userlogin'], function (){
     Route::post('/order/add', 'OrderController@add');
     Route::get('/order/show', 'OrderController@show');
     Route::get('/order/list', 'OrderController@list');
+    Route::any('/order/orderpay', 'OrderController@orderpay');
+
+    Route::get('/info', 'UserController@info');
 });
 Route::get('/goods', 'GoodsController@index');
 Route::get('/goods/property', 'GoodsController@property');
@@ -82,4 +85,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => 'chec
 
     Route::resource("card", 'CardController');
     Route::resource('/goods', 'GoodsController');
+
+    Route::get('/auth', 'AuthController@index');
+
+    Route::any('/userexport', 'UserController@userExport');
+    Route::any('/user/upload', 'UserController@upload');
 });
