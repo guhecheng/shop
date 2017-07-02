@@ -46,9 +46,9 @@ class IndexController extends Controller {
         	$user = $this->app->oauth->user();
         	if ($openid = $user->id) {
         		$request->session()->put('openid', $openid);		
-        		$user = DB::table("user")->where('openid', $openid)->select('userid')->first();
-        		if ($user->userid) {
-        			$request->session()->put('uid', $user->userid);
+        		$data = DB::table("user")->where('openid', $openid)->select('userid')->first();
+        		if (!empty($data) && !empty($data->userid)) {
+        			$request->session()->put('uid', $data->userid);
         		} else {
 	        		$uid = DB::table("user")->insertGetId([
 	        			'openid'	=>  $user->id,

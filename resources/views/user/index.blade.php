@@ -2,6 +2,7 @@
 @section('my-active', 'active')
 @section('content')
     <div class="user_index">
+        @if ($user)
         <div class="photo">
             <div class="icon" style="background-image:url('{{ $user->avatar }}')"></div>
             <div>{{ $user->uname }}</div>
@@ -43,6 +44,7 @@
         <a href="/address"><div class="address">地址管理</div></a>
         <a href="/aboutme"><div class="aboutme">关于我们</div></a>
         <br clear="all" />
+        @endif
     </div>
     @include('layouts.footer')
     <style type="text/css">

@@ -156,6 +156,7 @@
         });
         $(function() {
             $(document).on("click", ".goods-property-key-value", function() {
+            	alert('测试号');
                 $(this).parent().find(".active").removeClass("active");
                 $(this).addClass("active");
             });

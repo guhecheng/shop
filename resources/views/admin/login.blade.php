@@ -96,7 +96,7 @@
                 success: function(data) {
                     if (data.rs == 1) {
                         alert('登陆成功');
-                        location.href = "/admin/"
+                        location.href = "/admin/type"
                     }
                 }
             });
