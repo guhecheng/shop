@@ -150,6 +150,10 @@
     <script>
         $(function() {
             $(".sku-property").height($(window).height());
+            $(document).on("touchstart", ".goods-property-key-value", function() {
+                $(this).parent().find(".active").removeClass("active");
+                $(this).addClass("active");
+            });
         });
         var picSwiper = new Swiper('.pic-container', {
             loop : true,
@@ -167,13 +171,6 @@
             getsku();
             $(".goods_sure_act ").show();
             $(".goods_sure").hide();
-        });
-        $(function() {
-            $(document).on("touchstart", ".goods-property-key-value", function() {
-            	alert('测试号');
-                $(this).parent().find(".active").removeClass("active");
-                $(this).addClass("active");
-            });
         });
         $(".goods_add_num").on('click', function () {
             $("#goods_num").val(parseInt($("#goods_num").val()) + 1);
