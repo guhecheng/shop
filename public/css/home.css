@@ -364,14 +364,19 @@ body {
 }
 /*card.blade.php*/
 .card #card_recharge {
-    width:60%;
-    height: 1.5rem;
-    line-height: 1.5rem;
+    width:50%;
+    line-height: 2.4rem;
     margin: auto;
     background-color: #C81E1E;
     border-color: #C81E1E;
     color:#fff;
-    font-size: 0.8rem;
+    font-size: 1rem;
+    text-align: center;
+    border-radius: 1.2rem;
+}
+.card_click {
+    margin-top: 1.2rem;
+    margin-bottom: 1rem;
 }
 .card {
     margin: 0;
@@ -428,7 +433,13 @@ body {
 
 .card-money-select {
     background: #C1C1C1;
+    position: absolute;
+    top:0;
     opacity: 0.5;
+    display: none;
+    width: 100%;
+    left: 0;
+    z-index: 100;
 }
 
 .card-select-area {
@@ -441,34 +452,44 @@ body {
     display: none;
 }
 .card-select-area .title {
-    margin: 0.1rem auto;
+    margin: 1rem auto;
     position: relative;
+    line-height: 2rem;
+    text-align: center;
+    font-weight:bold;
+    font-size: 1rem;
 }
 .title .cancel {
-    font-size: 1.5rem;
     width:1.5rem;
-    line-height:1.5rem;
+    height: 1.5rem;
     position: absolute;
-    top:0.1rem;
-    right:0.1rem;
+    top:0rem;
+    right:0.5rem;
+    background-image:url('/images/close.png');
+    background-repeat:no-repeat;
+    background-size: 100%;
 }
 .card-money>div {
     width:90%;
     margin: 0 auto;
 }
+.card-money-area {
+    padding: 0 5%;
+    width: 90%;
+}
 .card-money-area div {
     float: left;
     width: 45%;
-    line-height: 1.5rem;
+    line-height: 2rem;
     border: solid 1px #0c0c0c;
     text-align: center;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.8rem;
 }
 .card-money-area div:nth-child(even) {
     margin-left: 10%;
 }
 .sure_recharge {
-    line-height: 2rem;
+    line-height: 3rem;
     margin-top:1rem;
     background:#F2F2F2;
     text-align:center;

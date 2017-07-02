@@ -24,9 +24,8 @@ CREATE TABLE IF NOT EXISTS user (
   last_login_time datetime comment '最后登陆时间',
   primary key(userid)
 ) engine=innodb charset=utf8mb4;
-insert into user(openid, uname, icon, money, level, phone, score)
-    values ('wx_123456', '谷和成', 'http://avatar.csdn.net/9/D/D/1_iefreer.jpg', 100, 1, '17801083781', 1234 );
-
+insert into user(openid, uname, avatar, sex, money) values('oBm9hvzL3JRgqrjfzlIPpktM4EgQ', 'GG',
+'http://wx.qlogo.cn/mmopen/ia0MXiakBq7O08cJPQmKzunVdjRdevbPHzYX4ZDdKkSqiclCf5AAQbCRY41rd7jqXN2Uib5k6o6a6uUQEdjA0DMSDeicpDX7OibA0J/0', 1, 0);
 /*商品类型*/
 drop table if exists goodstype;
 create table if not exists goodstype (
@@ -231,4 +230,40 @@ create table if not exists log (
   log_id int not null auto_increment,
   reqest_url varchar(255) not null default '',
   info varchar(255) not null default ''
+) ENGINE=innodb charset=utf8;
+
+
+/*权限列表*/
+drop table if exists auth;
+create table if not exists auth (
+  auth_id int not null default 0 AUTO_INCREMENT,
+  auth_name varchar(20) not null default '' comment '权限名称',
+  auth_url varchar(50) not null default '' comment '权限列表对应url地址',
+  is_show tinyint not null default 0  comment '是否展示在菜单项',
+  auth_pid int not null default 0 comment '权限列表上级',
+  PRIMARY KEY(auth_id)
+) ENGINE=INNODB charset=utf8;
+
+/*权限用户对应表*/
+drop table if exists admin_auth;
+CREATE TABLE if NOT EXISTS admin_auth (
+  id int NOT NULL AUTO_INCREMENT,
+  admin_id INT NOT NULL DEFAULT 0 comment '管理员id',
+  auth_id int NOT NULL DEFAULT 0 COMMENT '对应权限列表id',
+  PRIMARY KEY (id)
+) engine=innodb charset=utf8;
+
+
+/*用户孩子表*/
+drop table if exists children;
+create table if not exists children(
+  relate_id int not null AUTO_INCREMENT,
+  name varchar(20) not null default '' COMMENT '姓名',
+  birth_date timestamp default current_timestamp comment '生日',
+  sex tinyint not null default 0 comment '性别，0:未知，1:男,2:女',
+  school varchar(100) not null default '' comment '学校',
+  age tinyint not null default 0 comment '年龄',
+  like_brands varchar(255) not null default '' comment '喜欢的品牌',
+  relate tinyint DEFAULT 0 COMMENT '与用户关系,0:未知,1:儿,2:女，3:侄子',
+  PRIMARY KEY (relate_id)
 ) ENGINE=innodb charset=utf8;

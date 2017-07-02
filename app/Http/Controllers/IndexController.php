@@ -42,7 +42,7 @@ class IndexController extends Controller {
     }
 
     public function index(Request $request) {
-    	if (!$request->session()->has('uid') && empty($requset->input('code'))){
+    	if (!$request->session()->has('uid') && !empty($request->input('code'))){
         	$user = $this->app->oauth->user();
         	if ($openid = $user->id) {
         		$request->session()->put('openid', $openid);		

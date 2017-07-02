@@ -17,8 +17,7 @@
             </div>
         </div>
         <div>
-
-            <div class="swiper-container">
+            <div class="swiper-container goods-container">
                 <div class="buttons-tab" id="index-tab">
                     <a href="#tab1" class="tab-link active button" attr-value="">推荐</a>
                     @foreach ($types as $key=>$type)
@@ -47,8 +46,29 @@
             </div>
         </div>
     </div>
+    <div class="index-car">
+        <div></div>
+    </div>
     @include('layouts.footer')
     <style type="text/css">
+        .index-car {
+            width: 3rem;
+            height: 3rem;
+            position: absolute;
+            bottom: 5rem;
+            right: 1rem;
+            background-color: red;
+            border-radius: 3rem;
+        }
+        .index-car div {
+            background-image: url('/images/car.png');
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            width: 2rem;
+            height: 2rem;
+            margin-left:0.5rem;
+            margin-top:0.5rem;
+        }
         .buttons-tab a {
             display: block;
             float: left;
@@ -79,12 +99,17 @@
             text-align:center;
             overflow: hidden;
         }
+        .tab-link {
+            line-height: 2.4rem;}
         .buttons-tab {
             background-color: #F2F2F2;
         }
         .swiper-slide,.swiper-container,.swiper-wrapper {  width: 100%; }
     </style>
     <script>
+        $(".index-car").on("click", function () {
+            location.href = '/car';
+        });
         $(document).on("click", ".goods-item", function() {
             location.href = "/goods?goodsid=" + $(this).attr("attr-id");
         });
@@ -95,9 +120,7 @@
             loop : true,
             autoplay: 3000,
         });
-        mySwiper = new Swiper('.swiper-container',{
-            speed: 500,
-            slideToClickedSlide: true,
+        mySwiper = new Swiper('.goods-container',{
             onSlideChangeStart: function(swiper){
                 console.log(swiper.activeIndex);
                 var index = swiper.activeIndex;
@@ -109,17 +132,8 @@
         $(".tab-link").on("click", function () {
             $(".tab-link").removeClass("active");
             $(this).addClass("active");
-            var index = $(this).index();
-            /*console.log(index);
-            if (index == 0) {
-                $(".goods-slide").removeClass("swiper-slide-active")
-                                .removeClass("swiper-slide-next")
-                                .removeClass("swiper-slide-prev");
-                $(".goods-slide:eq(0)").addClass("swiper-slide-active");
-            }*/
-            console.log(mySwiper);
-            mySwiper.slideTo($(this).index());
-            //getdata(index);
+            var index = $(this).index()
+            mySwiper.slideTo(index);
         });
         function getdata(index) {
             if ($(".goods-slide:eq("+index+")").attr("attr-is-add") == 1) return;
@@ -129,12 +143,11 @@
                 dataType: 'json',
                 type: 'get',
                 success: function(data) {
-                    console.log(data);
                     if (data.goods) {
                         var html = '';
                         for (var i in data.goods) {
                             var goods = data.goods[i];
-                            html +=  '<div class="goods-item" attr-id="">';
+                            html +=  '<div class="goods-item" attr-id="'+goods.goodsid+'">';
                             html += '<div class="goods-item-icon" style="background-image:url('+goods.goodsicon+')"></div>';
                             html += '<div class="goods-item-content">';
                             html += '<div class="goods-name">'+goods.goodsname+'</div>';

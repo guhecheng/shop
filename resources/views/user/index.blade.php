@@ -20,19 +20,19 @@
         </div>
         <a href="/order"><div class="order">全部订单</div></a>
         <div class="order-state-list">
-            <a href="/order?order_state=">
+            <a href="/order?status=1">
                 <div class="order-state-list-item">
                     <div class="order-state-list-wait-pay"></div>
                     <div>待付款</div>
                 </div>
             </a>
-            <a href="/order?order_state=">
+            <a href="/order?status=2">
                 <div class="order-state-list-item">
                     <div class="order-state-list-wait-send"></div>
                     <div>待发货</div>
                 </div>
             </a>
-            <a href="/order?order_state=">
+            <a href="/order?status=3">
                 <div class="order-state-list-item">
                     <div class="order-state-list-wait-save"></div>
                     <div>待收货</div>

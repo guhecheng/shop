@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.comm')
 
 @section('title', '会员卡')
 @section('card-active', 'active')
@@ -20,7 +20,7 @@
         </div>
         <div class="card_click">
             <div class="content-block">
-                <p><a href="#" class="button button-big button-round " id="card_recharge">充值 </a></p>
+                <p id="card_recharge">充值</p>
             </div>
         </div>
         <div class="card_desc">
@@ -41,7 +41,7 @@
     <div class="card-select-area">
         <div class="title">
             选择充值金额
-            <div class="cancel">x</div>
+            <div class="cancel"></div>
         </div>
         <div class="card-money">
             <div class="card-money-area">
@@ -68,32 +68,25 @@
         <div id="sure_pay">确认付款</div>
     </div>
     @include('layouts.footer')
-
-    <style>
-        .page {
-            background-color: #fff;}
-        .footer { height:3rem;}
-    </style>
     <script type="text/javascript">
-        $(document).ready(function () {
-           $("#card_recharge").on("click", function() {
-                //$(".card-money-select").show();
-               $.popup(".card-money-select");
-               $(".card-select-area").show();
-           });
-           $(".select-money").on("click", function() {
-               $(".select-money").removeClass("active");
-               $(this).addClass("active");
-           })
-           $(".sure_recharge").on("click", function() {
-               console.log($(".card-money-area").find(".active"));
-               if ($(".card-money-area").find(".active").length) {
-                   var money = parseInt($(".card-money-area").find(".active").attr("attr-value"));
-                   if (money >= 0) {
-                       $(".card-select-area").hide();
-                   }
-               }
-           });
+        $(function () {
+            $(".card-money-select").height($(window).height());
+        });
+        $("#card_recharge").on("click", function() {
+            $(".card-money-select, .card-select-area").show();
+        });
+        $(".select-money").on("click", function() {
+            $(".select-money").removeClass("active");
+            $(this).addClass("active");
+        })
+        $(".sure_recharge").on("click", function() {
+            console.log($(".card-money-area").find(".active"));
+            if ($(".card-money-area").find(".active").length) {
+                var money = parseInt($(".card-money-area").find(".active").attr("attr-value"));
+                if (money >= 0) {
+                    $(".card-select-area").hide();
+                }
+            }
         });
     </script>
 @endsection('content')

@@ -7,6 +7,7 @@
  */
 namespace App\Http\Controllers;
 
+use Illuminate\Pagination\Paginator;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -51,9 +52,83 @@ class OrderController extends Controller {
     }
 
     public function index(Request $request) {
-        $uid = $request->session()->get("uid");
-        $state = $request->input('state');
+        $uid = $request->session()->get('uid');
+        $status = $request->input('status');   // 订单状态
+        $pagesize = 5;          // 获取数据条数
+        if ($status == 1) {
+            $where = [
+                ['uid', '=', $uid],
+                ['status', '<=', 1]
+            ];
+        } else if ($status == 2) {
+            $where = [
+                ['uid', '=', $uid],
+                ['status', '=', 2]
+            ];
+        } else if ($status == 3) {
+            $where = [
+                ['uid', '=', $uid],
+                ['status', '>=', 4]
+            ];
+        } else if (empty($status) || $status == -1) {
 
+            $where = [
+                ['uid', '=', $uid]
+            ];
+        } else {
+
+        }
+        $orders = DB::table('orderinfo')->where($where)
+                    ->orderBy('create_time', 'desc')->limit($pagesize)->get();
+        if ($orders->isEmpty()) {
+            return view('order.list', ['orders' => $orders, 'status'=>$status]);
+        }
+        $order_no = [];
+        foreach ($orders as $order) {
+            $order_no[] = $order->order_no;
+        }
+        $data = DB::table('order')->whereIn('order_no', $order_no)->get();
+        $goodsid = [];
+        $skuids = [];
+        foreach ($data as $value) {
+            $goodsid[] = $value->goodsid;
+            $skuids[] = $value->skuid;
+        }
+        // 获取商品姓名
+        $goods = DB::table('goods')->whereIn('goodsid', $goodsid)
+                        ->select('goodsname', 'goodsicon', 'goodsid')->get();
+        // 获取属性
+        $property = DB::table('goodsproperty')
+                    ->leftJoin('propertykey', 'propertykey.key_id', '=', 'goodsproperty.key_id')
+                    ->leftJoin('propertyvalue', 'propertyvalue.value_id', '=', 'goodsproperty.value_id')
+                    ->whereIn('goodsproperty.sku_id', $skuids)
+                    ->select('goodsproperty.goods_id', 'goodsproperty.sku_id', 'propertykey.key_name', 'propertyvalue.value_name')
+                    ->get();
+        foreach ($data as &$item) {
+            foreach ($goods as $value) {
+                if ($item->goodsid = $value->goodsid) {
+                    $item->goodsname = $value->goodsname;
+                    $item->goodsicon = $value->goodsicon;
+                }
+            }
+            $item->property = '';
+            foreach ($property as $v) {
+                if ($v->sku_id == $item->skuid) {
+                    $item->property .= $v->key_name . ':' . $v->value_name . ' ';
+                }
+            }
+        }
+        foreach ($orders as &$item) {
+            foreach ($data as $value) {
+                if ($item->order_no == $value->order_no) {
+                    $item->data[] = $value;
+                }
+            }
+        }
+        if ($request->ajax()) {
+            return response()->json(['orders' => $orders]);
+        } else
+            return view('order.list', ['orders' => $orders, 'status'=>$status]);
     }
 
     public function create(Request $request) {
@@ -162,6 +237,7 @@ class OrderController extends Controller {
         $address = DB::table('useraddress')->where('address_id', $addressid)->first();
         DB::table("orderinfo")->insert([
             'order_no' => $orderno,
+            'uid' => $uid,
             'price' => $price,
             'discount' => $discount,
             'discount_price' => $price * $discount / 100,
@@ -174,6 +250,7 @@ class OrderController extends Controller {
             DB::table('order')->insert([
                 'order_no' => $orderno,
                 'skuid' => $value->sku_id,
+                'goodsid' => $goodsid[$key],
                 'count' => $num[$key],
                 'price' => $value->price
             ]);
@@ -263,12 +340,7 @@ class OrderController extends Controller {
      * 订单列表
      */
     public function listorder(Request $request) {
-        $uid = $request->session()->get('uid');
-        $orders = DB::table("orderinfo")->where("uid", $uid)->get();
 
-        foreach ($orders as $order) {
-
-        }
     }
 
 }
