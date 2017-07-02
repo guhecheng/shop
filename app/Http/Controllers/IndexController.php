@@ -48,7 +48,7 @@ class IndexController extends Controller {
         		$request->session()->put('openid', $openid);		
         		$user = DB::table("user")->where('openid', $openid)->select('userid')->first();
         		if ($user->userid) {
-        			$request->session()->put('uid', $$user->userid);
+        			$request->session()->put('uid', $user->userid);
         		} else {
 	        		$uid = DB::table("user")->insertGetId([
 	        			'openid'	=>  $user->id,
