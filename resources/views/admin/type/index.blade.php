@@ -27,7 +27,7 @@
                                 <th>操作</th>
                             </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="type_tbody">
                             @foreach($types as $type)
                                 <tr>
                                     <td>{{ $type->typename }}</td>
@@ -68,21 +68,19 @@
                     <span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">添加种类</h4>
             </div>
-            <form action="/admin/type/add" method="post" enctype="multipart/form-data">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="cardname" class="col-sm-2 control-label">种类名</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="typename" id="typename" placeholder="请输入种类名">
-                        </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cardname" class="col-sm-2 control-label">种类名</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" name="typename" id="typename" placeholder="请输入种类名">
                     </div>
-                    {{ csrf_field() }}
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-                    <input type="submit" class="btn btn-primary add_type" value="添加" />
-                </div>
-            </form>
+                {{ csrf_field() }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                <input type="submit" class="btn btn-primary add_type" value="添加" />
+            </div>
         </div>
         <!-- /.modal-content -->
     </div>
@@ -97,22 +95,22 @@
                     <span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">编辑种类</h4>
             </div>
-            <form enctype="multipart/form-data" method="post" action="/admin/type/modify">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="cardname" class="col-sm-2 control-label">种类名</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="typename" id="edit_typename" placeholder="请输入种类名">
-                        </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cardname" class="col-sm-2 control-label">种类名</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" name="typename" id="edit_typename" placeholder="请输入种类名">
                     </div>
-                    <input type="hidden" id="typeid" value="" name="typeid" />
-                    {{ csrf_field() }}
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-                    <input type="submit" class="btn btn-primary update_card" value="修改" />
-                </div>
-            </form>
+                <input type="hidden" id="typeid" value="" name="typeid" />
+                <input type="hidden" id="item" value="" name="item" />
+                {{ csrf_field() }}
+                <br clear="all" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                <input type="submit" class="btn btn-primary update_btn" value="修改" />
+            </div>
         </div>
         <!-- /.modal-content -->
     </div>
@@ -155,54 +153,30 @@
 <script src="/css/admin/themes/explorer/theme.js" type="text/javascript"></script>
 
 <script type="text/javascript">
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
     $(function() {
         $(".add-btn").on("click", function() {
             $("#add-modal").modal('show');
         });
-        //initFileInput("add_img", "/admin/card/upload");
-        $("#add_img").fileinput({
-            language: 'zh', //设置语言
-            uploadUrl: '/admin/card/upload', //上传的地址
-            allowedFileExtensions : ['jpg', 'png','gif'],//接收的文件后缀
-            showUpload: false, //是否显示上传按钮
-            showCaption: false,//是否显示标题
-            browseClass: "btn btn-primary", //按钮样式
-            previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
-        });
-        $(".modify-btn").on("click", function () {
+        $(document).on("click", ".modify-btn", function () {
             var attr_id = $(this).attr("attr-id");
             var par = $(this).parent().parent();
             $("#edit_typename").val($.trim(par.find("td:eq(0)").text()));
             $("#mod-modal").modal('show');
             $("#typeid").val(attr_id);
-
-            $("#update_img").fileinput({
-                showUpload: false,
-                showCaption: false,
-                browseClass: "btn btn-primary btn-lg",
-                fileType: "any",
-                previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
-                overwriteInitial: false,
-                initialPreviewAsData: true,
-                initialPreview: [
-                    "http://lorempixel.com/1920/1080/transport/1"
-                ],
-                initialPreviewConfig: [
-                    {caption: "transport-1.jpg", size: 329892, width: "120px", url: "{$url}", key: 1},
-                ]
-            });
+            $("#item").val(par.index());
         });
 
-        $(".del-btn").on("click", function() {
+        $(document).on("click", ".del-btn", function() {
             if (!confirm('确定删除?')) return ;
             var typeid = $(this).attr("attr-id");
             if (typeid == '' || typeof typeid == 'undefined') return false;
             var that = $(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
+
             $.ajax({
                 url:'/admin/type/delete',
                 data: {'typeid': typeid},
@@ -215,5 +189,57 @@
             })
         });
 
+    });
+    $(".add_type").on("click", function() {
+        var typename = $("#typename").val();
+        if (typename == '' ) {
+            alert('类型名不能为空');
+            return false;
+        }
+        $.ajax({
+            url:'/admin/type/add',
+            type:'post',
+            data: { 'typename': typename},
+            dataType: 'json',
+            success: function(data) {
+                if (data.rs == 1) {
+                    var html = "<tr><td>"+typename+"</td>";
+                    html += "<td>";
+                    html += ' <button type="button" class="btn btn-primary modify-btn" attr-id="'+data.typeid+'">修改</button>';
+                    html += '<button type="button" class="btn btn-primary del-btn" attr-id="'+data.typeid+'">删除</button>';
+                    html += '<a href="/admin/property?typeid='+data.typeid+'"><button type="button" class="btn btn-primary" attr-id="'+data.typeid+'">属性操作</button></a>';
+                    html += "</td></tr>";
+                    $(".type_tbody").append(html);
+                    $("#add-modal").modal('hide');
+                } else {
+                    alert("修改失败");
+                    return false;
+                }
+            }
+        })
+    });
+    $(".update_btn").on("click", function() {
+        var typename = $("#edit_typename").val();
+        var typeid = $("#typeid").val();
+        if (typename == '' ) {
+            alert('类型名不能为空');
+            return false;
+        }
+        $.ajax({
+            url:'/admin/type/modify',
+            type:'post',
+            data: { 'typename': typename, 'typeid': typeid},
+            dataType: 'json',
+            success: function(data) {
+                if (data.rs == 1) {
+                    var item = parseInt($("#item").val());
+                    $("tr:eq("+item+")").find("td:eq(0)").text(typename);
+                    ("#mod-modal").modal('hide');
+                } else {
+                    alert("修改失败");
+                    return false;
+                }
+            }
+        })
     });
 </script>

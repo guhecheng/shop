@@ -66,6 +66,17 @@
                             <br clear="all" />
                         </div>
                         <div class="form-group">
+                            <label for="lastname" class="col-sm-2 control-label">积分倍数</label>
+                            <div class="col-sm-10">
+                                <select name="score_award" id="score_award">
+                                    <option>0</option>
+                                    <option>1</option>
+                                    <option>2</option>
+                                </select>
+                            </div>
+                            <br clear="all" />
+                        </div>
+                        <div class="form-group">
                             <label for="lastname" class="col-sm-2 control-label">选择类目</label>
                             <div class="col-sm-10">
                                 <select id="goodstype" name="goodstype">
@@ -107,11 +118,11 @@
                             @include('UEditor::head')
                             <script id="container" name="content" type="text/plain"></script>
                         </div>
-                        <div class="form-group">
+                        {{--<div class="form-group">
                             <div class="col-sm-offset-2 col-sm-10">
                                 <button id="create_sku" class="btn btn-default">添加对应库存</button>
                             </div>
-                        </div>
+                        </div>--}}
                         <div class="form-group">
                             <div class="col-sm-offset-2 col-sm-10">
                                 <button id="create_sku" class="btn btn-default">添加商品</button>
@@ -188,6 +199,7 @@
         width: 700px;
         min-height:400px;
     }
+    #add_property { margin-right: 10px;}
 </style>
 
 <script type="text/javascript">
@@ -319,6 +331,7 @@
                 success: function (data) {
                     var keyid = 0;
                     var keyids = html = '';
+                    var sku_title = '';
                     $("#show_sku,.table-title,#show_property, .add_foot").empty();
                     if (data != '') {
                         for (var i in data.propertys) {
@@ -326,12 +339,13 @@
                             if (property.key_id == keyid) continue;
                             else keyid = property.key_id;
                             html += "<tr>";
-                            html += "<td>" + property.key_name +"</td>";
+                            html += "<td "+ (property.is_enum==0?'': "class='select_attr'") +">";
+                            html += property.key_name +"</td>";
                             html += '<td>' ;
                             if (property.is_enum == 0) {
                                 html += '<input type="text" name="common_attr[' +property.key_id + ' ][]" />';
                             } else {
-                                $(".table-title").append("<th>"+property.key_name+"</th>");
+                                //$(".table-title").append("<th>"+property.key_name+"</th>");
                                 keyids += keyid + ",";
                                 if (property.value_name != '') {
                                     for (var j in data.propertys) {
@@ -348,15 +362,23 @@
                         html += '</td>';
                         html += "</tr>";
                         $("#show_property").append(html);
-                        $(".add_foot").append( '<tr>'+ '<td colspan="2"><button id="add_property" class="btn btn-primary">添加属性</button></td>' +'</tr>');
+                        $(".add_foot").append( '<tr>'+ '<td colspan="2"><button id="add_property" class="btn btn-primary">添加属性</button><button id="create_sku" class="btn btn-default">添加对应库存</button></td>' +'</tr>');
                     }
                     $("#attr_key_ids").val(keyids);
                 }
             });
         }
     });
-    $("#create_sku").on("click", function(event) {
+    $(document).on("click", "#create_sku", function(event) {
         event.preventDefault();
+        $("#show_sku").empty();
+        $(".table-title").empty();
+        var item = 0;
+        $(".select_attr").each(function() {
+            $(".table-title").append("<th>"+$(this).text()+"</th>");
+            item += 1;
+        });
+        if (item == 0) return;
         $(".table-title").append("<th>价格</th><th>数量</th>");
         var ids = $("#attr_key_ids").val();
         console.log(ids);

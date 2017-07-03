@@ -53,6 +53,9 @@
                             钻石会员: 8折
                             @else
                             @endif
+                            @if ($order->discount_price)
+                                <span style="color:red;">￥-{{ $order->discount_price }}</span>
+                            @endif
                         </div>
                 </div>
                 @endif
@@ -62,16 +65,7 @@
                     共计<?php echo $count; ?>件商品
                 </div>
                 <div class="order-total">
-                    <div>合计: ￥<span id="total_money">
-                            @if ($user->level == 1)
-                                <?php echo $total * 0.9; ?>
-                            @elseif ($user->level == 2)
-                                <?php echo $total * 0.85; ?>
-                            @elseif ($user->level == 3)
-                                <?php echo $total * 0.8; ?>
-                            @else
-                                <?php echo $total; ?>
-                            @endif
+                    <div>合计: ￥<span id="total_money">{{ $order->price }}
                         </span>元</div>
                 </div>
                 <div class="order-buy">付款</div>

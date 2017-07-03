@@ -82,8 +82,8 @@
     <style type="text/css">
         .goods-property-list { background: #fff;padding-left:5%;}
         .goods-property-list:after {
-            display:block;clear:both;content:"";visibility:hidden;height:0
-        }
+             display:block;clear:both;content:"";visibility:hidden;height:0
+         }
         .goods-property-li div{
             font-weight: 400; line-height: 1.6rem;}
         .goods-property-li div:first-child {

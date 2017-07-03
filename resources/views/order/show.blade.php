@@ -7,7 +7,7 @@
         <div>
             <div>
 
-                @if ($order->status <= 1)
+                @if ($order->status == 1)
                     <div class="order-state">
                         <div class="order-state-img" style="background-image:url('/images/wait_pay.png')"></div>
                         <div>订单未支付</div>

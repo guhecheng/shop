@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS user (
   score double not null default '0.0' comment '积分',
   card_no varchar(20) not null default '' comment '会员卡号',
   is_delete tinyint not null default 0 comment '状态, 0: 正常, 1:禁用',
+  is_old tinyint not null default 0 comment '老会员, 0:否，1:是',
+  child_id int not null default 0 comment '对应孩子表id',
   create_time TIMESTAMP DEFAULT current_timestamp comment '创建时间',
   update_time datetime comment '更新时间',
   last_login_time datetime comment '最后登陆时间',
@@ -276,7 +278,7 @@ drop table if exists children;
 create table if not exists children(
   relate_id int not null AUTO_INCREMENT,
   name varchar(20) not null default '' COMMENT '姓名',
-  birth_date timestamp default current_timestamp comment '生日',
+  birth_date date comment '生日',
   sex tinyint not null default 0 comment '性别，0:未知，1:男,2:女',
   school varchar(100) not null default '' comment '学校',
   age tinyint not null default 0 comment '年龄',

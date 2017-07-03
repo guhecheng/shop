@@ -1,38 +1,43 @@
 @extends('layouts.app')
 @section('content')
     <div class="content user-info">
+        @if (empty($user->is_old))
         <div class="user-info-item">
             <div>我是老会员</div>
             <div class="user-info-link link-old">点击关联<div></div></div>
         </div>
+        @endif
         <div class="user-info-icon-item">
             <div>头像</div>
-            <div class="user-info-icon-div2"><div class="user-info-icon"></div><div></div></div>
+            <div class="user-info-icon-div2">
+                <div class="user-info-icon" style="background-image:url({{ $user->avatar }})"></div>
+                <div></div>
+            </div>
         </div>
         <div class="user-info-item">
             <div>姓名</div>
-            <div class="user-info-link">点击关联<div></div></div>
+            <div class="user-info-link">{{ empty($user->nickname)?$user->uname:$user->nickname }}<div></div></div>
         </div>
         <div class="user-info-item">
             <div>手机号码</div>
-            <div class="user-info-link">点击关联<div></div></div>
+            <div class="user-info-link">{{ empty($user->phone)?'添加':$user->phone }}<div></div></div>
         </div>
         <div class="user-info-children">孩子信息</div>
         <div class="user-info-item">
             <div>姓名</div>
-            <div class="user-info-link">点击关联<div></div></div>
+            <div class="user-info-link">{{ empty($user->name) ? '添加' : $user->name }}<div></div></div>
         </div>
         <div class="user-info-item">
             <div>生日</div>
-            <div class="user-info-link">点击关联<div></div></div>
+            <div class="user-info-date-link">{{ empty($user->birth_date) ? '添加' : $user->birth_date }}<div></div></div>
         </div>
         <div class="user-info-item">
             <div>性别</div>
-            <div class="user-info-date-link">点击关联<div></div></div>
+            <div class="user-info-link">{{ empty($user->childsex) ? '添加':($user->childsex==1?'男':'女') }}<div></div></div>
         </div>
         <div class="user-info-item">
             <div>学校</div>
-            <div class="user-info-link">点击关联<div></div></div>
+            <div class="user-info-link">{{ empty($user->school) ? '添加':$user->school }}<div></div></div>
         </div>
         <div class="user-info-item">
             <div>最喜欢的童装品牌</div>
@@ -54,8 +59,16 @@
         </div>
         <div class="relate">关联会员</div>
     </div>
+    <div class="commarea">
+        <div class="comm-input">
+            <div class="content-title"></div>
+            <div class="comm-input-content"><input type="text" name="add-content" class="add-content"/></div>
+            <input type="hidden" name="info-type" class="info-type" value="" />
+        </div>
+        <div class="sure-btn">确定</div>
+    </div>
     <style type="text/css">
-        .linkuser {
+        .linkuser,.commarea {
             position: fixed;
             bottom:0 ;
             width:100%;
@@ -63,7 +76,32 @@
             z-index: 200;
             background: #fff;
             padding-bottom: 2rem;
+            display:none;
         }
+        .sure-btn {
+            line-height:1.8rem;
+            width: 50%;
+            margin: 0 auto;
+            text-align:center;
+            border: solid 1px #C1C1C1;
+        }
+        .content-title { width: 30%; line-height:1.8rem;}
+
+        .comm-input {
+            width: 100%;
+            padding:1rem 20%;
+        }
+        .comm-input:after {
+            display:block;clear:both;content:"";visibility:hidden;height:0
+        }
+        .comm-input div {
+            float:left;
+        }
+        .comm-input-content {
+            width: 60%;
+        }
+        .add-content { width: 100%; padding:0 5%; border:solid 1px #C1C1C1;
+            line-height:1.8rem;}
         .phone,.pass {
             margin-bottom: 1rem;
             padding: 0 20%;
@@ -120,6 +158,7 @@
             border-radius: 2rem;
             border:solid 1px #C1C1C1;
             margin-top:0.5rem;
+            background-size: 100%;
         }
         .user-info-item {
             line-height: 2rem;
@@ -144,21 +183,75 @@
         }
         .user-info-icon-div2 div:last-child { margin-top:1rem;}
         .bg { position:absolute;z-index:100;
-            display: none; top:0; background: #000000; opacity: 0.8; width: 100%; height: 100%;}
+            display: none; top:0; background: #000; opacity: 0.1; width: 100%; height: 100%;}
         .close-linkuser {text-align:right;
             line-height:2rem;padding-right:1rem;font-size:0.8rem;}
     </style>
     <script type="text/javascript">
         $(function() {
             $(".bg").height($(window).height());
-            $(".user-info-date-link").calendar({
+            /*$("#my-input").calendar({
                 value: ['2015-12-05']
-            });
+            });*/
         });
-
+        $.ajaxSettings = $.extend($.ajaxSettings, {
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
         $(".link-old").on("click", function() {
             $(".bg").show();
             $(".linkuser").show();
+        });
+        $(".close-btn").on("click", function() {
+            $(".bg").hide();
+            $(".linkuser").hide();
+            $("#phone").val("");
+            $("#pass").val("");
+        });
+        $(".relate").on("click", function() {
+            var phone = $("#phone").val();
+            var pass = $("#pass").val();
+            if (phone == '' || pass == '') {
+                alert('手机号或密码不能为空');
+                return false;
+            }
+            $.ajax({
+                url : '/relate',
+                type:'post',
+                data: {'phone':phone, 'pass':pass},
+                dataType:'json',
+                success: function (data) {
+                    if (data.rs == 1) {
+                        alert('关联成功');
+                        location.reload();
+                    } else {
+                        alert('信息填写错误');
+                        return false;
+                    }
+                }
+            })
+        });
+        $(".user-info-link").on("click", function() {
+            $(".commarea,.bg").show();
+            var par = $(this).parent();
+            $(".info-type").val($(this).index());
+            $(".content-title").text($(this).parent().find("div").first().text());
+            $(".add-content").val($(this).text());
+        });
+        $(".sure-btn").on('click', function() {
+            var index = $('.info-type').val();
+            var content = $(".add-content").val();
+            if (content == '') alert('不能为空');
+            $.ajax({
+                type:'post',
+                url: '/modinfo',
+                data: {'index':index, 'content': content},
+                dataType:'json',
+                success: function(data) {
+
+                }
+            });
         });
     </script>
 @endsection

@@ -41,6 +41,10 @@ Route::group(['middleware' => 'userlogin'], function (){
     Route::any('/order/orderpay', 'OrderController@orderpay');
 
     Route::get('/info', 'UserController@info');
+    Route::post('/relate', 'UserController@relate');
+    Route::post('/modinfo', 'UserController@modinfo');
+
+    Route::post('/modcar', 'CarController@modcar');
 });
 Route::get('/goods', 'GoodsController@index');
 Route::get('/goods/property', 'GoodsController@property');

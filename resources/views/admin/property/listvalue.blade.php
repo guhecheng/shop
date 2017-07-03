@@ -4,9 +4,12 @@
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1>
-            种类列表
-        </h1>
+        <a href="/admin/type"><h4>{{ $typename }}</h4></a>>><a href="/admin/property?typeid={{ $typeid }}>"><h4>{{ $key_name }}</h4></a>
+        <br clear="all" />
+        <style type="text/css">
+            h4{
+                display: inline;}
+        </style>
         <button type="button" class="btn btn-primary add-btn">添加</button>
     </section>
 

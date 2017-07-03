@@ -20,10 +20,12 @@ class TypeController extends Controller {
 
     public function add(Request $request) {
         $typename = $request->input('typename');
-        $rs = DB::table('goodstype')->insert([
+        if (empty($typename))
+            return response()->json(['rs' => 0]);
+        $id = DB::table('goodstype')->insertGetId([
             'typename' => $typename
         ]);
-        return redirect('/admin/type');
+        return response()->json(['rs'=>$id>0?1:0, 'typeid'=>$id]);
     }
 
     public function delete(Request $request) {
@@ -41,7 +43,8 @@ class TypeController extends Controller {
         if ($typeid && $typename) {
             DB::table('goodstype')->where('typeid', $typeid)
                                   ->update(['typename' => $typename]);
+            return response()->json(['rs' => 1]);
         }
-        return redirect('/admin/type');
+        return response()->json(['rs' => 0]);
     }
 }

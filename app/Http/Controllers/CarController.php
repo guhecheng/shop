@@ -116,4 +116,21 @@ class CarController extends Controller {
         }
         return response()->json(['rs' => 1]);
     }
+
+    /**
+     * 根据cartid修改购物车数量(@Override 没有判断库存多少是否上限)
+     * @param Request $request
+     */
+    public function modcar(Request $request) {
+        $cartid = $request->input('cartid');
+        $count = $request->input('count');
+        if (empty($cartid) || empty($count))
+            exit;
+        $sku = DB::table('cart')->leftJoin('goodssku', 'goodssku.sku_id', '=', 'cart.skuid')
+                    ->where('cart.cartid', $cartid)->first();
+        if ($sku->num < $count) {
+            return response()->json(['rs' => 0, 'max_count'=>$sku->num]);
+        }
+        DB::table('cart')->where('cartid', $cartid)->update(['goodscount'=>$count]);
+    }
 }

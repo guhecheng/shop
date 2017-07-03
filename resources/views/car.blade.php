@@ -20,12 +20,12 @@
                                 <div class="car-price">￥<span class="car-money">{{ $item->price / 100 }}</span> 元</div>
                                 <div>{{ $item->property }}</div>
                             </div>
-                            <div class="car-num">
+                            <div class="car-num" attr-id="{{ $item->cartid }}">
                                 <div class="reduce_num">-</div>
                                 <div><input name="text" value="{{ $item->goodscount }}" class="car-item-count" /></div>
                                 <div class="add_num">+</div>
                             </div>
-                            <?php $total += $item->price / 100 * $item->goodscount; ?>
+                        <?php $total += $item->price / 100 * $item->goodscount; ?>
                         </div>
                         <br clear="all" />
                     </div>
@@ -138,12 +138,66 @@
         $(".reduce_num").on('click', function() {
             var par = $(this).parent();
             var count = par.find('.car-item-count').val();
-            par.find('.car-item-count').val(count > 1 ? count - 1 : 1);
+            count = count > 1 ? count - 1 : 1;
+            par.find('.car-item-count').val(count);
+            $.ajax({
+                url:'/modcar',
+                type:'post',
+                async: false,
+                data: {'count': count, 'cartid': parseInt(par.attr('attr-id'))},
+                dataType:'json',
+                success: function(data) {
+                    if (data.rs == 0) {
+                        alert('库存仅剩'+data.max_count);
+                        par.find('.car-item-count').val(data.max_count);
+                        return;
+                    }
+                }
+            });
         });
         $(".add_num").on('click', function() {
             var par = $(this).parent();
             var count = par.find('.car-item-count').val();
-            par.find('.car-item-count').val(parseInt(count) + 1);
+            count = parseInt(count) + 1;
+            par.find('.car-item-count').val(count);
+            $.ajax({
+                url:'/modcar',
+                type:'post',
+                async: false,
+                data: {'count': count, 'cartid': parseInt(par.attr('attr-id'))},
+                dataType:'json',
+                success: function(data) {
+                    if (data.rs == 0) {
+                        alert('库存仅剩'+data.max_count);
+                        par.find('.car-item-count').val(data.max_count);
+                        return;
+                    }
+                }
+            });
+        });
+        $(".car-item-count").on("input propertychange", function () {
+            var value = 0;
+            if (isNaN($(this).val())) {
+                value = parseInt($(this).val()) > 0 ? parseInt($(this).val()) : 1;
+            } else {
+                value = $(this).val() <= 0 ? 1 : $(this).val();
+            }
+            $(this).val(value);
+            th = $(this);
+            $.ajax({
+                url:'/modcar',
+                type:'post',
+                data: {'count': value, 'cartid': parseInt($(this).parent().parent().attr("attr-id"))},
+                async: false,
+                dataType:'json',
+                success: function(data) {
+                    if (data.rs == 0) {
+                        alert('库存仅剩'+data.max_count);
+                        th.val(data.max_count);
+                        return;
+                    }
+                }
+            });
         });
         $(".car-edit").on("click", function() {
             $("#act-type").val(2);
@@ -180,6 +234,10 @@
             $(".active").each(function(item) {
                 car_ids += $(this).parent().parent().attr("attr-id") + ',';
             });
+            if (car_ids == '') {
+                alert('没有选择物品');
+                return ;
+            }
             location.href = '/order/create?car_ids=' + car_ids;
         });
     </script>

@@ -4,9 +4,7 @@
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1>
-            种类列表
-        </h1>
+        <a href="/admin/type"><h2>{{ $typename }}属性列表</h2></a>
         <button type="button" class="btn btn-primary add-btn">添加</button>
     </section>
 
@@ -38,7 +36,7 @@
                                         <button type="button" class="btn btn-primary modify-btn" attr-id="{{ $property->key_id }}">修改</button>
                                         <button type="button" class="btn btn-primary del-btn" attr-id="{{ $property->key_id }}">删除</button>
                                         @if (!empty($property->is_enum))
-                                        <a href="/admin/property/listvalue?keyid={{ $property->key_id }}"><button type="button" class="btn btn-primary" attr-id="{{ $property->key_id }}">添加属性值</button></a>
+                                        <a href="/admin/property/listvalue?keyid={{ $property->key_id }}&typeid={{ $typeid }}"><button type="button" class="btn btn-primary" attr-id="{{ $property->key_id }}">添加属性值</button></a>
                                         @endif
                                     </td>
                                 </tr>
@@ -171,6 +169,11 @@
 <script src="/css/admin/themes/explorer/theme.js" type="text/javascript"></script>
 
 <script type="text/javascript">
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
     $(function() {
         $(".add-btn").on("click", function() {
             $("#add-modal").modal('show');
@@ -191,11 +194,7 @@
             var keyid = $(this).attr("attr-id");
             if (keyid == '' || typeof keyid == 'undefined') return false;
             var that = $(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
+
             $.ajax({
                 url:'/admin/property/deletekey',
                 data: {'keyid': keyid},

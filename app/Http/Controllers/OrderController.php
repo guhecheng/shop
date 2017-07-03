@@ -58,7 +58,7 @@ class OrderController extends Controller {
         if ($status == 1) {
             $where = [
                 ['uid', '=', $uid],
-                ['status', '<=', 1]
+                ['status', '=', 1]
             ];
         } else if ($status == 2) {
             $where = [
@@ -73,7 +73,8 @@ class OrderController extends Controller {
         } else if (empty($status) || $status == -1) {
 
             $where = [
-                ['uid', '=', $uid]
+                ['uid', '=', $uid],
+                ['status', '>', 0]
             ];
         } else {
 
@@ -221,34 +222,21 @@ class OrderController extends Controller {
         }
 
         $user = DB::table('user')->where('userid', $request->session()->get('uid'))->first();
-        return view('order.create', ['goods' => $goods, 'user'=>$user, 'address'=>$address, 'orderno' => $orderno]);
+        return view('order.create', ['goods' => $goods, 'user'=>$user, 'address'=>$address, 'orderno' => $orderno, 'order'=>$order]);
     }
     public function add(Request $request) {
         $orderno = $request->input('orderno');
         $address_id = $request->input('address_id');
+        if (empty($orderno) || empty($address_id))
+            return response()->json(['rs' => 0]);
         $address = DB::table('useraddress')->where('address_id', $address_id)->first();
-        DB::table('orderinfo')->where(['order_no', $orderno])->update([
-            'recv_name' => $address->name ,
+        $rs = DB::table('orderinfo')->where(['order_no', $orderno])->update([
+            'recv_name' => $address->name,
             'phone' => $address->phone ,
             'location' => $address->address . $address->location,
             'status' => $this->state['ORDER_WAIT_PATY']
         ]);
-        /*$attributes = [
-            'trade_type'       => 'JSAPI', // JSAPI，NATIVE，APP...
-            'body'             => 'iPad mini 16G 白色',
-            'detail'           => 'iPad mini 16G 白色',
-            'out_trade_no'     => '1217752501201407033233368018',
-            'total_fee'        => $price, // 单位：分
-            'notify_url'       => 'http://xxx.com/order-notify', // 支付结果通知网址，如果不设置则会使用配置里的默认地址
-            'openid'           => '当前用户的 openid', // trade_type=JSAPI，此参数必传，用户在商户appid下的唯一标识，
-            // ...
-        ];
-        $order = new Order($attributes);
-
-        $result = $this->payment->prepare($order);
-        if ($result->return_code == 'SUCCESS' && $result->result_code == 'SUCCESS'){
-            $prepayId = $result->prepay_id;
-        }*/
+        return response()->json(['rs' => empty($rs) ? 0 : 1]);
     }
 
 

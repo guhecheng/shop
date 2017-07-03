@@ -21,8 +21,8 @@ class PropertyController extends Controller {
                     ['is_delete', '=', 0]
                     ])
                     ->get();
-
-        return view('admin.property.index', ['propertys' => $propertys, 'typeid' => $typeid]);
+        $type = DB::table('goodstype')->where('typeid', $typeid)->select('typename')->first();
+        return view('admin.property.index', ['propertys' => $propertys, 'typeid' => $typeid, 'typename'=>$type->typename]);
     }
 
     public function addkey(Request $request) {
@@ -65,11 +65,15 @@ class PropertyController extends Controller {
 
     public function listvalue(Request $request) {
         $keyid = $request->input('keyid');
+        $typeid = $request->input('typeid');
         $values = DB::table('propertyvalue')->where([
                             ['key_id', '=', $keyid],
                             ['is_delete', '=', 0]
                     ])->get();
-        return view('admin.property.listvalue', ['values' => $values, 'keyid' => $keyid]);
+        $type = DB::table('goodstype')->where('typeid', $typeid)->select('typename')->first();
+        $key = DB::table('propertykey')->where('key_id', $keyid)->select('key_name')->first();
+        return view('admin.property.listvalue', ['values' => $values, 'keyid' => $keyid,
+            'typeid'=>$typeid, 'typename'=>$type->typename, 'key_name'=>$key->key_name]);
     }
 
     public function addvalue(Request $request) {
