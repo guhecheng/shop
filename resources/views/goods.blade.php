@@ -31,6 +31,19 @@
                     <div>购买</div>
                     <div style=""></div>
                 </div>
+                @if ($goods->is_discount || $goods->score_award)
+                <div class="goods-activity">
+                    @if ($goods->score_award)
+                    <div class="goods-activity-item1">
+                        <div>积分活动</div>
+                        <div>{{ $goods->score_award }}倍积分</div>
+                    </div>
+                    @endif
+                    @if ($goods->is_discount)
+                    <div class="goods-activity-item2">会员卡折扣</div>
+                    @endif
+                </div>
+                @endif
             </div>
             <div class="goods-property-list">
                 <ul>
@@ -81,11 +94,24 @@
     </div>
     <style type="text/css">
         .goods-property-list { background: #fff;padding-left:5%;}
-        .goods-property-list:after {
+        .goods-property-list:after,.goods-activity:after,.goods-select:after {
              display:block;clear:both;content:"";visibility:hidden;height:0
          }
+        .goods-activity {
+            line-height:1.8rem;
+            padding:0 5%;
+            background: #fff;
+        }
+        .goods-activity-item2 {
+            text-align: right;
+        }
         .goods-property-li div{
             font-weight: 400; line-height: 1.6rem;}
+        .goods-activity-item1, .goods-activity-item2 {
+            float:left;
+            width: 50%;
+        }
+        .goods-activity-item1 div{ float:left; width: 50%; }
         .goods-property-li div:first-child {
             float:left;
             width: 50%;

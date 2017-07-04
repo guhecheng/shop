@@ -39,27 +39,41 @@
                 </div>
                 <div class="order-express">
                     <div>运费</div>
-                    <div>10元(全场满500元包邮)</div>
+                    <div>10元@if($user->level<1)(全场满1000元包邮)@endif</div>
                 </div>
                 @if ($user->level >= 1)
-                <div class="order-discount">
-                    <div>会员折扣</div>
-                        <div>
-                            @if ($user->level == 1)
-                            金牌会员: 9折
-                            @elseif ($user->level == 2)
-                            铂金会员: 8.5折
-                            @elseif ($user->level == 3)
-                            钻石会员: 8折
-                            @else
-                            @endif
-                            @if ($order->discount_price)
-                                <span style="color:red;">￥-{{ $order->discount_price }}</span>
-                            @endif
-                        </div>
+                <div class="order-express">
+                    <div>会员卡运费减免</div>
+                    <div>-￥10元</div>
                 </div>
+                @if ($order->discount)
+                    <div class="order-discount">
+                        <div>会员卡折扣</div>
+                            <div>(
+                                @if ($user->level == 1)
+                                金牌会员: 9折
+                                @elseif ($user->level == 2)
+                                铂金会员: 8.5折
+                                @else
+                                钻石会员: 8折
+                                @endif
+                                )
+                                @if ($order->discount_price)
+                                    <span style="color:red;">￥-{{ $order->discount_price }}</span>
+                                @endif
+                            </div>
+                    </div>
+                @endif
+                @endif
+                @if ($user->score)
+                    <div>
+                        <div>积分折扣</div>
+                        <div>{{ $user->score }}积分抵扣{{ $user->score / 100 }}元</div>
+                    </div>
                 @endif
             </div>
+            {{  }}
+            <div></div>
             <div class="order-act">
                 <div class="order-count">
                     共计<?php echo $count; ?>件商品
@@ -72,6 +86,9 @@
             </div>
     </div>
     <style type="text/css">
+        .order-address:after {
+            display:block;clear:both;content:"";visibility:hidden;height:0
+        }
         .order-address-no-default {
             float:left;
             width: 80%;
@@ -82,11 +99,11 @@
     </style>
     <script>
         $(function() {
-            @if ($address)
+            {{--@if ($address)
                 $(".order-address").height($(".order-address-info").height());
             @else
                 $(".order-address").height($(".order-address-no-default").height());
-            @endif
+            @endif--}}
         });
         $.ajaxSettings = $.extend($.ajaxSettings, {
             headers: {

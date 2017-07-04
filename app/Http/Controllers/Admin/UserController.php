@@ -56,6 +56,7 @@ class UserController extends Controller {
     }
 
     public function upload(Request $request) {
+        set_time_limit(0);
         if ($request->method() == 'POST') {
             $file = $request->file('upload');
             if ( $file->isValid() ) {
@@ -63,7 +64,8 @@ class UserController extends Controller {
                 $realPath = $file->getRealPath();
                 Excel::load($realPath, function ($reader) {
                     $data = $reader->all();
-                    foreach ($data as $key => $item) {
+                    echo $data;
+                   /* foreach ($data as $key => $item) {
                         if ($key == 0) continue;
                         $count = DB::table('olduser')->where('phone', $item[1])->count();
                         if ($count) {
@@ -76,7 +78,7 @@ class UserController extends Controller {
                         DB::table('children')->insert([
                             ['name'=>$item[2], 'sex'=>$sex, 'birth_date'=>$item[4]]
                         ]);
-                    }
+                    }*/
                 });
             }
         }

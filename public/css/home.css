@@ -57,7 +57,7 @@ body {
 }
 .goods-content-name {
     font-weight: bold;
-    font-size: 0.8rem;
+    font-size: 1rem;
     margin-bottom: 0.1rem;
 }
 .goods-content-price span {
@@ -83,9 +83,9 @@ body {
 .goods-select {
     padding: 0.1rem 5%;
     background: #fff;
-    font-size:0.7rem;
-    line-height: 1.2rem;
-    height: 1.5rem;
+    font-size:0.8rem;
+    line-height: 1.8rem;
+    border-bottom:solid 1px #C1C1C1;
 }
 .goods-select div:first-child {
     float:left;
@@ -95,7 +95,7 @@ body {
     background:url('/images/more.png') no-repeat;
     width: 1rem;
     height: 1rem;
-    margin-top:0.2rem;
+    margin-top:0.5rem;
     background-size:100%;
 }
 .goods-detail {
@@ -129,7 +129,7 @@ body {
     display: none;
 }
 .goods-property-area, .goods_num {
-    padding: 0.2rem 4%;
+    padding: 0.4rem 4% 0.2rem;
     width: 100%;
 }
 .goods-property-area {
@@ -246,10 +246,10 @@ body {
 }
 .goods-property-icon{
     position: absolute;
-    top: -1rem;
+    top: -2rem;
     left: 5%;
-    height:2rem;
-    width: 2rem;
+    height:3rem;
+    width: 3rem;
     background-size: 100% 100%;
     background-repeat: no-repeat;
     border: solid 1px #C1C1C1;
@@ -646,13 +646,14 @@ body {
     border: solid 1px #C1C1C1;;
 }
 .car-property {
-    width: 40%;
+    width: 55%;
+    margin-right: 5%;
 }
 .car-property, .car-num {
     float: left;
 }
 .car-num {
-    width:60%;
+    width:40%;
     text-align: right;
 }
 .car-num div {
@@ -687,6 +688,7 @@ body {
 }
 .car-property div:last-child {
     height: 1rem;
+    font-size:0.6rem;
     overflow: hidden;
 }
 .car-item {
@@ -697,15 +699,17 @@ body {
 .car-price {
     color: red;
     font-weight: bold;
+    font-size: 0.7rem;
 }
 .car-name {
     height: 1.5rem;
-    line-height:0.8rem;
+    line-height:0.7rem;
+    font-size:0.7rem;
     font-weight:bold;
     overflow: hidden;
 }
 .car-item-content {
-    width: 60%;
+    width: 63%;
     margin-left:5%;
 }
 .car-select {
@@ -839,8 +843,8 @@ body {
 }
 .order-address {
     background: #fff;
-    min-height: 2.2rem;;
     border-bottom:0.5rem;
+    padding-bottom:0.2rem;
 }
 .order-item-icon {
     width: 3.4rem;

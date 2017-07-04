@@ -39,10 +39,29 @@
             <li class="treeview">
                 <a href="#">
                     <i class="fa fa-files-o"></i>
+                    <span>用户管理</span>
+                    <span class="pull-right-container"><span class="label label-primary pull-right"></span></span>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a href="/admin/user"><i class="fa fa-circle-o"></i>用户列表</a></li>
+                    <li><a href="/admin/userexport"><i class="fa fa-circle-o"></i>导入用户</a></li>
+                </ul>
+            </li>
+            <li class="treeview">
+                <a href="#">
+                    <i class="fa fa-files-o"></i>
+                    <span>订单管理</span>
+                    <span class="pull-right-container"><span class="label label-primary pull-right"></span></span>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a href="/admin/card"><i class="fa fa-circle-o"></i>订单列表</a></li>
+                </ul>
+            </li>
+            <li class="treeview">
+                <a href="#">
+                    <i class="fa fa-files-o"></i>
                     <span>会员卡管理</span>
-                    <span class="pull-right-container">
-              <span class="label label-primary pull-right"></span>
-            </span>
+                    <span class="pull-right-container"><span class="label label-primary pull-right"></span></span>
                 </a>
                 <ul class="treeview-menu">
                     <li><a href="/admin/card"><i class="fa fa-circle-o"></i>卡片列表</a></li>

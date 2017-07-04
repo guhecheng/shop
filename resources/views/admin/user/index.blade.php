@@ -45,7 +45,7 @@
                                         @endif
                                     </td>
                                     <td>{{ $user->phone }}</td>
-                                    <td><img src="{{ $user->icon }}" width="60" height="60"/></td>
+                                    <td><img src="{{ $user->avatar }}" width="60" height="60"/></td>
                                     <td>{{ $user->money / 100 }}</td>
                                     <td>
                                         <button type="button" class="btn btn-primary modify-btn" attr-id="{{ $user->userid}}">修改</button>
