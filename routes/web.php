@@ -94,4 +94,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => 'chec
 
     Route::any('/userexport', 'UserController@userExport');
     Route::any('/user/upload', 'UserController@upload');
+
+    Route::get('/message', 'MessageController@index');
+    Route::get('/message/delete', 'MessageController@delete');
+    Route::post('/message/add', 'MessageController@add');
+    Route::post('/message/update', 'MessageController@update');
+    Route::get('/message/send', 'MessageController@send');
 });

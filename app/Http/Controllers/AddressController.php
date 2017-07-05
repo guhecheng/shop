@@ -100,7 +100,7 @@ class AddressController extends Controller
     public function edit($id)
     {
         $address = DB::table("useraddress")->where('address_id', $id)->first();
-        return view('address.show', ['address' => $address]);
+        return view('address.edit', ['address' => $address]);
     }
 
     /**

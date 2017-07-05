@@ -67,6 +67,16 @@
                     <li><a href="/admin/card"><i class="fa fa-circle-o"></i>卡片列表</a></li>
                 </ul>
             </li>
+            <li class="treeview">
+                <a href="#">
+                    <i class="fa fa-files-o"></i>
+                    <span>消息管理</span>
+                    <span class="pull-right-container"><span class="label label-primary pull-right"></span></span>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a href="/admin/message"><i class="fa fa-circle-o"></i>消息列表</a></li>
+                </ul>
+            </li>
         </ul>
     </section>
     <!-- /.sidebar -->

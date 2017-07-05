@@ -22,14 +22,14 @@
                         <div class="order-item-header">
                             <div>{{ $item->order_no }}</div>
                             <div>
-                                @if ($item->status <= 1)
+                                @if ($item->status == 1)
                                     <span style="color:red;">未付款</span>
                                 @elseif ($item->status == 2)
                                     待发货
                                 @elsesif ($item->status == 3)
                                     已发货
                                 @elseif ($item->status == 4)
-                                    以完成
+                                    已完成
                                 @else
                                     <span style="color:#C1C1C1">已失效</span>
                                 @endif
@@ -61,9 +61,6 @@
                     <br clear="all" />
                 </div>
                 @endfor
-                {{--<div class="swiper-slide goods-slide" attr-value="1" attr-is-add="0"></div>
-                <div class="swiper-slide goods-slide" attr-value="2" attr-is-add="0"></div>
-                <div class="swiper-slide goods-slide" attr-value="3" attr-is-add="0"></div>--}}
             </div>
         </div>
     </div>
@@ -79,7 +76,7 @@
             border-bottom:solid 1px red;
         }
         .order-item {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             padding: 0;
         }
         .order-item-header, .goods-item, .price {
@@ -119,7 +116,6 @@
     <script type="text/javascript">
         $(function() {
             $(document).on("click", ".order-item", function () {
-                alert('jklfasdf');
                 location.href = "/order/show?orderno=" + $(this).attr("attr-id");
             });
         });

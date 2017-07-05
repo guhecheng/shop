@@ -101,9 +101,13 @@
             line-height:1.8rem;
             padding:0 5%;
             background: #fff;
+            border-top: solid 1px #C1C1C1;
         }
         .goods-activity-item2 {
             text-align: right;
+        }
+        .goods-select {
+            border-bottom: 0;
         }
         .goods-property-li div{
             font-weight: 400; line-height: 1.6rem;}
