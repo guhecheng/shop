@@ -50,6 +50,7 @@ Route::get('/goods', 'GoodsController@index');
 Route::get('/goods/property', 'GoodsController@property');
 Route::get('/goods/getgoods', 'GoodsController@getgoods');
 Route::post('/goods/getgoodssku', 'GoodsController@getgoodssku');
+Route::get('/test/testorder', 'TestController@testorder');
 
 
 

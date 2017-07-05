@@ -63,22 +63,22 @@ class UserController extends Controller {
                 $ext = $file->getClientOriginalExtension(); // 文件扩展
                 $realPath = $file->getRealPath();
                 Excel::load($realPath, function ($reader) {
-                    $data = $reader->all();
-                    echo $data;
-                   /* foreach ($data as $key => $item) {
-                        if ($key == 0) continue;
-                        $count = DB::table('olduser')->where('phone', $item[1])->count();
-                        if ($count) {
-                            continue;
-                        }
-                        $id = DB::table('olduser')->insertGetId([
-                            ['name'=>$item[0], 'phone'=>$item[1], 'password'=>'1234']
-                        ]);
-                        $sex = $item[2] == '男' ? '1' : ($item[3] == '女' ? 2 : 0);
-                        DB::table('children')->insert([
-                            ['name'=>$item[2], 'sex'=>$sex, 'birth_date'=>$item[4]]
-                        ]);
-                    }*/
+                    $reader = $reader->getSheet(0);
+                    var_dump($reader);
+                    /* foreach ($data as $key => $item) {
+                         if ($key == 0) continue;
+                         $count = DB::table('olduser')->where('phone', $item[1])->count();
+                         if ($count) {
+                             continue;
+                         }
+                         $id = DB::table('olduser')->insertGetId([
+                             ['name'=>$item[0], 'phone'=>$item[1], 'password'=>'1234']
+                         ]);
+                         $sex = $item[2] == '男' ? '1' : ($item[3] == '女' ? 2 : 0);
+                         DB::table('children')->insert([
+                             ['name'=>$item[2], 'sex'=>$sex, 'birth_date'=>$item[4]]
+                         ]);
+                     }*/
                 });
             }
         }

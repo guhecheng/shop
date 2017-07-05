@@ -18,13 +18,14 @@ class OrderController extends Controller {
     private $state = [
         'ORDER_CREATE' => 0 ,
         'ORDER_WAIT_PATY' => 1,
-        'ORDER_HAS_PAY' => 2,
-        'ORDER_WAIT_SEND' => 3,
-        'ORDER_HAS_SEND' => 4,
-        'ORDER_HAS_RECV' => 5
+        'ORDER_WAIT_SEND' => 2,
+        'ORDER_HAS_SEND' => 3,
+        'ORDER_HAS_RECV' => 3,
+        'ORDER_HAS_LOST' => 5
     ];
     private $pay_type = [
         'WX_PAY' => 0,
+        'CARD_PAY' => 1
     ];
     private $app;
     private $payment;
@@ -167,7 +168,7 @@ class OrderController extends Controller {
                     'order_no' => $orderno,
                     'skuid' => $item->sku_id,
                     'goodsid' => $item->goodsid,
-                    'count' => empty($request->input('num')) ? $item->num : $request->input('num'),
+                    'count' => empty($request->input('num')) ? $item->goodscount : $request->input('num'),
                     'price' => $true_price
                 ]);
             }
@@ -179,6 +180,7 @@ class OrderController extends Controller {
                 'discount_price' => $discount_price
             ]);
         }
+        //DB::table("cart")->whereIn('cartid', $car_ids)->update(['is_delete', 0]);
         return redirect('/order/orderpay?orderno=' . $orderno);
 
     }

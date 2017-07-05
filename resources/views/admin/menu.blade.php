@@ -54,7 +54,7 @@
                     <span class="pull-right-container"><span class="label label-primary pull-right"></span></span>
                 </a>
                 <ul class="treeview-menu">
-                    <li><a href="/admin/card"><i class="fa fa-circle-o"></i>订单列表</a></li>
+                    <li><a href="/admin/order"><i class="fa fa-circle-o"></i>订单列表</a></li>
                 </ul>
             </li>
             <li class="treeview">

@@ -22,7 +22,6 @@ CREATE TABLE IF NOT EXISTS user (
   card_no varchar(20) not null default '' comment '会员卡号',
   is_delete tinyint not null default 0 comment '状态, 0: 正常, 1:禁用',
   is_old tinyint not null default 0 comment '老会员, 0:否，1:是',
-  child_id int not null default 0 comment '对应孩子表id',
   create_time TIMESTAMP DEFAULT current_timestamp comment '创建时间',
   update_time datetime comment '更新时间',
   last_login_time datetime comment '最后登陆时间',
@@ -55,7 +54,8 @@ create table if not exists goods (
   is_ad tinyint not null default 0 comment '是否广告位,0:否，1:是',
   is_sale tinyint default 0 comment '是否上架，0:否，1:是',
   is_delete tinyint default 0 comment '是否删除,0:否，1:是',
-  is_discount tinyint default 0 comment '是否参与折扣, 0: 否， 1:是',
+  is_discount tinyint default 0 comment '是否参与会员折扣, 0: 否， 1:是',
+  discount tinyint not null default 0 comment '折扣价格',
   score_award tinyint default 0 comment '积分奖励倍数, 0:无, 1:一倍，2:2倍..',
   create_time timestamp default current_timestamp comment '创建时间',
   primary key(goodsid)
@@ -283,7 +283,23 @@ create table if not exists children(
   school varchar(100) not null default '' comment '学校',
   age tinyint not null default 0 comment '年龄',
   parent_id int not null default 0 comment '父辈id关联olduer表的id',
+  uid int not null default 0 comment '用户表id',
   like_brands varchar(255) not null default '' comment '喜欢的品牌',
   relate tinyint DEFAULT 0 COMMENT '与用户关系,0:未知,1:儿,2:女，3:侄子',
   PRIMARY KEY (relate_id)
 ) ENGINE=innodb charset=utf8;
+
+
+
+/*消息处理*/
+drop table if exists message;
+create table if not exists message (
+  id int not null AUTO_INCREMENT,
+  content varchar(255) not null default 0 COMMENT '内容',
+  to_id int not null DEFAULT 0 comment '接收者,0:所有人',
+  create_time TIMESTAMP DEFAULT current_timestamp  comment '创建时间',
+  send_time TIMESTAMP comment '发送时间',
+  is_send TINYINT default 0 comment '1已发送',
+  is_delete TINYINT DEFAULT 0 comment '1已删除',
+  PRIMARY KEY (id)
+) ENGINE = innodb charset=utf8;

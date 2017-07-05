@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', '我的购物车')
+@section('title', '购买')
 
 @section('content')
     <div class="content order-create">
@@ -72,7 +72,6 @@
                     </div>
                 @endif
             </div>
-            {{  }}
             <div></div>
             <div class="order-act">
                 <div class="order-count">
