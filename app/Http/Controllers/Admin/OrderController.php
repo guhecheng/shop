@@ -12,7 +12,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
-class CardController extends Controller
+class OrderController extends Controller
 {
     private $state = [
         'ORDER_CREATE' => 0 ,
@@ -29,11 +29,18 @@ class CardController extends Controller
 
     public function index() {
         $orders = DB::table('orderinfo')->leftJoin('order', 'order.order_no', '=', 'orderinfo.order_no')
-            ->where('orderinfo.status', ORDER_HAS_PAY)->get();
+            ->where('orderinfo.status', $this->state['ORDER_HAS_PAY'])->orderBy('order.order_no', 'asc')->get();
 
-        $skuids = [];
+        if (empty($orders))
+            return view('admin.order.index', ['orders' => null]);
+        // 没有获取到数据
+        $skuids = $order_no_items = [];
         foreach ($orders as $item) {
             $skuids[] = $item->skuid;
+            if (key_exists($item->order_no, $order_no_items)) {
+                $order_no_items[$item->order_no] += 1;
+            } else
+                $order_no_items[$item->order_no] = 1;
         }
         $sql = "select * from goodsproperty as gp
                 left join propertykey as pk on pk.key_id=gp.key_id
@@ -42,6 +49,11 @@ class CardController extends Controller
                 where gp.sku_id in (".implode(',', $skuids).")";
         $skus = DB::select($sql);
         foreach ($orders as &$item) {
+            foreach ($order_no_items as $k=>$v) {
+                if ($k == $item->order_no) {
+                    $item->times = $v;
+                }
+            }
             $item->property = '';
             foreach ($skus as $value) {
                 if ($value->sku_id == $item->skuid) {
@@ -51,21 +63,23 @@ class CardController extends Controller
                 }
             }
         }
+
         return view('admin.order.index', ['orders' => $orders]);
     }
 
-    public function modOrder(Request $request) {
+    public function send(Request $request) {
         $order_no = $request->input('order_no');
         $express_company = $request->input('express_company');
         $express_no = $request->input('express_no');
         if (empty($order_no) || empty($express_company) || empty(($express_no)))
             return response()->json(['rs'=>0, 'errmsg' => '信息不全']);
+
         $rs = DB::table('orderinfo')->where('order_no', $order_no)->update([
             'express_company' => $express_company,
             'express_no' => $express_no,
-            'status' => self::ORDER_HAS_SEND,
+            'status' => $this->state['ORDER_HAS_SEND'],
             'send_time' => date("Y-m-d H:i:s")
         ]);
-        return resoponse()->json(['rs' => $rs]);
+        return response()->json(['rs' => $rs]);
     }
 }

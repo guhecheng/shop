@@ -101,4 +101,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => 'chec
     Route::post('/message/add', 'MessageController@add');
     Route::post('/message/update', 'MessageController@update');
     Route::get('/message/send', 'MessageController@send');
+
+    Route::get('/order', 'OrderController@index');
+    Route::post('/order/send', 'OrderController@send');
 });
