@@ -8,9 +8,9 @@
     <div class="content goods">
         <div class="swiper-container pic-container">
             <div class="swiper-wrapper">
-                @foreach(explode(',', $goods->goodspic) as $key=>$value)
+                @foreach(explode(',', rtrim($goods->goodspic, ',') ) as $key=>$value)
                     <div class="swiper-slide" style="background-image:url('{{ $value }}')">
-                        <div class="index-pic-num">{{ $key+1 }}/{{count(explode(',', $goods->goodspic))}}</div>
+                        <div class="index-pic-num">{{ $key+1 }}/{{count(explode(',', rtrim($goods->goodspic, ',')))}}</div>
                     </div>
                 @endforeach
             </div>
@@ -21,7 +21,7 @@
                     <div class="goods-content-name">{{ $goods->goodsname }}</div>
                     <div class="goods-content-price"><span>￥ {{ $goods->price / 100 }}</span></div>
                     <div class="goods-content-detail">
-                        <div>满500包邮</div>
+                        <div>满1000包邮</div>
                         <div></div>
                         <div>库存 {{ $count }}</div>
                         <br clear="both" />

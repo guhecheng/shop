@@ -104,4 +104,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => 'chec
 
     Route::get('/order', 'OrderController@index');
     Route::post('/order/send', 'OrderController@send');
+
+    Route::post("/modify", 'AdminController@modify');
 });

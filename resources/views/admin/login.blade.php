@@ -95,12 +95,19 @@
                 dataType: 'json',
                 success: function(data) {
                     if (data.rs == 1) {
-                        alert('登陆成功');
-                        location.href = "/admin/type"
+                        location.href = "/admin"
+                    } else {
+                        alert('账号或密码错误');
+                        return false;
                     }
                 }
             });
-        })
+        });
+        $("#name, #password").on("keypress", function(event) {
+            if (event.keyCode == '13')
+            if ($("#name").val() != '' && $("#password").val() != '')
+                $(".login-btn").trigger("click");
+        });
     });
 </script>
 </body>
