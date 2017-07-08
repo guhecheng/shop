@@ -723,7 +723,7 @@ body {
     margin-top: 1.1rem;
 }
 .car-act,.car-act-del {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     width:100%;
     border-top:solid 1px #0c0c0c;
@@ -781,6 +781,9 @@ body {
 }
 .car-act-del-area {
     width:60%;
+}
+.cars {
+    margin-bottom: 2.5rem;
 }
 
 /*order/create.blade.php */

@@ -5,9 +5,8 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            商品列表
+            修改密码
         </h1>
-        <a href="/admin/goods/add"><button type="button" class="btn btn-primary add-btn">添加</button></a>
     </section>
 
     <!-- Main content -->
@@ -16,42 +15,23 @@
             <div class="col-xs-12">
                 <div class="box">
                     <div class="box-header">
-                        <h3 class="box-title">商品列表</h3>
+                        <h3 class="box-title">修改密码</h3>
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
-                        <table id="example2" class="table table-bordered table-hover">
-                            <thead>
-                            <tr>
-                                <th>商品名</th>
-                                <th>图标</th>
-                                <th>基本价</th>
-                                <th>是否推荐</th>
-                                <th>操作</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach($goods as $good)
-                                <tr>
-                                    <td>{{ $good->goodsname }}</td>
-                                    <td><img src="{{ $good->goodsicon }}" /></td>
-                                    <td>{{ $good->price / 100 }}</td>
-                                    <td>{{ empty($good->is_hot) ? '否' : '是' }}</td>
-                                    <td>
-                                        <a href="/admin/goods/modify?goodsid={{ $good->goodsid }}>"><button type="button" class="btn btn-primary modify-btn" attr-id="{{ $good->goodsid}}">修改</button></a>
-                                        <button type="button" class="btn btn-primary del-btn" attr-id="{{ $good->goodsid }}">删除</button>
-                                        <button type="button" class="btn btn-primary mod-hot" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_sale) ? 0 : 1}}">{{ empty($good->is_sale) ? '上架' : '下架' }}</button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                            </tbody>
-                            <tfoot>
-                            <tr>
-                                <td rowspan="4">
-                                </td>
-                            </tr>
-                            </tfoot>
-                        </table>
+                        <div class="form-group">
+                            <label for="name">原密码</label>
+                            <input type="password" class="form-control" id="old_pass" placeholder="原密码">
+                        </div>
+                        <div class="form-group">
+                            <label for="name">新密码</label>
+                            <input type="password" class="form-control" id="new_pass" placeholder="新密码">
+                        </div>
+                        <div class="form-group">
+                            <label for="name">重复密码</label>
+                            <input type="password" class="form-control" id="repeat_pass" placeholder="重复密码">
+                        </div>
+                        <button type="submit" class="btn btn-default" id="mod_btn">提交</button>
                     </div>
                     <!-- /.box-body -->
                 </div>
@@ -99,62 +79,44 @@
 <script src="/css/admin/themes/explorer/theme.js" type="text/javascript"></script>
 
 <script type="text/javascript">
-    $(function() {
-        $(".add-btn").on("click", function() {
-            $("#add-modal").modal('show');
-        });
-        //initFileInput("add_img", "/admin/card/upload");
-        $("#add_img").fileinput({
-            language: 'zh', //设置语言
-            uploadUrl: '/admin/card/upload', //上传的地址
-            allowedFileExtensions : ['jpg', 'png','gif'],//接收的文件后缀
-            showUpload: false, //是否显示上传按钮
-            showCaption: false,//是否显示标题
-            browseClass: "btn btn-primary", //按钮样式
-            previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
-        });
-
-        $(".del-btn").on("click", function() {
-            if (!confirm('确定删除?')) return ;
-            var goodsid = $(this).attr("attr-id");
-            if (goodsid == '' || typeof goodsid == 'undefined') return false;
-            var that = $(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.ajax({
-                url:'/admin/goods/delete',
-                data: {'goodsid': goodsid},
-                type:"get",
-                dataType:'json',
-                success: function(data) {
-                    if (data.rs == 1)
-                        that.parent().parent().remove();
-                }
-            })
-        });
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
     });
-    $(".mod-hot").on("click", function() {
-        var goodsid = $(this).attr("attr-id");
-        var status = $(this).attr("attr-value");
-        if (goodsid == '' || typeof goodsid == 'undefined') return false;
-        var that = $(this);
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
+    $("#mod_btn").on('click', function () {
+        var old_pass =$("#old_pass").val();
+        var new_pass = $("#new_pass").val();
+        var repeat_pass = $("#repeat_pass").val();
+        if (old_pass == '' || new_pass == '' || repeat_pass == '') {
+            alert('密码不能为空');
+            return false;
+        }
+        if (new_pass != repeat_pass) {
+            alert('新密码两次不一致');
+            return false;
+        }
+        if (new_pass.length < 6) {
+            alert('密码过短');
+            return false;
+        }
         $.ajax({
-            url:'/admin/goods/changehot',
-            data: {'goodsid': goodsid, 'status' : status},
-            type:"get",
-            dataType:'json',
+            url: '/admin/modify',
+            type: 'post',
+            data: { 'old_pass': old_pass, 'new_pass': new_pass, 'repeat_pass': repeat_pass },
+            dataType: 'json',
             success: function(data) {
-                if (data.rs == 1)
-                    that.attr('attr-value', 1 - parseInt(status)).text(status == 0 ? '下架' : '上架');
+                if (data.rs == 1) {
+                    alert('密码修改成功');
+                    return false;
+                } else {
+                    alert(data.errmsg);
+                    return;
+                }
+
             }
         })
+    });
+    $(function() {
     });
 </script>

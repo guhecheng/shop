@@ -24,6 +24,11 @@ class AdminController extends Controller {
         return view('admin.login', ['name' => Cookie::get('name')]);
     }
 
+    /**
+     * 检验登陆
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function check(Request $request) {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
@@ -46,5 +51,31 @@ class AdminController extends Controller {
             } else
                 return response()->json(['rs' => 0, 'msg' => '账号密码不一致']);
         }
+    }
+
+    public function modify(Request $request) {
+        $old_pass = $request->input("old_pass");
+        $new_pass = $request->input("new_pass");
+        $repeat_pass = $request->input('repeat_pass');
+        if (empty($old_pass) || empty($new_pass) || empty($repeat_pass)) {
+            return response()->json(['rs' => 0, 'errmsg' => '密码不能为空']);
+        }
+        if ($new_pass != $repeat_pass) {
+            return response()->json(['rs' => 0, 'errmsg' => '新密码两次不一致']);
+        }
+        if (strlen($new_pass) < 6) {
+            return response()->json(['rs' => 0, 'errmsg' => '密码过于简单']);
+        }
+        $sysuid = $request->session()->get('sysuid');
+        $user = DB::table('adminuser')->where('admin_id', $sysuid)
+            ->select('password')->first();
+        if (!Hash::check($old_pass, $user->password)) {
+            return response()->json(['rs' => 0, 'errmsg' => '原密码错误']);
+        }
+        $rs = DB::table('adminuser')->where('admin_id', $sysuid)
+            ->update([
+                'password' => Hash::make($new_pass)
+            ]);
+        return response()->json(['rs' => $rs]);
     }
 }

@@ -17,7 +17,21 @@ class AuthController extends Controller {
         return view('admin.auth.index', ['auths' => $auths]);
     }
 
-    public function add() {
+    public function add(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'auth_name' => 'required',
+            'auth_url' => 'required',
+            'parent_auth_id' => 'required'
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json(['rs' => 0, 'msg' => '填写不完整']);
+        }
+        $rs = DB::table('auth')->insert([
+            'auth_name' => $request->input('auth_name'),
+            'auth_url' => $request->input('auth_url'),
+            'auth_pid' => $request->input('parent_auth_id')
+        ]);
+        return response()->json(['rs' => 1]) ;
     }
 }

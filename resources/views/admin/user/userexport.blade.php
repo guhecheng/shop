@@ -26,7 +26,7 @@
                         @endif
                         <div><a href="/excel/会员信息.xls"><button class="btn btn-primary">下载模板</button></a></div>
                         <div style="margin-bottom:10px;">请按照下载的excel模板填写数据</div>
-                        <form enctype="multipart/form-data" method="post" action="/admin/user/upload">
+                        <form enctype="multipart/form-data" method="post" action="">
                             <input type="file" id="upload" name="upload" style="margin-bottom:10px;" />
                             {{ csrf_field() }}
                             <input type="submit" class="btn btn-default" value="提交" />
