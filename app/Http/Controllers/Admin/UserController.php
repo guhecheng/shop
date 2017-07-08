@@ -62,10 +62,29 @@ class UserController extends Controller {
             if ( $file->isValid() ) {
                 $ext = $file->getClientOriginalExtension(); // 文件扩展
                 $realPath = $file->getRealPath();
-                Excel::load($realPath, function ($reader) {
+                if ($ext != 'csv')
+                    return view('/admin/user/userexport', ['error' => '文件类型不对']);
+
+                $fp = fopen($realPath, 'r+');
+                while (!feof($fp)) {
+                    var_dump(fgetcsv($fp));
+                    if (empty($content = fgetcsv($fp))) continue;
+                    $count = DB::table('olduser')->where('phone', $content[1])->count();
+                    if ($count) {
+                        continue;
+                    }
+                    $id = DB::table('olduser')->insertGetId([
+                        ['name'=>$content[0], 'phone'=>$content[1], 'password'=>'1234']
+                    ]);
+                    $sex = $content[2] == '男' ? '1' : ($content[3] == '女' ? 2 : 0);
+                    DB::table('children')->insert([
+                        ['name'=>$content[2], 'sex'=>$sex, 'birth_date'=>$content[4]]
+                    ]);
+                }
+                /*Excel::load($realPath, function ($reader) {
                     $reader = $reader->getSheet(0);
                     var_dump($reader);
-                    /* foreach ($data as $key => $item) {
+                     foreach ($data as $key => $item) {
                          if ($key == 0) continue;
                          $count = DB::table('olduser')->where('phone', $item[1])->count();
                          if ($count) {
@@ -78,8 +97,8 @@ class UserController extends Controller {
                          DB::table('children')->insert([
                              ['name'=>$item[2], 'sex'=>$sex, 'birth_date'=>$item[4]]
                          ]);
-                     }*/
-                });
+                     }
+                });*/
             }
         }
         return view('/admin/user/userexport', ['error' => '没有选择文件']);

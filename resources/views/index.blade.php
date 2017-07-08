@@ -17,13 +17,23 @@
             </div>
         </div>
         <div>
+            <div class="swiper-container type-container">
+                <div class="swiper-wrapper type-wrapper">
+                    <div class="swiper-slide type-slide active" attr-is-add="0" attr-id="0">推荐</div>
+                    @foreach ($types as $key=>$type)
+                    <div class="swiper-slide type-slide" attr-is-add="0" attr-id="{{ $type->typeid }}">
+                        {{ $type->typename }}
+                    </div>
+                    @endforeach
+                </div>
+            </div>
             <div class="swiper-container goods-container">
-                <div class="buttons-tab" id="index-tab">
+                {{--<div class="buttons-tab" id="index-tab">
                     <a href="#tab1" class="tab-link active button" attr-value="">推荐</a>
                     @foreach ($types as $key=>$type)
                         <a href="#tab{{ $key+2 }}" class="tab-link button" attr-value="{{ $type->typeid }}">{{ $type->typename }}</a>
                     @endforeach
-                </div>
+                </div>--}}
                 <div class="swiper-wrapper">
                     <div class="swiper-slide goods-slide" attr-is-add="0">
                         @foreach ($goods as $item)
@@ -51,6 +61,29 @@
     </div>
     @include('layouts.footer')
     <style type="text/css">
+        .type-wrapper .active {
+            color: red;
+        }
+        .type-slide {
+            line-height:3rem;
+            text-align: center;
+            font-size: 18px;
+            background: #fff;
+            border-bottom: solid 1px #C1C1C1;
+            /* Center slide text vertically */
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            -webkit-justify-content: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            -webkit-align-items: center;
+            align-items: center;
+        }
         .index-car {
             width: 3rem;
             height: 3rem;
@@ -103,6 +136,23 @@
         .swiper-slide,.swiper-container,.swiper-wrapper {  width: 100%; }
     </style>
     <script>
+        var typeSwiper = new Swiper('.type-container', {
+            slidePerView: 5,
+            breakpoints: {
+                1024: {
+                    slidesPerView: 6,
+                },
+                768: {
+                    slidesPerView: 5,
+                },
+                640: {
+                    slidesPerView: 4,
+                },
+                320: {
+                    slidesPerView: 3,
+                }
+            }
+        });
         $(".index-car").on("click", function () {
             location.href = '/car';
         });
@@ -120,9 +170,10 @@
             onSlideChangeStart: function(swiper){
                 console.log(swiper.activeIndex);
                 var index = swiper.activeIndex;
-                $(".tab-link").removeClass("active");
-                $(".tab-link:eq("+index+")").addClass("active");
+                $(".type-slide").removeClass("active");
+                $(".type-slide:eq("+index+")").addClass("active");
                 getdata(index);
+                typeSwiper.slideTo(index);
             },
         });
         $(".tab-link").on("click", function () {
@@ -131,11 +182,17 @@
             var index = $(this).index()
             mySwiper.slideTo(index);
         });
+        $(".type-slide").on("click", function () {
+            $(".type-slide").removeClass("active");
+            $(this).addClass("active");
+            var index = $(this).index()
+            mySwiper.slideTo(index);
+        });
         function getdata(index) {
             if ($(".goods-slide:eq("+index+")").attr("attr-is-add") == 1) return;
             $.ajax({
                 url: '/goods/getgoods',
-                data: {'typeid': $(".tab-link:eq("+index+")").attr("attr-value")},
+                data: {'typeid': $(".type-slide:eq("+index+")").attr("attr-id")},
                 dataType: 'json',
                 type: 'get',
                 success: function(data) {

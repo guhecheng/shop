@@ -39,7 +39,7 @@
             </div>
             <div class="car-count">
                 <div>合计: ￥<span id="total_money">0.00</span>元</div>
-                <div>满500元包邮</div>
+                <div>满1000元包邮</div>
             </div>
             <div class="car-edit">编辑</div>
             <div class="car-buy">结算</div>
@@ -204,6 +204,7 @@
             $(".car-act").hide();
             $(".car-select").find("div").removeClass("active");
             $(".car-select").attr("attr-value", 0);
+            $(".car-act-del-select-pic").removeClass("isactive");
             $(".car-act-del").show();
         });
         $(".car-sure").on("click", function() {
@@ -211,6 +212,7 @@
             $(".car-act").show();
             $(".car-select").attr("attr-value", 0);
             $(".car-select").find("div").removeClass("active");
+            $(".car-act-select-pic").removeClass("isactive");
             $(".car-act-del").hide();
         });
         $(".car-del").on("click", function() {

@@ -133,7 +133,7 @@ body {
     width: 100%;
 }
 .goods-property-area {
-    padding-top: 1rem;
+    padding-top: 1.5rem;
 }
 .goods-property-area .goods-property-key {
     font-size: 0.7rem;
@@ -246,10 +246,10 @@ body {
 }
 .goods-property-icon{
     position: absolute;
-    top: -2rem;
-    left: 5%;
-    height:3rem;
-    width: 3rem;
+    top: -3rem;
+    left: 8%;
+    height:4rem;
+    width: 4rem;
     background-size: 100% 100%;
     background-repeat: no-repeat;
     border: solid 1px #C1C1C1;

@@ -93,6 +93,8 @@
         </div>
     </div>
     <style type="text/css">
+        .goods_num {
+            margin-bottom:1rem;}
         .goods-property-list { background: #fff;padding-left:5%;}
         .goods-property-list:after,.goods-activity:after,.goods-select:after {
              display:block;clear:both;content:"";visibility:hidden;height:0
