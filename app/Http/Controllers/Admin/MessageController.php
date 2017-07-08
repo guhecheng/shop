@@ -8,6 +8,8 @@ use Excel;
 use EasyWeChat\Foundation\Application;
 
 class MessageController extends Controller {
+    const HAS_SEND = 1;
+    const HAS_NOT_SEND= 0;
 
 	public function index(Request $request) {
 		$messages = DB::table('message')->where('is_delete', 0)->orderBy('create_time', 'desc')
@@ -51,12 +53,14 @@ class MessageController extends Controller {
 	    $id = $request->input('id');
 	    if (empty($id))
 	        return response()->json(['rs' => 0]);
-	    $content = DB::table('message')->where('id', $id);
-	    var_dump($content);
-	    if (!empty($content)) {
+	    $content = DB::table('message')->where('id', $id)->select('content')->first();
+	    if (!empty($content->content)) {
 	        $app = new Application(config('wx'));
             $broadcast = $app->broadcast;
-            $broadcast->sendText($content);
+            $rs = $broadcast->sendText($content->content);
+            if ($rs['errcode'] == 0) {
+                DB::table('message')->where('id', $id)->update(['is_send'=>self::HAS_SEND, 'send_time'=>date("Y-m-d H:i:s")]);
+            }
         }
         return response()->json(['rs' => 1]);
     }
