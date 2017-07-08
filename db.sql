@@ -213,26 +213,31 @@ create table if not exists `order` (
 
 
 /*订单对应*/
-drop table if exists orderinfo;
-create table if not exists orderinfo (
-  info_id int not null auto_increment,
-  uid int not null default 0 comment '用户id',
-  order_no char(50) not null default '' comment '订单号',
-  express_no varchar(50) not null default '' comment '快递号',
-  express_company varchar(50) not null default '' comment '快递公司',
-  price int not null default 0 comment '价格',
-  express_price int not null default 0 comment '快递价格',
-  discount int not null default 0 comment '折扣',
-  discount_price int not null default 0 comment '折扣价格',
-  status tinyint default 0 comment '订单状态, 0: 创建，1:待支付，2:已支付,3:待发货，4:已发货，5:已收货',
-  create_time timestamp default current_timestamp comment '创建时间',
-  pay_time datetime comment '支付时间',
-  send_time datetime comment '发货时间',
-  pay_type tinyint default 0 comment '支付方式,0:微信，1:支付宝， 2:其他',
-  cancel_time datetime comment '取消时间',
-  unique key(order_no),
-  primary key(info_id)
-) engine=innodb charset=utf8;
+
+DROP TABLE IF EXISTS `orderinfo`;
+
+CREATE TABLE `orderinfo` (
+  `info_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_no` char(50) NOT NULL DEFAULT '' COMMENT '订单号',
+  `uid` int(11) NOT NULL,
+  `express_no` varchar(50) NOT NULL DEFAULT '' COMMENT '快递号',
+  `express_company` varchar(50) NOT NULL DEFAULT '' COMMENT '快递公司',
+  `price` int(11) NOT NULL DEFAULT '0' COMMENT '价格',
+  `express_price` int(11) NOT NULL DEFAULT '0' COMMENT '快递价格',
+  `discount` int(11) NOT NULL DEFAULT '0' COMMENT '折扣',
+  `discount_price` int(11) NOT NULL DEFAULT '0' COMMENT '折扣价格',
+  `recv_name` varchar(100) NOT NULL DEFAULT '' COMMENT '收货人',
+  `phone` varchar(20) NOT NULL DEFAULT '' COMMENT '电话',
+  `location` varchar(255) NOT NULL DEFAULT '' COMMENT '地址',
+  `status` tinyint(4) DEFAULT '0' COMMENT '订单状态, 0: 创建，1:待支付，2:已支付,3:待发货，4:已发货，5:已收货',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `pay_time` datetime DEFAULT NULL COMMENT '支付时间',
+  `send_time` datetime DEFAULT NULL COMMENT '发货时间',
+  `pay_type` tinyint(4) DEFAULT '0' COMMENT '支付方式,0:微信，1:支付宝， 2:其他',
+  `cancel_time` datetime DEFAULT NULL COMMENT '取消时间',
+  PRIMARY KEY (`info_id`),
+  UNIQUE KEY `order_no` (`order_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Log日志*/
 drop table if exists log;
