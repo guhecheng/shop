@@ -45,7 +45,7 @@ class UserController extends Controller {
             ['家长姓名', '电话', '孩子姓名', '孩子性别', '孩子生日'],
             ['谷贺成', '17801083781', '谷x', '男', '2001-01-01']
         ];
-        Excel::create('会员信息', function($excel) use ($data) {
+        Excel::create('member', function($excel) use ($data) {
             $excel->sheet('score', function ($sheet) use ($data) {
                 $sheet->rows($data);
             });
@@ -83,8 +83,13 @@ class UserController extends Controller {
                 }
                 /*Excel::load($realPath, function ($reader) {
                     $reader = $reader->getSheet(0);
+<<<<<<< Updated upstream
                     var_dump($reader);
                      foreach ($data as $key => $item) {
+=======
+                    dd($$reader->toArray());
+                     /*foreach ($data as $key => $item) {
+>>>>>>> Stashed changes
                          if ($key == 0) continue;
                          $count = DB::table('olduser')->where('phone', $item[1])->count();
                          if ($count) {
