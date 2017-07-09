@@ -27,7 +27,7 @@ class QueryListener
      */
     public function handle(QueryExecuted $event)
     {
-        if (env('APP_ENV', 'production') == 'local') {
+        if (env('APP_ENV', 'production') == 'test') {
             $sql = str_replace("?", "'%s'", $event->sql);
             $log = vsprintf($sql, $event->bindings);
             Log::info($log);

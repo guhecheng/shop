@@ -54,32 +54,61 @@ class UserController extends Controller {
 
     public function modinfo(Request $request) {
         $index = $request->input('index');
-        $content = $request->input('content');
+        $content = trim($request->input('content'));
         $uid = $request->session()->get("uid");
         if (empty($index) || empty($content)) {
             return response()->json(['rs' => 0]);
         }
         $data = [];
-        switch (index) {
-            case 0:
-                DB::table('user')->where('uid', $uid)->update([
+        switch ($index) {
+            case 'myname':
+                $rs = DB::table('user')->where('userid', $uid)->update([
                     'nickname' => $content
                 ]);
                 break;
-            case 1:
-                DB::table('user')->where('uid', $uid)->update([
+            case 'phone':
+                $count = DB::table('user')->where([
+                    ['userid', '=', $uid],
+                    ['phone', '=', $content]
+                ])->count();
+                if ($count >= 1)
+                    return response()->json(['rs'=>0, 'errmsg' => '手机号码已存在']);
+                $rs = DB::table('user')->where('userid', $uid)->update([
                     'phone' => $content
                 ]);
                 break;
-            case 2:
-                DB::table('children')->where('uid', $uid)->update([
-                    'name' => $content
+            case 'child_name':
+                $rs = $this->addOrUpdateChild($uid, ['name' => $content]);
+                break;
+            case 'child_birth_date':
+                $rs = $this->addOrUpdateChild($uid, ['birth_date' => $content]);
+                break;
+            case 'child_sex':
+                $rs = $this->addOrUpdateChild($uid, [
+                    'birth_date' => $content == '男' ? 1 : ($content == '女' ? 2 : 0)
                 ]);
                 break;
-            case 3:
-                DB::table('children')->where('uid', $uid)->update([
-                    'birth_date' => $content
-                ]);
+            case 'child_school':
+                $rs = $this->addOrUpdateChild($uid, ['school' => $content]);
+                break;
+            case 'child_brand':
+                $rs = $this->addOrUpdateChild($uid, ['like_brandss' => $content]);
+                break;
+        }
+        return response()->json(['rs' => $rs]);
+    }
+
+    /**
+     * 根据用户id获取孩子信息从而判断是添加还是修改
+     * @param $uid
+     * @param $data
+     */
+    private function addOrUpdateChild($uid, $data) {
+        $user = DB::table('user')->where('userid', $uid)->select('child_id')->first();
+        if (empty($user->child_id)) {
+            return DB::table('children')->where('relate_id', $user->child_id)->insert($data);
+        } else {
+            return DB::table('children')->where('relate_id', $user->child_id)->update($data);
         }
     }
     /**

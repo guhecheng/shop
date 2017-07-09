@@ -44,23 +44,41 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="cardname" class="col-sm-2 control-label">父类权限</label>
-                    <div class="col-sm-10">
+                    <label for="cardname" class="col-sm-4 control-label">父类权限</label>
+                    <div class="col-sm-8">
                         <select id="parent_auth">
                             <option value="0">顶级权限</option>
+                            @foreach($auths as $auth)
+                                <option value="{{ $auth->auth_id }}">
+                                    {{  str_repeat('&nbsp;', $auth->pos * 3) }}
+                                    {{ $auth->auth_name }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
+                    <br clear="all" />
                 </div>
                 <div class="form-group">
-                    <label for="cardname" class="col-sm-2 control-label">添加权限名</label>
-                    <div class="col-sm-10">
+                    <label for="cardname" class="col-sm-4 control-label">添加权限名</label>
+                    <div class="col-sm-8">
                         <input type="text" class="form-control" name="add_authname" id="add_authname" placeholder="请输入权限名">
                     </div>
+                    <br clear="all" />
                 </div>
                 <div class="form-group">
-                    <label for="cardname" class="col-sm-2 control-label">添加对应url</label>
-                    <div class="col-sm-10">
+                    <label for="cardname" class="col-sm-4 control-label">添加对应url</label>
+                    <div class="col-sm-8">
                         <input type="text" class="form-control" name="add_url" id="add_url" placeholder="请输入对应地址">
+                    </div>
+                    <br clear="all" />
+                </div>
+                <div class="form-group">
+                    <label for="cardname" class="col-sm-4 control-label">是否菜单显示</label>
+                    <div class="col-sm-8">
+                        <select id="is_show">
+                            <option value="1">是</option>
+                            <option value="0">否</option>
+                        </select>
                     </div>
                 </div>
                 <br clear="all" />
@@ -124,17 +142,23 @@
         var parent_auth_id = $("#parent_auth").val();
         var auth_url = $("#add_url").val();
         var auth_name = $("#add_authname").val();
-        if (auth_name == '' || auth_url == '') {
+        if (auth_name == '' ) {
             alert('信息填写不全');
             return false;
         }
         $.ajax({
             url:'/admin/auth/add',
             type: 'post',
-            data: {'parent_auth_id': parent_auth_id, 'auth_name': auth_name, 'auth_url' : auth_url},
+            data: {'parent_auth_id': parent_auth_id, 'auth_name': auth_name,
+                    'auth_url' : auth_url == '' ? "" : auth_url, 'is_show': $("#is_show").val()},
             dataType: 'json',
             success: function(data) {
-
+                if (data.rs == 0) {
+                    alert(data.errmsg);
+                } else {
+                    alert('添加成功');
+                    location.reload();
+                }
             }
         })
     });

@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Excel;
 
 class OrderController extends Controller
 {
@@ -42,6 +43,10 @@ class OrderController extends Controller
             } else
                 $order_no_items[$item->order_no] = 1;
         }
+
+        if (empty($skuids))
+            return view('admin.order.index', ['orders' => null]);
+
         $sql = "select * from goodsproperty as gp
                 left join propertykey as pk on pk.key_id=gp.key_id
                 left join propertyvalue as pv on pv.value_id=gp.value_id
@@ -81,5 +86,54 @@ class OrderController extends Controller
             'send_time' => date("Y-m-d H:i:s")
         ]);
         return response()->json(['rs' => $rs]);
+    }
+
+    public function export(Request $request) {
+        $orders = DB::table('orderinfo')->leftJoin('order', 'order.order_no', '=', 'orderinfo.order_no')
+            ->where('orderinfo.status', $this->state['ORDER_HAS_PAY'])->orderBy('order.order_no', 'asc')->get();
+
+        if (empty($orders))
+            return view('admin.order.index', ['orders' => null]);
+        // 没有获取到数据
+        $skuids = $order_no_items = [];
+        foreach ($orders as $item) {
+            $skuids[] = $item->skuid;
+            if (key_exists($item->order_no, $order_no_items)) {
+                $order_no_items[$item->order_no] += 1;
+            } else
+                $order_no_items[$item->order_no] = 1;
+        }
+
+        if (empty($skuids))
+            return view('admin.order.index', ['orders' => null]);
+
+        $sql = "select * from goodsproperty as gp
+                left join propertykey as pk on pk.key_id=gp.key_id
+                left join propertyvalue as pv on pv.value_id=gp.value_id
+                left join goods on goods.goodsid=gp.goods_id
+                where gp.sku_id in (".implode(',', $skuids).")";
+        $skus = DB::select($sql);
+        foreach ($orders as &$item) {
+            foreach ($order_no_items as $k=>$v) {
+                if ($k == $item->order_no) {
+                    $item->times = $v;
+                }
+            }
+            $item->property = '';
+            foreach ($skus as $value) {
+                if ($value->sku_id == $item->skuid) {
+                    $item->goodsicon = $value->goodsicon;
+                    $item->goodsname = $value->goodsname;
+                    $item->property .= $value->key_name . ':' . $value->value_name . " ";
+                }
+            }
+        }
+        Excel::create('订单', function ($excel) use ($orders) {
+            $excel->setTitle('订单');
+            $excel->sheet('未发货订单', function($sheet) use ($orders) {
+                $sheet->fromArray($orders);
+            });
+        })->downlad('xls');
+
     }
 }

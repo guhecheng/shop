@@ -24,19 +24,26 @@
         <!-- /.search form -->
         <!-- sidebar menu: : style can be found in sidebar.less -->
         <ul class="sidebar-menu">
-            <li class="active treeview">
-                <a href="#">
-                    <i class="fa fa-dashboard"></i> <span>商品管理</span>
-                    <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-                </a>
-                <ul class="treeview-menu">
-                    <li class="active"><a href="/admin/goods"><i class="fa fa-circle-o"></i>商品列表</a></li>
-                    <li><a href="/admin/type"><i class="fa fa-circle-o"></i> 类目管理</a></li>
-                </ul>
-            </li>
-            <li class="treeview">
+            @foreach($menu_auths as $auth)
+                @if (empty($auth->auth_pid))
+                <li class="treeview">
+                    <a href="#">
+                        <i class="fa fa-dashboard"></i> <span>{{ $auth->auth_name }}</span>
+                        <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+                    </a>
+                    <ul class="treeview-menu">
+                        @foreach( $menu_auths as $item)
+                            @if ($item->auth_pid == $auth->auth_id)
+                                <li {{ $_SERVER['REQUEST_URI'] == $item->auth_url ? 'class=active':'' }}>
+                                    <a href="{{ $item->auth_url }}"><i class="fa fa-circle-o"></i>{{ $item->auth_name }}</a>
+                                </li>
+                            @endif
+                        @endforeach
+                    </ul>
+                </li>
+                @endif
+            @endforeach
+            {{--<li class="treeview">
                 <a href="#">
                     <i class="fa fa-files-o"></i>
                     <span>用户管理</span>
@@ -76,8 +83,13 @@
                 <ul class="treeview-menu">
                     <li><a href="/admin/message"><i class="fa fa-circle-o"></i>消息列表</a></li>
                 </ul>
-            </li>
+            </li>--}}
         </ul>
     </section>
     <!-- /.sidebar -->
 </aside>
+<script type="text/javascript">
+    $(function() {
+        $(".treeview-menu").find(".active").parent().parent().addClass("active");
+    });
+</script>

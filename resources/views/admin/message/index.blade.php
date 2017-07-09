@@ -266,7 +266,8 @@
                 dataType:'json',
                 success: function(data) {
                     if (data.rs == 1)
-                        that.parent().parent().remove();
+                        //that.parent().parent().remove();
+                        location.reload();
                 }
             })
         });

@@ -256,6 +256,9 @@ create table if not exists auth (
   auth_url varchar(50) not null default '' comment '权限列表对应url地址',
   is_show tinyint not null default 0  comment '是否展示在菜单项',
   auth_pid int not null default 0 comment '权限列表上级',
+  create_time TIMESTAMP DEFAULT current_timestamp,
+  is_delete TINYINT not null default 0 comment '是否删除',
+  sort int NOT NULL default 0 comment '显示顺序',
   PRIMARY KEY(auth_id)
 ) ENGINE=INNODB charset=utf8;
 

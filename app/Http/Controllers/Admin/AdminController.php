@@ -47,6 +47,7 @@ class AdminController extends Controller {
                     Cookie::make('name', $request->input('name'));
                 }
                 session(['sysuid' => $user->admin_id]);
+                session(['sysname' => $user->nick_name]);
                 return response()->json(['rs' => 1]);
             } else
                 return response()->json(['rs' => 0, 'msg' => '账号密码不一致']);
@@ -77,5 +78,10 @@ class AdminController extends Controller {
                 'password' => Hash::make($new_pass)
             ]);
         return response()->json(['rs' => $rs]);
+    }
+
+    public function logout(Request $request) {
+        $request->session()->flush();
+        return redirect('/admin/login');
     }
 }

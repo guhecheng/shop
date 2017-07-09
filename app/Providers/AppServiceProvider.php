@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\DB;
 
 class AppServiceProvider extends ServiceProvider
 {

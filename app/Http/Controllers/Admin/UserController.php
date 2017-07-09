@@ -82,4 +82,9 @@ class UserController extends Controller {
 
         return view('/admin/user/userexport', ['error' => '没有选择文件']);
     }
+
+    public function usercard() {
+        $cards = DB::table('user')->where('card_no', '>', '')->paginate(20);
+        return view('admin.user.card', ['cards' => $cards]);
+    }
 }

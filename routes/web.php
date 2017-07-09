@@ -55,16 +55,17 @@ Route::get('/test/testorder', 'TestController@testorder');
 
 
 Route::get('/admin/login', 'Admin\AdminController@login');
-Route::get('/admin', 'Admin\AdminController@index');
 Route::post('/admin/check', 'Admin\AdminController@check');
 
-Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => 'checklogin'], function() {
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['checklogin', 'menu']], function() {
+    Route::get('/logout', 'AdminController@logout');
     Route::get('/', 'AdminController@index');
 
     Route::get('/manage', 'ManagerController@index');
 
     Route::get('/user', 'UserController@index');
     Route::get('/user/delete', 'UserController@delete');
+    Route::get('/user/usercard', 'UserController@usercard');
 
     Route::get('/type', 'TypeController@index');
     Route::post('/type/add', 'TypeController@add');
@@ -92,6 +93,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => 'chec
     Route::resource('/goods', 'GoodsController');
 
     Route::get('/auth', 'AuthController@index');
+    Route::post('/auth/add', 'AuthController@add');
+    Route::get('/adminauth', 'AuthController@adminauth');
+    Route::post('/auth/addAdmin', 'AuthController@addAdmin');
+    Route::get('/auth/disable', 'AuthController@disable');
 
     Route::any('/userexport', 'UserController@userExport');
     Route::any('/user/upload', 'UserController@upload');
@@ -106,4 +111,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => 'chec
     Route::post('/order/send', 'OrderController@send');
 
     Route::post("/modify", 'AdminController@modify');
+
+    Route::get('/capital', 'CapitalController@index');
 });

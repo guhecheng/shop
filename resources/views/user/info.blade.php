@@ -16,32 +16,32 @@
         </div>
         <div class="user-info-item">
             <div>姓名</div>
-            <div class="user-info-link">{{ empty($user->nickname)?$user->uname:$user->nickname }}<div></div></div>
+            <div class="user-info-link" attr-type="myname">{{ empty($user->nickname)?$user->uname:$user->nickname }}<div></div></div>
         </div>
         <div class="user-info-item">
             <div>手机号码</div>
-            <div class="user-info-link">{{ empty($user->phone)?'添加':$user->phone }}<div></div></div>
+            <div class="user-info-link" attr-type="phone">{{ empty($user->phone)?'添加':$user->phone }}<div></div></div>
         </div>
         <div class="user-info-children">孩子信息</div>
         <div class="user-info-item">
             <div>姓名</div>
-            <div class="user-info-link">{{ empty($user->name) ? '添加' : $user->name }}<div></div></div>
+            <div class="user-info-link" attr-type="child_name">{{ empty($user->name) ? '添加' : $user->name }}<div></div></div>
         </div>
         <div class="user-info-item">
             <div>生日</div>
-            <div class="user-info-date-link">{{ empty($user->birth_date) ? '添加' : $user->birth_date }}<div></div></div>
+            <div class="user-info-date-link" attr-type="child_birth_date">{{ empty($user->birth_date) ? '添加' : $user->birth_date }}<div></div></div>
         </div>
         <div class="user-info-item">
             <div>性别</div>
-            <div class="user-info-link">{{ empty($user->childsex) ? '添加':($user->childsex==1?'男':'女') }}<div></div></div>
+            <div class="user-info-link" attr-type="child_sex">{{ empty($user->childsex) ? '添加':($user->childsex==1?'男':'女') }}<div></div></div>
         </div>
         <div class="user-info-item">
             <div>学校</div>
-            <div class="user-info-link">{{ empty($user->school) ? '添加':$user->school }}<div></div></div>
+            <div class="user-info-link" attr-type="child_school">{{ empty($user->school) ? '添加':$user->school }}<div></div></div>
         </div>
         <div class="user-info-item">
             <div>最喜欢的童装品牌</div>
-            <div class="user-info-link">点击选择<div></div></div>
+            <div class="user-info-link" attr-type="child_brand">点击选择<div></div></div>
         </div>
     </div>
     <div class="bg"></div>
@@ -60,6 +60,7 @@
         <div class="relate">关联会员</div>
     </div>
     <div class="commarea">
+        <div class="close-commarea"><span class="close-area-btn">关闭</span></div>
         <div class="comm-input">
             <div class="content-title"></div>
             <div class="comm-input-content"><input type="text" name="add-content" class="add-content"/></div>
@@ -68,6 +69,8 @@
         <div class="sure-btn">确定</div>
     </div>
     <style type="text/css">
+        .close-commarea { padding-right: 5%; text-align: right; }
+        .close-area-btn { font-size: 0.8rem;}
         .linkuser,.commarea {
             position: fixed;
             bottom:0 ;
@@ -232,26 +235,45 @@
                 }
             })
         });
-        $(".user-info-link").on("click", function() {
+        $(".user-info-link").on("click", function(item, index) {
+            console.log($(this).attr("attr-type"));
             $(".commarea,.bg").show();
             var par = $(this).parent();
-            $(".info-type").val($(this).index());
-            $(".content-title").text($(this).parent().find("div").first().text());
-            $(".add-content").val($(this).text());
+            $(".info-type").val($(this).attr("attr-type"));
+            $(".content-title").text($.trim($(this).parent().find("div").first().text()));
+            var content = $.trim($(this).text());
+            $(".add-content").val(content == '添加' ? '' : content);
         });
         $(".sure-btn").on('click', function() {
             var index = $('.info-type').val();
+            console.log(index);
             var content = $(".add-content").val();
-            if (content == '') alert('不能为空');
+            if (content == '') {
+                alert('不能为空');
+                return false;
+            }
+            if (index == 1 && !(/^1[34578]\d{9}$/.test(content))) {
+                alert('手机号码错误');
+                return false;
+            }
             $.ajax({
                 type:'post',
                 url: '/modinfo',
                 data: {'index':index, 'content': content},
                 dataType:'json',
                 success: function(data) {
-
+                    if (data.rs == 1) {
+                        location.reload();
+                        //$(".commarea,.bg").hide();
+                    } else {
+                        alert('修改失败');
+                        return false;
+                    }
                 }
             });
+        });
+        $(".close-area-btn").on("click", function() {
+            $(".commarea,.bg").hide();
         });
     </script>
 @endsection
