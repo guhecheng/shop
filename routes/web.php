@@ -97,6 +97,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::get('/adminauth', 'AuthController@adminauth');
     Route::post('/auth/addAdmin', 'AuthController@addAdmin');
     Route::get('/auth/disable', 'AuthController@disable');
+    Route::post('/auth/updateAdmin', 'AuthController@updateAdmin');
 
     Route::any('/userexport', 'UserController@userExport');
     Route::any('/user/upload', 'UserController@upload');
@@ -109,6 +110,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
 
     Route::get('/order', 'OrderController@index');
     Route::post('/order/send', 'OrderController@send');
+    Route::get('/order/export', 'OrderController@export');
 
     Route::post("/modify", 'AdminController@modify');
 

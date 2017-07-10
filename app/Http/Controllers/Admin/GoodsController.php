@@ -56,6 +56,7 @@ class GoodsController extends Controller {
         $logo = $request->input('logo');
         $imglist = $request->input('imglist');
         $is_hot = $request->input('is_hot');
+        $score_award = $request->input('score_award');
         DB::beginTransaction();
         $goodsid = DB::table('goods')->insertGetId([
             'goodsname' => trim($goodsname),
@@ -65,7 +66,8 @@ class GoodsController extends Controller {
             'typeid' => $goodstype,
             'price' => $goodsprice * 100,
             'goodsdesc' => $request->input('content'),
-            'is_discount' => $request->input('discount')
+            'is_discount' => $request->input('discount'),
+            'score_award' => empty($score_award) ? 0 : $score_award
         ]);
         if ($goodsid) {
             foreach ($request->input('common_attr') as $key=>$value) {

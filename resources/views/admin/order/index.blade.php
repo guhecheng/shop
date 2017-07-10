@@ -19,6 +19,7 @@
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
+                        <a href="/admin/order/export"><button class="btn btn-primary">导出</button></a>
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>

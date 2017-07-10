@@ -93,6 +93,7 @@
         </div>
     </div>
     <style type="text/css">
+        .goods-detail { margin-bottom: 3.2rem;}
         .goods_num {
             margin-bottom:1rem;}
         .goods-property-list { background: #fff;padding-left:5%;}

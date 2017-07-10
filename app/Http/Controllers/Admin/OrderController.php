@@ -128,12 +128,25 @@ class OrderController extends Controller
                 }
             }
         }
-        Excel::create('订单', function ($excel) use ($orders) {
+        $data[] = ['订单号', '物品名', '物品属性', '购买数量', '支付金额', '收货人', '联系方式', '联系地址', '支付时间'];
+        foreach ($orders as $order) {
+            $data[] = [
+                $order->order_no,
+                $order->goodsname,
+                $order->property,
+                $order->count,
+                $order->price * $order->count / 100,
+                $order->recv_name,
+                $order->location,
+                $order->pay_time
+            ];
+        }
+        Excel::create('订单', function ($excel) use ($data) {
             $excel->setTitle('订单');
-            $excel->sheet('未发货订单', function($sheet) use ($orders) {
-                $sheet->fromArray($orders);
+            $excel->sheet('未发货订单', function($sheet) use ($data) {
+                $sheet->rows($data);
             });
-        })->downlad('xls');
+        })->download('xls');
 
     }
 }

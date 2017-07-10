@@ -147,6 +147,56 @@
     <!-- /.modal-dialog -->
 </div>
 
+<div class="modal fade" id="mod-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">权限管理</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cardname" class="col-sm-4 control-label">账户名</label>
+                    <div class="col-sm-8">
+                        <span id="mod_auth_name"></span>
+                    </div>
+                    <br clear="all" />
+                </div>
+                <div class="form-group">
+                    <label for="cardname" class="col-sm-4 control-label">选择权限</label>
+                    <div class="col-sm-8">
+                        @foreach($auths as $auth)
+                            @if ($auth->auth_pid == 0)
+                                <div class="auth-item">
+                                    <div class="auth-item-p"><input type="checkbox" class="mod_auth_p" value="{{ $auth->auth_id }}" />{{ $auth->auth_name }}</div>
+                                    <div class="auth-item-s">
+                                        @foreach ($auths as $item)
+                                            @if ($item->auth_pid == $auth->auth_id)
+                                                <input type="checkbox" class="mod_auth_check" value="{{ $item->auth_id }}" />{{ $item->auth_name }} &nbsp;&nbsp;
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                    <br />
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                    <br clear="all" />
+                </div>
+                <input type="hidden" id="mod_admin_id" value="" />
+                <br clear="all" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                <input type="submit" class="btn btn-primary mod_admin" value="修改" />
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
 <!-- /.content-wrapper -->
 <footer class="main-footer">
     <div class="pull-right hidden-xs">
@@ -190,18 +240,44 @@
 </style>
 <script type="text/javascript">
     $(function() {
-        $(".auth").on("click", function () {
+        $(".auth,.mod_auth_check").on("click", function () {
             var flag = false;
             $(this).parent().find("input").each(function() {
                 if ($(this).prop("checked")==true) flag = true;
             });
             $(this).parent().parent().find(".auth_p").prop("checked", flag);
         });
-        $(".auth_p").on("click", function () {
+        $(".mod_auth_check").on("click", function () {
+            var flag = false;
+            $(this).parent().find("input").each(function() {
+                if ($(this).prop("checked")==true) flag = true;
+            });
+            $(this).parent().parent().find(".mod_auth_p").prop("checked", flag);
+        });
+        $(".auth_p, .mod_auth_p").on("click", function () {
+            if ($(this).prop("checked"))
+                $(this).parent().parent().find(".mod_auth_check").prop("checked", true);
+            else
+                $(this).parent().parent().find(".mod_auth_check").prop("checked", false);
+        });
+        $(".mod_auth_p").on("click", function () {
             if ($(this).prop("checked"))
                 $(this).parent().parent().find(".auth").prop("checked", true);
             else
                 $(this).parent().parent().find(".auth").prop("checked", false);
+        });
+        $(".mod-auth").on('click',function () {
+            $("#mod-modal").modal(true);
+            $("#mod_admin_id").val($(this).attr("attr-id"));
+            $("#mod_auth_name").text($.trim($(this).parent().parent().find("td:eq(0)").text()));
+            var auth_ids = $(this).parent().find(".admin_auth_ids").val();
+            var auth_ids_arr = auth_ids.split(',');
+            console.log(auth_ids_arr);
+            $(".mod_auth_p,.mod_auth_check").each(function () {
+                if (auth_ids_arr.indexOf($(this).val()) >= 0) {
+                    $(this).prop("checked", true);
+                }
+            });
         });
     });
     $.ajaxSetup({
@@ -271,5 +347,33 @@
                 }
             }
         })
-    })
+    });
+
+    $(".mod_admin").on("click", function () {
+        var admin_id = $("#mod_admin_id").val();
+        var ids = '';
+        $(".mod_auth_p, .mod_auth_check").each(function () {
+            if ($(this).prop("checked"))
+                ids += $(this).val() + ',';
+        });
+        if (admin_id == '' || ids == '') {
+            alert('请确保填写完整');
+            return false;
+        }
+        $.ajax({
+            url: '/admin/auth/updateAdmin',
+            type:'post',
+            data: {'auth_ids': ids, 'admin_id': admin_id},
+            dataType:'json',
+            success: function (data) {
+                if (data.rs == 1) {
+                    alert('修改成功');
+                    location.reload();
+                } else {
+                    alert(data.errmsg);
+                    return false;
+                }
+            }
+        });
+    });
 </script>

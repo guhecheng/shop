@@ -90,4 +90,18 @@ class AuthController extends Controller {
             ->update(['is_disabled'=>$request->input('status')]);
         return response()->json(['rs'=>$rs]);
     }
+
+    public function updateAdmin(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'admin_id' => 'required',
+            'auth_ids' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['rs' => 0, 'msg' => '填写不完整']);
+        }
+        $rs = DB::table('adminuser')->where('admin_id', $request->input('admin_id'))->update([
+            'auth_ids' => rtrim($request->input('auth_ids'), ',')
+        ]);
+        return response()->json(['rs' => empty($rs) ? 0 : 1]);
+    }
 }

@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class GoodsController extends Controller {
+    /**
+     * 上架
+     */
+    const IS_SALE = 1;
+    const OFF_SALE = 0;
 
     public function index(Request $request) {
         $goodsid = $request->input('goodsid');
@@ -58,7 +63,8 @@ class GoodsController extends Controller {
         $typeid = $request->input('typeid');
         $goods = DB::table('goods')->where([
             ['is_delete', '=', 0],
-            ['typeid', '=', $typeid]
+            ['typeid', '=', $typeid],
+            ['is_sale', '=', 1]
         ])
             ->limit(8)
             ->get();
