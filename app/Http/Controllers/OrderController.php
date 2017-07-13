@@ -218,6 +218,7 @@ class OrderController extends Controller {
                 if ($value->sku_id == $item->skuid) {
                     $item->goodsicon = $value->goodsicon;
                     $item->goodsname = $value->goodsname;
+                    $item->is_discount = $value->is_discount;
                     $item->property .= $value->key_name . ':' . $value->value_name . " ";
                 }
             }

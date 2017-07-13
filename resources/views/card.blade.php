@@ -5,7 +5,7 @@
 @section('content')
 
     <div class="content card">
-        <div class="card_pic">
+        <div class="card_pic" style="background-image:url('{{ $card->card_img }}')">
             <div class="card_no">卡号:{{ $card_no }}</div>
             <div class="level">
                 @if ($level == 1)

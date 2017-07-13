@@ -414,10 +414,11 @@ body {
 .card .card_pic {
     width:90%;
     margin:0.6rem auto;
-    height: 10rem;
+    height: 12rem;
     border-radius:0.5rem;
-    background: #000;
     position:relative;
+    background-repeat:no-repeat;
+    background-size: 100% 100%;
 }
 
 .card .card_no, .level {

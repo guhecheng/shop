@@ -10,15 +10,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 
 class MemberController extends Controller {
-
+    private $card_redis = 'card:list';
     public function card(Request $request) {
-        $uid = $request->input("uid");
+        $uid = $request->session()->get('uid');
         $user = DB::table("user")->where('userid', $uid)->first();
-        $card_no = 123456789;
-        $level = 1;
-        $pic = 'xx';
-        return view('card', ['card_no'=>$card_no, 'pic'=>$pic, 'level' => $level]);
+        $card = DB::table('card')->select('card_img')->where([ ['is_delete', '=',  0], ['card_level', '=', $user->level]])->first();
+        return view('card', ['card_no'=>$user->card_no,
+                                    'level' => $user->level,
+                                    'card' => $card]);
+    }
+
+    public function collect() {
+        
     }
 }
