@@ -56,18 +56,65 @@
         </div>
         <div class="sure_recharge">确认充值</div>
     </div>
-    <div class="card-wx-pay">
-        <div class="title">
-            选择支付方式
-            <div class="cancel">x</div>
-        </div>
-        <div class="pay-select">
-            <div></div>
-            <span>微信支付</span>
-        </div>
-        <div id="sure_pay">确认付款</div>
+    <div class="order-select-type">
+        <div class="order-select-title"><!--<div>请选择支付方式</div>--><div class="order-pay-close"></div></div>
+        <div class="wx-pay"><div></div><span>微信支付</span></div>
+        <div class="order-select-blank"></div>
+        <div class="order-sure-pay">确定支付</div>
     </div>
     @include('layouts.footer')
+    <style type="text/css">
+        .order-sure-pay {
+            text-align: center;
+            line-height:2rem;
+            font-weight:bold;
+            background:#F2F2F2;
+            font-size: 0.8rem;
+        }
+        .order-select-type {
+            position: fixed;
+            bottom:0;
+            width: 100%;
+            z-index: 200;
+        }
+        .order-select-title,.card-pay,.wx-pay{
+            background: #fff;
+            line-height:2rem;
+            padding:0 5%;
+            border-bottom:solid 1px #c6c6c6;
+        }
+        .order-select-title div:first-child {
+            float:left;
+        }
+        .order-select-title:after, .wx-pay:after {
+            display:block;clear:both;content:"";visibility:hidden;height:0
+        }
+        .wx-pay div{
+            background:url('/images/wx.png') no-repeat;
+            height: 1.2rem;
+            width: 1.6rem;
+            background-size: 100% 100%;
+            float: left;
+            margin-right:2%;
+            margin-top:0.4rem;
+        }
+        .order-select-blank {
+            height:3rem;
+            width:100%;
+            background:#fff;
+        }
+        .order-select-title {
+            font-weight: bold;
+        }
+        .order-pay-close {
+            background: url('/images/close.png') no-repeat;
+            background-size: 100%;
+            width: 1.2rem;
+            height: 1.2rem;
+            margin-top: 0.4rem;
+            float:right;
+        }
+    </style>
     <script type="text/javascript">
         $(function () {
             $(".card-money-select").height($(window).height());
@@ -85,8 +132,15 @@
                 var money = parseInt($(".card-money-area").find(".active").attr("attr-value"));
                 if (money >= 0) {
                     $(".card-select-area").hide();
+                    $(".order-select-type").show();
                 }
             }
+        });
+        $(".order-pay-close").on("click", function () {
+
+        });
+        $(".order-sure-pay").on("click", function () {
+
         });
     </script>
 @endsection('content')

@@ -85,6 +85,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::get("/goods/add", 'GoodsController@add');
     Route::get("/goods/delete", 'GoodsController@delete');
     Route::get("/goods/changehot", 'GoodsController@changehot');
+    Route::get("/goods/changesale", 'GoodsController@changesale');
     Route::get("/goods/getproperty", 'GoodsController@getproperty');
     Route::post("/goods/upload", 'GoodsController@upload');
     Route::post("/goods/create", 'GoodsController@create');

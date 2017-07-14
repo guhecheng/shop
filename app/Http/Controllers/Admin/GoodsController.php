@@ -131,13 +131,24 @@ class GoodsController extends Controller {
         return response()->json(['rs' => empty($rs) ? 0 : 1]);
     }
 
-    public function changehot(Request $request) {
+    public function changesale(Request $request) {
         $goodsid = $request->input('goodsid');
         $status = $request->input('status');
         if (!empty($goodsid))
             $rs = DB::table('goods')->where('goodsid', $goodsid)
                 ->update([
                     'is_sale' => 1 - $status
+                ]);
+        return response()->json(['rs' => empty($rs) ? 0 : 1]);
+    }
+
+    public function changehot(Request $request) {
+        $goodsid = $request->input('goodsid');
+        $status = $request->input('status');
+        if (!empty($goodsid))
+            $rs = DB::table('goods')->where('goodsid', $goodsid)
+                ->update([
+                    'is_hot' => $status
                 ]);
         return response()->json(['rs' => empty($rs) ? 0 : 1]);
     }

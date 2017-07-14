@@ -40,7 +40,9 @@
                                     <td>
                                         <a href="/admin/goods/modify?goodsid={{ $good->goodsid }}>"><button type="button" class="btn btn-primary modify-btn" attr-id="{{ $good->goodsid}}">修改</button></a>
                                         <button type="button" class="btn btn-primary del-btn" attr-id="{{ $good->goodsid }}">删除</button>
-                                        <button type="button" class="btn btn-primary mod-hot" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_sale) ? 0 : 1}}">{{ empty($good->is_sale) ? '上架' : '下架' }}</button>
+                                        <button type="button" class="btn btn-primary mod-sale" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_sale) ? 0 : 1}}">{{ empty($good->is_sale) ? '上架' : '下架' }}</button>
+                                        <button type="button" class="btn btn-primary mod-ad" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_ad) ? 1 : 0}}">{{ empty($good->is_ad) ? '上广告' : '下广告' }}</button>
+                                        <button type="button" class="btn btn-primary mod-hot" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_hot) ? 1 : 0}}">{{ empty($good->is_hot) ? '推荐' : '取消推荐' }}</button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -99,6 +101,11 @@
 <script src="/css/admin/themes/explorer/theme.js" type="text/javascript"></script>
 
 <script type="text/javascript">
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
     $(function() {
         $(".add-btn").on("click", function() {
             $("#add-modal").modal('show');
@@ -119,11 +126,7 @@
             var goodsid = $(this).attr("attr-id");
             if (goodsid == '' || typeof goodsid == 'undefined') return false;
             var that = $(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
+
             $.ajax({
                 url:'/admin/goods/delete',
                 data: {'goodsid': goodsid},
@@ -136,18 +139,13 @@
             })
         });
     });
-    $(".mod-hot").on("click", function() {
+    $(".mod-sale").on("click", function() {
         var goodsid = $(this).attr("attr-id");
         var status = $(this).attr("attr-value");
         if (goodsid == '' || typeof goodsid == 'undefined') return false;
         var that = $(this);
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
         $.ajax({
-            url:'/admin/goods/changehot',
+            url:'/admin/goods/changesale',
             data: {'goodsid': goodsid, 'status' : status},
             type:"get",
             dataType:'json',
@@ -157,4 +155,19 @@
             }
         })
     });
-</script>
+    $(".mod-hot").on("click", function() {
+        var goodsid = $(this).attr("attr-id");
+        var status = $(this).attr("attr-value");
+        if (goodsid == '' || typeof goodsid == 'undefined') return false;
+        var that = $(this);
+        $.ajax({
+            url:'/admin/goods/changehot',
+            data: {'goodsid': goodsid, 'status' : status},
+            type:"get",
+            dataType:'json',
+            success: function(data) {
+                if (data.rs == 1)
+                    that.attr('attr-value', 1 - parseInt(status)).text(status == 0 ? '推荐' : '取消推荐');
+            }
+        })
+    });</script>

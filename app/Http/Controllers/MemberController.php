@@ -23,7 +23,9 @@ class MemberController extends Controller {
                                     'card' => $card]);
     }
 
-    public function collect() {
-        
+    public function collect(Request $request) {
+        $money = $request->input('money');
+        DB::table('user')->where('userid', $request->session()->get('uid'))
+                        ->update();
     }
 }
