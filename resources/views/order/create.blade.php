@@ -205,6 +205,38 @@
             background: #3879D9;
         }
     </style>
+    <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script type="text/javascript">
+        //调用微信JS api 支付
+        function jsApiCall(data)
+        {
+            WeixinJSBridge.invoke(
+                'getBrandWCPayRequest',data,
+                function(res){
+                    if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+                        alert('支付成功');
+                        location.href = "/order/show?orderno={{ $orderno }}";
+                    } else {
+                        $("#pay_chance").val(0);
+                    }
+                }
+            );
+        }
+
+        function callpay(param)
+        {
+            if (typeof WeixinJSBridge == "undefined"){
+                if( document.addEventListener ){
+                    document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
+                }else if (document.attachEvent){
+                    document.attachEvent('WeixinJSBridgeReady', jsApiCall);
+                    document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
+                }
+            }else{
+                jsApiCall(param);
+            }
+        }
+    </script>
     <script>
         $(function() {
             {{--@if ($address)
@@ -259,7 +291,22 @@
             });
          })*/
          $(".order-sure-pay").on("click", function () {
-
+            if ($(".wx-pay").hasClass("active")) {
+                $.ajax({
+                    url:'/order/pay',
+                    data:{'order_no':'{{ $orderno }}', 'money':1},
+                    dataType:'json',
+                    type:'post',
+                    success:function(data) {
+                        if (data.rs == 0) {
+                            alert(data.errmsg);
+                            return false;
+                        } else {
+                            jsApiCall(data);
+                        }
+                    }
+                });
+            }
          });
     </script>
 @endsection

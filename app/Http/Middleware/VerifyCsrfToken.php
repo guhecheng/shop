@@ -13,6 +13,9 @@ class VerifyCsrfToken extends BaseVerifier
      */
     protected $except = [
         'address/setdefault',
-        '/admin/card'
+        '/admin/card',
+        '/card/notify',
+        '/order/wxnotify',
+        '/wx'
     ];
 }

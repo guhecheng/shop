@@ -17,7 +17,7 @@ use EasyWeChat\Foundation\Application;
 class OrderController extends Controller {
     private $state = [
         'ORDER_CREATE' => 0 ,
-        'ORDER_WAIT_PATY' => 1,
+        'ORDER_WAIT_PAY' => 1,
         'ORDER_WAIT_SEND' => 2,
         'ORDER_HAS_SEND' => 3,
         'ORDER_HAS_RECV' => 3,
@@ -31,25 +31,7 @@ class OrderController extends Controller {
     private $payment;
 
     public function __construct() {
-        $options = [
-            // 前面的appid什么的也得保留哦
-            'app_id' => 'xxxx',
-            // ...
-            // payment
-            'payment' => [
-                'merchant_id'        => 'your-mch-id',
-                'key'                => 'key-for-signature',
-                'cert_path'          => 'path/to/your/cert.pem', // XXX: 绝对路径！！！！
-                'key_path'           => 'path/to/your/key',      // XXX: 绝对路径！！！！
-                'notify_url'         => '默认的订单回调地址',       // 你也可以在下单时单独设置来想覆盖它
-                // 'device_info'     => '013467007045764',
-                // 'sub_app_id'      => '',
-                // 'sub_merchant_id' => '',
-                // ...
-            ],
-        ];
-        $this->app = new Application($options);
-        $payment = $this->app->payment;
+        $this->app = new Application(config('wx'));
     }
 
     public function index(Request $request) {
@@ -181,7 +163,7 @@ class OrderController extends Controller {
             ]);
         }
         //DB::table("cart")->whereIn('cartid', $car_ids)->update(['is_delete', 0]);
-        return redirect('/order/orderpay?orderno=' . $orderno);
+        return redirect('/orderpay?orderno=' . $orderno);
 
     }
     public function orderpay(Request $request) {
@@ -237,33 +219,102 @@ class OrderController extends Controller {
             'recv_name' => $address->name,
             'phone' => $address->phone ,
             'location' => $address->address . $address->location,
-            'status' => $this->state['ORDER_WAIT_PATY']
+            'status' => $this->state['ORDER_WAIT_PAY']
         ]);
         return response()->json(['rs' => empty($rs) ? 0 : 1]);
     }
 
+    public function pay(Request $request) {
+        $order_no = $request->input('order_no');
+        $money = $request->input('money');
+        $app = new Application(config('wx'));
+        $payment = $app->payment;
+        $openid = $request->session()->get('openid');
+        $order = DB::table('orderinfo')->where('order_no', $order_no)->first();
+        $attributes = [
+            'trade_type'    =>  'JSAPI',
+            'body'          =>  '商品购买',
+            'detail'        =>  '购买商品',
+            'out_trade_no'  =>  $order_no,
+            'total_fee'     => $money,
+            /*'total_fee'     => $money * 100,*/
+            'notify_url'    => 'http://www.jingyuxuexiao.com/order/wxnotify',
+            'openid'    => $openid
+        ];
+        $order = new Order($attributes);
+        $result = $payment->prepare($order);
+        if ($result->return_code == 'SUCCESS' && $result->result_code == 'SUCCESS'){
+            $prepayId = $result->prepay_id;
+            exit($payment->configForPayment($prepayId));
+        }
+        return response()->json(['rs' => 0, 'errmsg' => "网络出现异常"]);
+    }
 
-    public function wxpaynotify(Request $request) {
+    public function wxnotify(Request $request) {
         $response = $this->app->payment->handleNotify(function($notify, $successful){
             // 使用通知里的 "微信支付订单号" 或者 "商户订单号" 去自己的数据库找到订单
-            $order = 查询订单($notify->out_trade_no);
+            //$order = 查询订单($notify->out_trade_no);
+            $order = DB::table('orderinfo')->where('order_no', $notify->out_trade_no)->first();
             if (!$order) { // 如果订单不存在
                 return 'Order not exist.'; // 告诉微信，我已经处理完了，订单没找到，别再通知我了
             }
             // 如果订单存在
             // 检查订单是否已经更新过支付状态
-            if ($order->paid_at) { // 假设订单字段“支付时间”不为空代表已经支付
+            if ($order->status == $this->state['ORDER_WAIT_SEND']) { // 假设订单字段“支付时间”不为空代表已经支付
                 return true; // 已经支付成功了就不再更新了
             }
             // 用户是否支付成功
             if ($successful) {
-                // 不是已经支付状态则修改为已经支付状态
-                $order->paid_at = time(); // 更新支付时间为当前时间
-                $order->status = 'paid';
+                try {
+                    DB::beginTransaction();
+                    $info = DB::table('orderinfo')->where('info_id', $order->info_id)->update([
+                        'status' => $this->state['ORDER_WAIT_SEND'],
+                        'pay_time' => date("Y-m-d H:i:s"),
+                    ]);
+                    if (!$info) {
+                        throw new \Exception("修改订单状态失败");
+                    }
+                    $trans['insert'] = DB::table('usertransmoney')->insert([
+                        'uid'   => $order->uid,
+                        'trans_type'    => 0,
+                        'trans_money' => $order->price,
+                        'order_no' => $notify->out_trade_no
+                    ]);
+                    if (!$trans['insert'])
+                        throw new \Exception('操作失败');
+
+                    $user = DB::table('user')->where("userid", $order->uid)->first();
+                    if (empty($user)) {
+                        throw new \Exception('用户不存在');
+                    }
+                    $level = 0;
+                    if ($user->level < 3) {
+                        $money = DB::table('usertransmoney')->where([
+                            ['uid', '=', $user->userid],
+                            ['create_time', '>=', date("Y-m-d H:i:s", strtotime("-1 year"))]
+                        ])->sum('trans_money');
+                        $card = DB::table('card')->where([
+                            ['is_delete', '=>', 0],
+                            ['card_score', '<=', $money / 100]
+                        ])->orderBy('card_level', 'desc')->select('card_level')->limit(1)->first();
+                        $level = !empty($card) ? $card->card_level : 0;
+                    } else
+                        $level = $user->level;
+
+                    $user_rs = DB::table('user')->where("userid", $order->uid)->update([
+                        'level' => $level,
+                        'score' => $user->score + intval($order->price/100)
+                    ]);
+                    if (!$user_rs) {
+                        throw new \Exception("修改用户金额失败");
+                    }
+                    DB::commit();
+                } catch (\Exception $e) {
+                    DB::rollback();
+                }
             } else { // 用户支付失败
-                $order->status = 'paid_fail';
+                return false;
             }
-            $order->save(); // 保存订单
             return true; // 返回处理完成
         });
         return $response;

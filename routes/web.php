@@ -20,14 +20,16 @@ Route::get('/aboutme', function() {
 });
 Route::get('/test', 'IndexController@test');
 Route::get('/addmenu', 'IndexController@addmenu');
-Route::get('/wx', 'IndexController@wx');
+Route::any('/wx', 'IndexController@wx');
+Route::any('/card/notify', 'MemberController@notify');
+Route::any('/order/wxnotify', 'OrderController@wxnotify');
+
 Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/my', 'UserController@index');
     Route::get('/money', 'UserController@money');
     Route::get('/score', 'UserController@score');
     Route::get('/card', 'MemberController@card');
-    Route::get('/card/pay', 'MemberController@card');
-    Route::get('/card', 'MemberController@card');
+    Route::post('/card/pay', 'MemberController@pay');
 
 
     Route::resource('address', 'AddressController');
@@ -42,7 +44,8 @@ Route::group(['middleware' => 'userlogin'], function (){
     Route::post('/order/add', 'OrderController@add');
     Route::get('/order/show', 'OrderController@show');
     Route::get('/order/list', 'OrderController@list');
-    Route::any('/order/orderpay', 'OrderController@orderpay');
+    Route::any('/orderpay', 'OrderController@orderpay');
+    Route::any('/order/pay', 'OrderController@pay');
 
     Route::get('/info', 'UserController@info');
     Route::post('/relate', 'UserController@relate');

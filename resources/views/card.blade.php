@@ -5,7 +5,7 @@
 @section('content')
 
     <div class="content card">
-        <div class="card_pic" style="background-image:url('{{ $card->card_img }}')">
+        <div class="card_pic" style="background-image:url('{{ empty($card->card_img)? '' : $card->card_img }}')">
             <div class="card_no">卡号:{{ $card_no }}</div>
             <div class="level">
                 @if ($level == 1)
@@ -56,6 +56,7 @@
         </div>
         <div class="sure_recharge">确认充值</div>
     </div>
+    <input type="hidden" id="pay_chance" value="0" />
     {{--<div class="order-select-type">
         <div class="order-select-title"><!--<div>请选择支付方式</div>--><div class="order-pay-close"></div></div>
         <div class="wx-pay"><div></div><span>微信支付</span></div>
@@ -115,20 +116,25 @@
             float:right;
         }
     </style>
+    <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
     <script type="text/javascript">
         //调用微信JS api 支付
-        function jsApiCall(param)
+        function jsApiCall(data)
         {
             WeixinJSBridge.invoke(
-                'getBrandWCPayRequest', param,
+                'getBrandWCPayRequest',data,
                 function(res){
-                    WeixinJSBridge.log(res.err_msg);
-                    alert(res.err_code+res.err_desc+res.err_msg);
+                    if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+                        alert('支付成功');
+                        location.href = "/card";
+                    } else {
+                        $("#pay_chance").val(0);
+                    }
                 }
             );
         }
 
-        function callpay()
+        function callpay(param)
         {
             if (typeof WeixinJSBridge == "undefined"){
                 if( document.addEventListener ){
@@ -138,13 +144,13 @@
                     document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
                 }
             }else{
-                jsApiCall(data);
+                jsApiCall(param);
             }
         }
     </script>
     <script type="text/javascript">
         //获取共享地址
-        function editAddress(address)
+        /*function editAddress(address)
         {
             WeixinJSBridge.invoke(
                 'editAddress', address, function(res){
@@ -170,7 +176,7 @@
             }else{
                 editAddress();
             }
-        };
+        };*/
 
     </script>
     <script type="text/javascript">
@@ -190,19 +196,20 @@
             $(this).addClass("active");
         })
         $(".sure_recharge").on("click", function() {
-            console.log($(".card-money-area").find(".active"));
+            if ($("#pay_chance").val() >= 1) return;
             if ($(".card-money-area").find(".active").length) {
                 var money = parseInt($(".card-money-area").find(".active").attr("data-value"));
                 if (money >= 0) {
+                    $("#pay_chance").val(1);
                     $.ajax({
-                        type:'json',
+                        type:'post',
                         data: { 'money' : money},
                         dataType:'json',
-                        url:'/admin/member/pay',
-                        async: false,
+                        url:'/card/pay',
                         success: function(data) {
                             if (data.rs == 0) {
                                 alert(data.errmsg);
+                                $("#pay_chance").val(0);
                                 return false;
                             }
                             callpay(data);
@@ -216,6 +223,11 @@
         });
         $(".order-sure-pay").on("click", function () {
 
+        });
+        $(".cancel").on("click", function () {
+            $(".card-money-area").removeClass("active");
+            $("#pay_chance").val(0);
+            $(".card-money-select, .card-select-area").hide();
         });
     </script>
 @endsection('content')

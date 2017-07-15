@@ -21,23 +21,41 @@ class IndexController extends Controller {
         $this->app = new Application(config('wx'));
     }
     public function wx(Request $request) {
-        Log::info('jfklasdjfdaslfdsa');
         $server = $this->app->server;
-        $server->setMessageHandler(function ($message) {
+        $server->setMessageHandler(function ($message) use ($request) {
+            Log::info($message);
             switch ($message->MsgType) {
                 case 'event':
                     switch ($message->Event) {
                         case 'subscribe':
-                            Log::info($$message->FromUserName);
+                            $user = DB::table('user')->where("openid", $message->FromUserName)->first();
+                            if (empty($user)) {
+                                $id = DB::table('user')->insertGetID([
+                                    'openid'=>$message->FromUserName
+                                ]);
+                            } else {
+                                if ($user->status == 0 )
+                                    return '欢迎来到温江童马儿童高端服务';
+
+                                DB::table('user')->where('openid', $message->FromUserName)->update([
+                                    'status' => 0,
+                                    'update_time' => date("Y-m-d H:i:s")
+                                ]);
+                            }
+                            $request->session()->put('openid', $message->FromUserName);
+                            $request->session()->put('uid', empty($id) ? $user->userid : $id);
+                            return '欢迎来到温江童马儿童高端服务';
                             break;
                         case 'unsubscribe':
-                            Log::info('取消');
+                            DB::table('user')->where('openid', $message->FromUserName)->update([
+                                'status' => 1,
+                                'unsb_time' => date("Y-m-d H:i:s")
+                            ]);
                             break;
                     }
                     break;
                 case 'text': return '收到文字信息'; break;
             }
-            return '您好，欢迎关注温江童马儿童高端服务';
         });
         $response = $server->serve();
         return $response;

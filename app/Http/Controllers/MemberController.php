@@ -10,9 +10,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
 use EasyWeChat\Foundation\Application;
 use EasyWeChat\Payment\Order;
+use Illuminate\Support\Facades\Log;
 
 
 class MemberController extends Controller {
@@ -37,38 +37,52 @@ class MemberController extends Controller {
         if (empty($money) || intval($money) == 0) {
             return response()->json(['rs' => 0, 'errmsg' => '请确定支付金额']);
         }
-        $rs = DB::table('cardrecharge')->insertGetId([
-            'uid' => $request->sessoin()->get('uid'),
-            'money' => intval($money)
-        ]);
-        if (empty($rs)) {
-            return response()->json(['rs' => 0, 'errmsg' => '交易出现问题，请点击重新支付']);
-        }
+         try {
+            DB::beginTransaction();
+            $total_fee = 1;
+            $charge_order = DB::table("cardrecharge")->orderBy('id', 'desc')->select('id')->limit(1)->first();
+            $charge_no = date("Ymd") . mt_rand(1111, 9999) . ( empty($charge_order->id) ? 0 : $charge_order->id + 1);
+            $charge_id = DB::table('cardrecharge')->insertGetId([
+                'uid' => $request->session()->get('uid'),
+                /*'money' => intval($money) * 100,*/
+                'money' => $total_fee,
+                'charge_no' => $charge_no
+            ]);
+            if (!$charge_id)
+                throw new \Exception("订单创建失败");
+             DB::commit();
+         } catch (\Exception $e) {
+             DB::rollback();
+             return response()->json(['rs' => 0, 'errmsg' => '交易出现问题，请点击重新支付']);
+         }
+
         $app = new Application(config('wx'));
         $payment = $app->payment;
+        $openid = $request->session()->get('openid');
         $attributes = [
             'trade_type'    =>  'JSAPI',
             'body'          =>  '会员卡充值',
             'detail'        =>  '会员卡充值',
-            'out_trade_no'  =>  $rs->id,
-            'total_fee'     => $money,
-            'notify_url'    => 'http://www.jingyuxuexiao.com/card/pay',
-            'sub_openid'    => $request->session()->get('openid')
+            'out_trade_no'  =>  $charge_no,
+            'total_fee'     => $total_fee,
+            /*'total_fee'     => $money * 100,*/
+            'notify_url'    => 'http://www.jingyuxuexiao.com/card/notify',
+            'openid'    => $openid
         ];
         $order = new Order($attributes);
         $result = $payment->prepare($order);
         if ($result->return_code == 'SUCCESS' && $result->result_code == 'SUCCESS'){
             $prepayId = $result->prepay_id;
-            exit($payment->configForAppPayment($prepayId));
+            exit($payment->configForPayment($prepayId));
         }
         return response()->json(['rs' => 0, 'errmsg' => "网络出现异常"]);
     }
 
-    public function paycallback() {
+    public function notify() {
         $app = new Application(config('wx'));
-
         $response = $app->payment->handleNotify(function($notify, $successful){
-            $order = DB::table('chardcharge')->where('id', $notify->out_trade_no)->get();
+            $order = DB::table('cardrecharge')->where('charge_no', $notify->out_trade_no)->first();
+
             if (!$order) { // 如果订单不存在
                 return 'Order not exist.'; // 告诉微信，我已经处理完了，订单没找到，别再通知我了
             }
@@ -83,21 +97,25 @@ class MemberController extends Controller {
 
                 // 不是已经支付状态则修改为已经支付状态
                 try {
-                    $order_rs = DB::table('order')->where('id', $order->id)->update(['status' => 1, 'pay_time' => date("Y-m-d H:i:s")]);
+                    echo $order->id;
+                    $order_rs = DB::table('cardrecharge')->where('id', $order->id)
+                                ->update(['status' => 1, 'pay_time' => date("Y-m-d H:i:s")]);
                     if (!$order_rs) {
                         throw new \Exception('订单状态修改失败');
                     }
                     $trans['insert'] = DB::table('usertransmoney')->insert([
                         'uid'   => $order->uid,
                         'trans_type'    => 1,
-                        'trans_money' => $order->money
+                        'trans_money' => $order->money,
+                        'order_no' => $notify->out_trade_no
                     ]);
                     if (!$trans['insert'])
                         throw new \Exception('操作失败');
 
-                    $user = DB::table('user')->get("userid", $order->uid)->first();
-                    if (empty($user))
+                    $user = DB::table('user')->where("userid", $order->uid)->first();
+                    if (empty($user)) {
                         throw new \Exception('用户不存在');
+                    }
                     $level = 0;
                     if ($user->level < 3) {
                         $money = DB::table('usertransmoney')->where([
@@ -106,18 +124,18 @@ class MemberController extends Controller {
                         ])->sum('trans_money');
                         $card = DB::table('card')->where([
                             ['is_delete', '=>', 0],
-                            ['card_score', '<=', $money]
-                        ])->orderBy('card_level', 'asc')->select('card_level')->get();
-                        if (!empty($card)) {
-                            $level = $card->card_level;
-                        }
+                            ['card_score', '<=', $money / 100]
+                        ])->orderBy('card_level', 'desc')->select('card_level')->limit(1)->first();
+                        $level = !empty($card) ? $card->card_level : 0;
                     } else
-                        $level = $this->level;
+                        $level = $user->level;
 
-                    $user_rs = DB::table('user')->where("uid", $order->uid)->update([
+                    $user_rs = DB::table('user')->where("userid", $order->uid)->update([
                         'money' => $user->money + $order->money,
-                        'level' => $level
+                        'level' => $level,
+                        'score' => $user->score + intval($order->money / 100)
                     ]);
+
                     if (!$user_rs) {
                         throw new \Exception("修改用户金额失败");
                     }

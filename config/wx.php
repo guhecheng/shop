@@ -48,9 +48,9 @@ return [
      */
     'payment' => [
         'merchant_id'        => '1481215322',
-        'key'                => 'key-for-signature',
-        'cert_path'          => 'path/to/your/cert.pem', // XXX: 绝对路径！！！！
-        'key_path'           => 'path/to/your/key',      // XXX: 绝对路径！！！！
+        'key'                => '58b61138d83c3b6d8db283fd9acae553',
+        'cert_path'          => '/home/wwwroot/shop/config/cert/apiclient_cert.pem', // XXX: 绝对路径！！！！
+        'key_path'           => '/home/wwwroot/shop/config/cert/apiclient_key.pem',      // XXX: 绝对路径！！！！
         // 'device_info'     => '013467007045764',
         // 'sub_app_id'      => '',
         // 'sub_merchant_id' => '',
