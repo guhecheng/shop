@@ -45,23 +45,23 @@
         </div>
         <div class="card-money">
             <div class="card-money-area">
-                <div attr-value="100" class="select-money">100元</div>
-                <div attr-value="200" class="select-money">200元</div>
-                <div attr-value="500" class="select-money">500元</div>
-                <div attr-value="1000" class="select-money">1000元</div>
-                <div attr-value="2000" class="select-money">2000元</div>
-                <div attr-value="3000" class="select-money">3000元</div>
+                <div data-value="100" class="select-money">100元</div>
+                <div data-value="200" class="select-money">200元</div>
+                <div data-value="500" class="select-money">500元</div>
+                <div data-value="1000" class="select-money">1000元</div>
+                <div data-value="2000" class="select-money">2000元</div>
+                <div data-value="3000" class="select-money">3000元</div>
             </div>
             <br clear="all" />
         </div>
         <div class="sure_recharge">确认充值</div>
     </div>
-    <div class="order-select-type">
+    {{--<div class="order-select-type">
         <div class="order-select-title"><!--<div>请选择支付方式</div>--><div class="order-pay-close"></div></div>
         <div class="wx-pay"><div></div><span>微信支付</span></div>
         <div class="order-select-blank"></div>
         <div class="order-sure-pay">确定支付</div>
-    </div>
+    </div>--}}
     @include('layouts.footer')
     <style type="text/css">
         .order-sure-pay {
@@ -116,6 +116,69 @@
         }
     </style>
     <script type="text/javascript">
+        //调用微信JS api 支付
+        function jsApiCall(param)
+        {
+            WeixinJSBridge.invoke(
+                'getBrandWCPayRequest', param,
+                function(res){
+                    WeixinJSBridge.log(res.err_msg);
+                    alert(res.err_code+res.err_desc+res.err_msg);
+                }
+            );
+        }
+
+        function callpay()
+        {
+            if (typeof WeixinJSBridge == "undefined"){
+                if( document.addEventListener ){
+                    document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
+                }else if (document.attachEvent){
+                    document.attachEvent('WeixinJSBridgeReady', jsApiCall);
+                    document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
+                }
+            }else{
+                jsApiCall(data);
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        //获取共享地址
+        function editAddress(address)
+        {
+            WeixinJSBridge.invoke(
+                'editAddress', address, function(res){
+                    var value1 = res.proviceFirstStageName;
+                    var value2 = res.addressCitySecondStageName;
+                    var value3 = res.addressCountiesThirdStageName;
+                    var value4 = res.addressDetailInfo;
+                    var tel = res.telNumber;
+
+                    alert(value1 + value2 + value3 + value4 + ":" + tel);
+                }
+            );
+        }
+
+        window.onload = function(){
+            if (typeof WeixinJSBridge == "undefined"){
+                if( document.addEventListener ){
+                    document.addEventListener('WeixinJSBridgeReady', editAddress, false);
+                }else if (document.attachEvent){
+                    document.attachEvent('WeixinJSBridgeReady', editAddress);
+                    document.attachEvent('onWeixinJSBridgeReady', editAddress);
+                }
+            }else{
+                editAddress();
+            }
+        };
+
+    </script>
+    <script type="text/javascript">
+        $.ajaxSettings = $.extend($.ajaxSettings, {
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
         $(function () {
             $(".card-money-select").height($(window).height());
         });
@@ -129,10 +192,22 @@
         $(".sure_recharge").on("click", function() {
             console.log($(".card-money-area").find(".active"));
             if ($(".card-money-area").find(".active").length) {
-                var money = parseInt($(".card-money-area").find(".active").attr("attr-value"));
+                var money = parseInt($(".card-money-area").find(".active").attr("data-value"));
                 if (money >= 0) {
-                    $(".card-select-area").hide();
-                    $(".order-select-type").show();
+                    $.ajax({
+                        type:'json',
+                        data: { 'money' : money},
+                        dataType:'json',
+                        url:'/admin/member/pay',
+                        async: false,
+                        success: function(data) {
+                            if (data.rs == 0) {
+                                alert(data.errmsg);
+                                return false;
+                            }
+                            callpay(data);
+                        }
+                    });
                 }
             }
         });

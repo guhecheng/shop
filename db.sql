@@ -311,3 +311,16 @@ create table if not exists message (
   is_delete TINYINT DEFAULT 0 comment '1已删除',
   PRIMARY KEY (id)
 ) ENGINE = innodb charset=utf8;
+
+/*会员卡充值订单*/
+drop table if exists cardrecharge;
+create table if not exists cardrecharge (
+  id int not null AUTO_INCREMENT,
+  uid int not null DEFAULT 0 COMMENT '用户id',
+  money int not null default 0 COMMENT '支付金额,分为单位',
+  status tinyint(1) not null default 0 comment '订单状态, 0:创建待支付, 1:支付成功, 2:支付失败》。。',
+  pay_type TINYINT(1) not null DEFAULT 0 COMMENT '支付方式, 0:微信支付',
+  create_time TIMESTAMP DEFAULT current_timestamp comment '创建时间',
+  pay_time timestamp COMMENT '支付时间',
+  PRIMARY KEY (id)
+) ENGINE = INNODB CHARSET = utf8;

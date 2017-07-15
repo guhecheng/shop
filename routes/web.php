@@ -26,6 +26,10 @@ Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/money', 'UserController@money');
     Route::get('/score', 'UserController@score');
     Route::get('/card', 'MemberController@card');
+    Route::get('/card/pay', 'MemberController@card');
+    Route::get('/card', 'MemberController@card');
+
+
     Route::resource('address', 'AddressController');
     Route::post('/address/setdefault', 'AddressController@setdefault');
 
