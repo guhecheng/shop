@@ -95,7 +95,7 @@ class CardController extends Controller
         $card_name = $request->input("cardname");
         $card_score = $request->input("cardscore");
         $file = $request->file('update_img');
-        if ($file->isValid()) {
+        if (!empty($file) && $file->isValid()) {
             $ext = $file->getClientOriginalExtension(); // 文件扩展
             $type = $file->getClientMimeType();
             $realPath = $file->getRealPath();
@@ -109,6 +109,12 @@ class CardController extends Controller
                     'card_img' => '/uploads/' . $fileName
                 ]);
             }
+        } else {
+            DB::table('card')->where('card_id', $id)
+                ->update([
+                    'card_name' => $card_name,
+                    'card_score' => $card_score,
+                ]);
         }
         return redirect('/admin/card');
     }
@@ -124,5 +130,12 @@ class CardController extends Controller
         $rs = DB::table('card')->where('card_id', $id)
                         ->update(['is_delete' => $this->deleted]);
         return response()->json(['rs' => empty($rs) ? 0 : 1]);
+    }
+
+    public function recharge(Request $request) {
+        $records = DB::table('cardrecharge')
+            ->leftJoin('user', 'cardrecharge.uid', '=', 'user.userid')
+            ->orderBy('pay_time', 'desc')->select('cardrecharge.*', 'user.uname')->paginate(20);
+        return view('/admin/card/recharge', ['records' => $records]);
     }
 }

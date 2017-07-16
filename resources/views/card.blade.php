@@ -45,12 +45,14 @@
         </div>
         <div class="card-money">
             <div class="card-money-area">
-                <div data-value="100" class="select-money">100元</div>
+                <div data-value="0.01" class="select-money">0.01元</div>
+                <div data-value="0.02" class="select-money">0.02元</div>
+                {{--<div data-value="100" class="select-money">100元</div>
                 <div data-value="200" class="select-money">200元</div>
                 <div data-value="500" class="select-money">500元</div>
                 <div data-value="1000" class="select-money">1000元</div>
                 <div data-value="2000" class="select-money">2000元</div>
-                <div data-value="3000" class="select-money">3000元</div>
+                <div data-value="3000" class="select-money">3000元</div>--}}
             </div>
             <br clear="all" />
         </div>
@@ -126,7 +128,7 @@
                 function(res){
                     if(res.err_msg == "get_brand_wcpay_request:ok" ) {
                         alert('支付成功');
-                        location.href = "/card";
+                        window.location.href = "/card/forward";
                     } else {
                         $("#pay_chance").val(0);
                     }
@@ -198,12 +200,12 @@
         $(".sure_recharge").on("click", function() {
             if ($("#pay_chance").val() >= 1) return;
             if ($(".card-money-area").find(".active").length) {
-                var money = parseInt($(".card-money-area").find(".active").attr("data-value"));
-                if (money >= 0) {
+                var money = $(".card-money-area").find(".active").attr("data-value");
+                if (money > 0) {
                     $("#pay_chance").val(1);
                     $.ajax({
                         type:'post',
-                        data: { 'money' : money},
+                        data: { 'money' : ''+money},
                         dataType:'json',
                         url:'/card/pay',
                         success: function(data) {

@@ -20,9 +20,16 @@ class IndexController extends Controller {
     public function __construct() {
         $this->app = new Application(config('wx'));
     }
+
+    /**
+     * 微信接收事件
+     * @param Request $request
+     * @return mixed
+     */
     public function wx(Request $request) {
         $server = $this->app->server;
-        $server->setMessageHandler(function ($message) use ($request) {
+        $userService = $this->app->user;
+        $server->setMessageHandler(function ($message) use ($request, $userService) {
             Log::info($message);
             switch ($message->MsgType) {
                 case 'event':
@@ -30,17 +37,20 @@ class IndexController extends Controller {
                         case 'subscribe':
                             $user = DB::table('user')->where("openid", $message->FromUserName)->first();
                             if (empty($user)) {
-                                $id = DB::table('user')->insertGetID([
-                                    'openid'=>$message->FromUserName
+                                $userinfo = $userService->get($message->FromUserName);
+                                $id = DB::table("user")->insertGetId([
+                                    'openid'	=>  $message->FromUserName,
+                                    'uname'		=>  $userinfo->nickname,
+                                    'avatar'	=>	$userinfo->headimgurl,
+                                    'sex'		=>  $userinfo->sex
                                 ]);
                             } else {
-                                if ($user->status == 0 )
-                                    return '欢迎来到温江童马儿童高端服务';
 
-                                DB::table('user')->where('openid', $message->FromUserName)->update([
-                                    'status' => 0,
-                                    'update_time' => date("Y-m-d H:i:s")
-                                ]);
+                                if ($user->status != 0 )
+                                    DB::table('user')->where('openid', $message->FromUserName)->update([
+                                        'status' => 0,
+                                        'update_time' => date("Y-m-d H:i:s")
+                                    ]);
                             }
                             $request->session()->put('openid', $message->FromUserName);
                             $request->session()->put('uid', empty($id) ? $user->userid : $id);
@@ -52,9 +62,27 @@ class IndexController extends Controller {
                                 'unsb_time' => date("Y-m-d H:i:s")
                             ]);
                             break;
+                        default:
+                            $user = DB::table('user')->where("openid", $message->FromUserName)->first();
+                            $request->session()->put('openid', $message->FromUserName);
+                            $request->session()->put('uid', $user->userid);
+                            //return '快乐' . date("Y-m-d") . '一天';
+                            break;
                     }
                     break;
-                case 'text': return '收到文字信息'; break;
+                case 'text':
+                    DB::table('usersendmsg')->insert([
+                        'openid' => $message->FromUserName,
+                        'content' => $message->Content,
+                    ]);
+                    break;
+                case 'image':
+                    DB::table('usersendmsg')->insert([
+                        'openid' => $message->FromUserName,
+                        'content' => $message->PicUrl,
+                        'type' => 1
+                    ]);
+                    break;
             }
         });
         $response = $server->serve();

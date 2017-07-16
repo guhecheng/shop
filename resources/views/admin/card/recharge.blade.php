@@ -5,9 +5,8 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            商品列表
+            会员卡充值列表
         </h1>
-        <a href="/admin/goods/add"><button type="button" class="btn btn-primary add-btn">添加</button></a>
     </section>
 
     <!-- Main content -->
@@ -16,40 +15,35 @@
             <div class="col-xs-12">
                 <div class="box">
                     <div class="box-header">
-                        <h3 class="box-title">商品列表</h3>
+                        <h3 class="box-title">会员卡列表</h3>
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>
-                                <th>商品名</th>
-                                <th>图标</th>
-                                <th>基本价</th>
-                                <th>是否推荐</th>
-                                <th>操作</th>
+                                <th>充值ID</th>
+                                <th>充值人</th>
+                                <th>充值余额(元)</th>
+                                <th>充值时间</th>
                             </tr>
                             </thead>
                             <tbody>
-                            @foreach($goods as $good)
+                            @if (!empty($records))
+                            @foreach($records as $record)
                                 <tr>
-                                    <td>{{ $good->goodsname }}</td>
-                                    <td><img src="{{ $good->goodsicon }}" /></td>
-                                    <td>{{ $good->price / 100 }}</td>
-                                    <td>{{ empty($good->is_hot) ? '否' : '是' }}</td>
-                                    <td>
-                                        {{--<a href="/admin/goods/modify?goodsid={{ $good->goodsid }}>"><button type="button" class="btn btn-primary modify-btn" attr-id="{{ $good->goodsid}}">修改</button></a>--}}
-                                        <button type="button" class="btn btn-primary del-btn" attr-id="{{ $good->goodsid }}">删除</button>
-                                        <button type="button" class="btn btn-primary mod-sale" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_sale) ? 0 : 1}}">{{ empty($good->is_sale) ? '上架' : '下架' }}</button>
-                                        <button type="button" class="btn btn-primary mod-ad" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_ad) ? 1 : 0}}">{{ empty($good->is_ad) ? '上广告' : '下广告' }}</button>
-                                        <button type="button" class="btn btn-primary mod-hot" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_hot) ? 1 : 0}}">{{ empty($good->is_hot) ? '推荐' : '取消推荐' }}</button>
-                                    </td>
+                                    <td>{{ $record->charge_no }}</td>
+                                    <td>{{ $record->uname }}</td>
+                                    <td>{{ $record->money / 100 }}</td>
+                                    <td>{{ $record->pay_time }}</td>
                                 </tr>
                             @endforeach
+                            @endif
                             </tbody>
                             <tfoot>
                             <tr>
                                 <td rowspan="4">
+                                    {{ $records->links() }}
                                 </td>
                             </tr>
                             </tfoot>
@@ -67,6 +61,7 @@
     <!-- /.content -->
 </div>
 
+<!-- /.modal -->
 <!-- /.content-wrapper -->
 <footer class="main-footer">
     <div class="pull-right hidden-xs">
@@ -74,9 +69,6 @@
     <strong>Copyright &copy; 2014-2017</strong> All rights
     reserved.
 </footer>
-
-<div class="control-sidebar-bg"></div>
-</div>
 
 <script src="/css/admin/plugins/jQuery/jquery-2.2.3.min.js"></script>
 <!-- Bootstrap 3.3.6 -->
@@ -120,16 +112,40 @@
             browseClass: "btn btn-primary", //按钮样式
             previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
         });
+        $(".modify-btn").on("click", function () {
+            var attr_id = $(this).prop("attr-id");
+            var par = $(this).parent().parent();
+            $("#edit_cardname").val($.trim(par.find("td:eq(0)").text()));
+            $("#edit_cardscore").val($.trim(par.find("td:eq(1)").text()));
+            $("#mod-modal").modal('show');
+            $("#address_id").val(attr_id);
+            $(this).find("form").prop("action", "/admin/card/" + attr_id);
+            $("#update_img").fileinput({
+                showUpload: false,
+                showCaption: false,
+                browseClass: "btn btn-primary btn-lg",
+                fileType: "any",
+                previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
+                overwriteInitial: false,
+                initialPreviewAsData: true,
+                initialPreview: [
+                    "http://lorempixel.com/1920/1080/transport/1"
+                ],
+                initialPreviewConfig: [
+                    {caption: "transport-1.jpg", size: 329892, width: "120px", url: "{$url}", key: 1},
+                ]
+            });
+        });
 
         $(".del-btn").on("click", function() {
             if (!confirm('确定删除?')) return ;
-            var goodsid = $(this).attr("attr-id");
-            if (goodsid == '' || typeof goodsid == 'undefined') return false;
+            var uid = $(this).attr("attr-id");
+            if (uid == '' || typeof uid == 'undefined') return false;
             var that = $(this);
 
             $.ajax({
-                url:'/admin/goods/delete',
-                data: {'goodsid': goodsid},
+                url:'/admin/user/delete',
+                data: {'uid': uid},
                 type:"get",
                 dataType:'json',
                 success: function(data) {
@@ -138,36 +154,6 @@
                 }
             })
         });
+
     });
-    $(".mod-sale").on("click", function() {
-        var goodsid = $(this).attr("attr-id");
-        var status = $(this).attr("attr-value");
-        if (goodsid == '' || typeof goodsid == 'undefined') return false;
-        var that = $(this);
-        $.ajax({
-            url:'/admin/goods/changesale',
-            data: {'goodsid': goodsid, 'status' : status},
-            type:"get",
-            dataType:'json',
-            success: function(data) {
-                if (data.rs == 1)
-                    that.attr('attr-value', 1 - parseInt(status)).text(status == 0 ? '下架' : '上架');
-            }
-        })
-    });
-    $(".mod-hot").on("click", function() {
-        var goodsid = $(this).attr("attr-id");
-        var status = $(this).attr("attr-value");
-        if (goodsid == '' || typeof goodsid == 'undefined') return false;
-        var that = $(this);
-        $.ajax({
-            url:'/admin/goods/changehot',
-            data: {'goodsid': goodsid, 'status' : status},
-            type:"get",
-            dataType:'json',
-            success: function(data) {
-                if (data.rs == 1)
-                    that.attr('attr-value', 1 - parseInt(status)).text(status == 0 ? '推荐' : '取消推荐');
-            }
-        })
-    });</script>
+</script>

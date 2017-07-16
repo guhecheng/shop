@@ -34,18 +34,16 @@ class MemberController extends Controller {
 
     public function pay(Request $request) {
         $money = $request->input('money');
-        if (empty($money) || intval($money) == 0) {
+        if (empty($money)) {
             return response()->json(['rs' => 0, 'errmsg' => '请确定支付金额']);
         }
          try {
             DB::beginTransaction();
-            $total_fee = 1;
             $charge_order = DB::table("cardrecharge")->orderBy('id', 'desc')->select('id')->limit(1)->first();
             $charge_no = date("Ymd") . mt_rand(1111, 9999) . ( empty($charge_order->id) ? 0 : $charge_order->id + 1);
             $charge_id = DB::table('cardrecharge')->insertGetId([
                 'uid' => $request->session()->get('uid'),
-                /*'money' => intval($money) * 100,*/
-                'money' => $total_fee,
+                'money' => $money * 100,
                 'charge_no' => $charge_no
             ]);
             if (!$charge_id)
@@ -64,8 +62,7 @@ class MemberController extends Controller {
             'body'          =>  '会员卡充值',
             'detail'        =>  '会员卡充值',
             'out_trade_no'  =>  $charge_no,
-            'total_fee'     => $total_fee,
-            /*'total_fee'     => $money * 100,*/
+            'total_fee'     => $money * 100,
             'notify_url'    => 'http://www.jingyuxuexiao.com/card/notify',
             'openid'    => $openid
         ];
@@ -97,7 +94,6 @@ class MemberController extends Controller {
 
                 // 不是已经支付状态则修改为已经支付状态
                 try {
-                    echo $order->id;
                     $order_rs = DB::table('cardrecharge')->where('id', $order->id)
                                 ->update(['status' => 1, 'pay_time' => date("Y-m-d H:i:s")]);
                     if (!$order_rs) {
@@ -112,6 +108,12 @@ class MemberController extends Controller {
                     if (!$trans['insert'])
                         throw new \Exception('操作失败');
 
+                    $score = DB::table('scorechange')->insert([
+                        'type' => 1,
+                        'paytype' => 1,
+                        'score' => intval($order->money / 100),
+                        'uid' => $order->uid
+                    ]);
                     $user = DB::table('user')->where("userid", $order->uid)->first();
                     if (empty($user)) {
                         throw new \Exception('用户不存在');
@@ -130,18 +132,30 @@ class MemberController extends Controller {
                     } else
                         $level = $user->level;
 
+                    if (empty($user->card_no)) {
+                        $card_no = DB::table("user")->max("card_no");
+                        if (empty($card_no)) {
+                            $no = 1;
+                            $card_no = str_pad(1, 8, "0", STR_PAD_LEFT);
+                        }
+                    } else {
+                        $card_no = $user->card_no;
+                    }
                     $user_rs = DB::table('user')->where("userid", $order->uid)->update([
                         'money' => $user->money + $order->money,
                         'level' => $level,
-                        'score' => $user->score + intval($order->money / 100)
+                        'score' => $user->score + intval($order->money / 100),
+                        'card_no' => $card_no
                     ]);
-
+                    var_dump($user->money);
+                    var_dump($order->money);
                     if (!$user_rs) {
                         throw new \Exception("修改用户金额失败");
                     }
                     DB::commit();
                 } catch (\Exception $e) {
                     DB::rollback();
+                    return false;
                 }
             } else { // 用户支付失败
                 return false;
@@ -149,5 +163,9 @@ class MemberController extends Controller {
             return true; // 返回处理完成
         });
         return $response;
+    }
+
+    public function forward(Request $request) {
+        return redirect('/card');
     }
 }

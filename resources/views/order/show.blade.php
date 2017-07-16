@@ -12,12 +12,12 @@
                         <div class="order-state-img" style="background-image:url('/images/wait_pay.png')"></div>
                         <div>订单未支付</div>
                     </div>
-                @elseif ($order->status == 2 || $order->status == 3)
+                @elseif ($order->status == 2)
                     <div class="order-state">
                         <div class="order-state-img" style="background-image:url('/images/has_pay.png')"></div>
                         <div>支付成功，等待发货</div>
                     </div>
-                @elseif ($order->status == 4 )
+                @elseif ($order->status == 3)
                     <div class="express-state" style="padding:0.2rem 5%; ">
                         <div class="express" style="margin: 0; width: 50%; margin-right:10%;  ">
                             <div class="express-company" style="display: block;">
@@ -26,7 +26,7 @@
                                 <br clear="all" />
                             </div>
                             <div style="display: block; line-height: 0.8rem;">快递单号: {{ $order->express_no }}</div>
-                            <div id="express_copy" style="display: block;">复制</div>
+                            <!--<div id="express_copy" style="display: block;">复制</div>-->
                         </div>
                         <div style="background-image:url('/images/has_send.png');" class="express-image"></div>
                         <br clear="all" />
@@ -69,25 +69,38 @@
         </div>
         <div class="order-express">
             <div>运费</div>
-            <div>10元(全场满500元包邮)</div>
+            <div>10元(全场满1000元包邮)</div>
         </div>
+        @if (empty($order->express_price))
+        <div class="order-express">
+            <div>运费减免</div>
+            <div>-￥10元</div>
+        </div>
+        @endif
+        @if (!empty($order->discount_price))
         <div class="order-discount">
             <div>会员折扣</div>
-            @if ($user->level >= 1)
-                <div>
-                    @if ($user->level == 1)
-                        金牌会员: 9折
-                    @elseif ($user->level == 2)
-                        铂金会员: 8.5折
-                    @elseif ($user->level == 3)
-                        钻石会员: 8折
-                    @else
-                    @endif
-                </div>
+            <div style="float:right;">
+            @if ($order->discount == 90)
+                金牌会员: 9折
+            @elseif ($order->discount == 85)
+                铂金会员: 8.5折
+            @elseif ($order->discount == 80)
+                钻石会员: 8折
             @else
-                <div></div>
             @endif
+                <div style="color:red;float:right;">￥-{{ $order->discount_price }}元</div>
+            </div>
         </div>
+        @endif
+        @if (!empty($order->exchange_score))
+            <div class="order-discount">
+                <div>积分折扣</div>
+                <div style="float:right;">
+                    {{ $order->exchange_score }}积分折扣{{ $order->exchange_score / 100 }}元
+                </div>
+            </div>
+        @endif
     </div>
 
     <div class="order-show-act">
@@ -96,10 +109,17 @@
                 共计<?php echo $count; ?>件商品
             </div>
             <div class="order-show-total">
-                <div>合计: <span id="total_money">￥{{ $order->price }}</span>元</div>
+                <div>合计: <span id="total_money">￥{{ $order->price / 100}}</span>元</div>
             </div>
             <br clear="all" />
         </div>
+        @if (intval($order->price / 100))
+        <div class="order-get-score">
+            <div style="float: left;">获得积分</div>
+            <div style="float: right;">{{ $order->price / 100 }}分</div>
+            <br clear="all" />
+        </div>
+        @endif
         <div class="order-show-time">
             <div>订单号: {{ $order->order_no }}</div>
             <div>下单时间: {{ $order->create_time }}</div>
@@ -112,9 +132,12 @@
         </div>
         <br clear="all" />
     </div>
-    @if ($order->status <= 1)
+    @if ($order->status == 1)
         <div class="order-to-buy">立即付款</div>
-        @endif
+    @endif
+    @if ($order->status == 3)
+    <div class="order-sure-save">确认收货</div>
+    @endif
         </div>
 
         <style type="text/css">
@@ -161,8 +184,8 @@
             .order-show-time { margin-top: 1rem;
                 margin-bottom:1rem;}
             .order-show-time div { line-height: 1rem; }
-            .order-to-buy { position:fixed; bottom:0; width: 100%;
-                line-height:1.5rem; font-size:0.7rem;text-align: center; background:#fff; }
+            .order-to-buy, .order-sure-save{ position:fixed; bottom:0; width: 100%;
+                line-height:2rem; font-size:1rem;text-align: center; background:#fff; }
             #total_money { color: red; }
             .express-image { background-size:100%; width:2rem;
                 height:2rem; margin-top:0.4rem;}
@@ -170,7 +193,42 @@
             .express-image { float:right; }
             #express_copy { width:2.2rem; height:1rem;border:solid 1px #C1C1C1;border-radius:0.8rem;
                 text-align: center;}
+            .order-item-content {
+                width: 74%;
+            }
         </style>
+        <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+        <script type="text/javascript">
+            //调用微信JS api 支付
+            function jsApiCall(data)
+            {
+                WeixinJSBridge.invoke(
+                    'getBrandWCPayRequest',data,
+                    function(res){
+                        if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+                            alert('支付成功');
+                            location.href = "/ordershow?orderno={{ $order->order_no }}";
+                        } else {
+                            //$("#pay_chance").val(0);
+                        }
+                    }
+                );
+            }
+
+            function callpay(param)
+            {
+                if (typeof WeixinJSBridge == "undefined"){
+                    if( document.addEventListener ){
+                        document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
+                    }else if (document.attachEvent){
+                        document.attachEvent('WeixinJSBridgeReady', jsApiCall);
+                        document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
+                    }
+                }else{
+                    jsApiCall(param);
+                }
+            }
+        </script>
         <script>
             $.ajaxSettings = $.extend($.ajaxSettings, {
                 headers: {
@@ -183,14 +241,37 @@
                     type:'post',
                     data: {'orderno':{{ $order->order_no }} },
                     dataType:'json',
-                    url: '/order/pay',
+                    url: '/order/repay',
+                    async: false,
                     success: function (data) {
-
+                        if (data.rs == 0) {
+                            alert(data.errmsg);
+                            return false;
+                        } else {
+                            callpay(data);
+                        }
                     }
                 });
             });
-            $("#express_copy").on("click", function() {
-
+            $(".order-sure-save").on("click", function() {
+                $.ajax({
+                    type:'post',
+                    data: {'orderno':{{ $order->order_no }}, 'status': 4 },
+                    dataType:'json',
+                        url: '/order/changeorder',
+                        async: false,
+                        success: function (data) {
+                        if (data.rs == 0) {
+                            alert(data.errmsg);
+                            return false;
+                        } else {
+                            location.reload();
+                        }
+                    }
+                });
             });
+            /*$("#express_copy").on("click", function() {
+
+            });*/
         </script>
 @endsection

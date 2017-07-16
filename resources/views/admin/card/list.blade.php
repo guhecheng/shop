@@ -105,13 +105,14 @@
                     <span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">编辑卡片</h4>
             </div>
-            <form enctype="multipart/form-data" method="post" action="/admin/card/1">
+            <form enctype="multipart/form-data" method="post" action="/admin/card/" class="mod-form">
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="cardname" class="col-sm-2 control-label">卡片名</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="cardname" id="edit_cardname" placeholder="请输入卡片名">
+                        <div class="col-sm-10" id="edit_cardname">
+                            {{--<input type="text" class="form-control" name="cardname" id="edit_cardname" placeholder="请输入卡片名">--}}
                         </div>
+                        <br clear="all" />
                     </div>
                     <div class="form-group">
                         <label for="cardname" class="col-sm-2 control-label">卡片积分</label>
@@ -189,13 +190,14 @@
             previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
         });
         $(".modify-btn").on("click", function () {
-            var attr_id = $(this).prop("attr-id");
+            var attr_id = $(this).attr("attr-id");
             var par = $(this).parent().parent();
-            $("#edit_cardname").val($.trim(par.find("td:eq(0)").text()));
+            $("#edit_cardname").text($.trim(par.find("td:eq(0)").text()));
             $("#edit_cardscore").val($.trim(par.find("td:eq(1)").text()));
             $("#mod-modal").modal('show');
             $("#address_id").val(attr_id);
-            $(this).find("form").prop("action", "/admin/card/" + attr_id);
+            console.log(attr_id);
+            $(".mod-form").attr("action", "/admin/card/" + attr_id);
             $("#update_img").fileinput({
                 showUpload: false,
                 showCaption: false,

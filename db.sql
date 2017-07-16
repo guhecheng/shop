@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS user (
   card_no varchar(20) not null default '' comment '会员卡号',
   is_delete tinyint not null default 0 comment '状态, 0: 正常, 1:禁用',
   is_old tinyint not null default 0 comment '老会员, 0:否，1:是',
+  child_id int not null default 0 comment '对应孩子表id',
   create_time TIMESTAMP DEFAULT current_timestamp comment '创建时间',
   update_time datetime comment '更新时间',
   last_login_time datetime comment '最后登陆时间',
@@ -143,7 +144,8 @@ drop table if exists scorechange;
 create table if not exists scorechange (
   score_id int not null auto_increment,
   score int not null default 0 comment '积分',
-  type tinyint not null default 0 comment '支付方式,0:其他，1 微信支付,2:会员卡支付',
+  type TINYINT NOT NULL DEFAULT 0 COMMENT '积分获取类型，购买商品积分：0，会员卡充值积分1，积分兑换商品2',
+  paytype tinyint not null default 0 comment '支付方式,0:其他，1 微信支付,2:会员卡支付',
   uid int not null default 0 comment '用户id',
   create_time timestamp default current_timestamp comment '创建时间',
   primary key(score_id)
@@ -222,7 +224,9 @@ CREATE TABLE `orderinfo` (
   `uid` int(11) NOT NULL,
   `express_no` varchar(50) NOT NULL DEFAULT '' COMMENT '快递号',
   `express_company` varchar(50) NOT NULL DEFAULT '' COMMENT '快递公司',
+  `car_ids` varchar(100) not null DEFAULT '' comment '购物车id列表',
   `price` int(11) NOT NULL DEFAULT '0' COMMENT '价格',
+  `exchange_score` int not null DEFAULT 0 COMMENT '兑换积分',
   `express_price` int(11) NOT NULL DEFAULT '0' COMMENT '快递价格',
   `discount` int(11) NOT NULL DEFAULT '0' COMMENT '折扣',
   `discount_price` int(11) NOT NULL DEFAULT '0' COMMENT '折扣价格',
@@ -236,7 +240,8 @@ CREATE TABLE `orderinfo` (
   `pay_type` tinyint(4) DEFAULT '0' COMMENT '支付方式,0:微信，1:支付宝， 2:其他',
   `cancel_time` datetime DEFAULT NULL COMMENT '取消时间',
   PRIMARY KEY (`info_id`),
-  UNIQUE KEY `order_no` (`order_no`)
+  UNIQUE KEY `order_no` (`order_no`),
+  INDEX uid(uid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Log日志*/
@@ -324,3 +329,16 @@ create table if not exists cardrecharge (
   pay_time timestamp COMMENT '支付时间',
   PRIMARY KEY (id)
 ) ENGINE = INNODB CHARSET = utf8;
+
+
+/*用户发送信息*/
+drop table if EXISTS usersendmsg;
+create table if not exists usersendmsg (
+  id int not null AUTO_INCREMENT,
+  openid varchar(100) not null default ''  comment '微信openid',
+  content varchar(255) not null default '' comment '用户发送的内容',
+  type TINYINT(1) NOT NULL DEFAULT 0 comment '信息类型，0：文本，1:图片，2：语音, 3: 视频...',
+  create_time TIMESTAMP DEFAULT current_timestamp COMMENT '创建时间',
+  PRIMARY KEY (id),
+  INDEX openid(openid)
+) engine=innodb charset=utf8mb4;

@@ -18,7 +18,7 @@
             </a>
             <a href="/money">
                 <div class="user_info_money">
-                    <div>￥{{ $user->money }}</div>
+                    <div>￥{{ $user->money / 100 }}元</div>
                     <div>账户余额</div>
                 </div>
             </a>

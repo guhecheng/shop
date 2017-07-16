@@ -4,14 +4,14 @@
         @if (empty($user->is_old))
         <div class="user-info-item">
             <div>我是老会员</div>
-            <div class="user-info-link link-old">点击关联<div></div></div>
+            <div class="link-old">点击关联<div></div></div>
         </div>
         @endif
         <div class="user-info-icon-item">
             <div>头像</div>
             <div class="user-info-icon-div2">
                 <div class="user-info-icon" style="background-image:url({{ $user->avatar }})"></div>
-                <div></div>
+                {{--<div></div>--}}
             </div>
         </div>
         <div class="user-info-item">
@@ -33,7 +33,7 @@
         </div>
         <div class="user-info-item">
             <div>性别</div>
-            <div class="user-info-link" attr-type="child_sex">{{ empty($user->childsex) ? '添加':($user->childsex==1?'男':'女') }}<div></div></div>
+            <div class="user-info-link" attr-type="child_sex">{{ empty($user->sex) ? '添加':($user->sex==1?'男':'女') }}<div></div></div>
         </div>
         <div class="user-info-item">
             <div>学校</div>
@@ -176,7 +176,7 @@
         .user-info-item div:last-child{
             float:right;
         }
-        .user-info-link div,.user-info-icon-div2 div:last-child {
+        .user-info-link div,.user-info-icon-div2 div:last-child,.link-old div:last-child {
             background:url('/images/more.png') no-repeat;
             background-size: 100%;
             width: 1rem;
@@ -186,7 +186,7 @@
         }
         .user-info-icon-div2 div:last-child { margin-top:1rem;}
         .bg { position:absolute;z-index:100;
-            display: none; top:0; background: #000; opacity: 0.1; width: 100%; height: 100%;}
+            display: none; top:0; background: #000; opacity: 0.2; width: 100%; height: 100%;}
         .close-linkuser {text-align:right;
             line-height:2rem;padding-right:1rem;font-size:0.8rem;}
     </style>
@@ -229,7 +229,7 @@
                         alert('关联成功');
                         location.reload();
                     } else {
-                        alert('信息填写错误');
+                        alert(data.errmsg);
                         return false;
                     }
                 }

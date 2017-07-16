@@ -11,7 +11,6 @@ body {
     height: 3rem;
     width: 3rem;
     float:left;
-    border: solid 1px #C1C1C1;
     margin-right: 0.5rem;
     background-repeat: no-repeat;
     background-size:100%;
@@ -21,7 +20,7 @@ body {
 }
 .goods-item-content {
     float: left;
-    width: 70%;
+    width: 80%;
 }
 .goods-item-content div {
     height: 1rem;
@@ -889,7 +888,7 @@ body {
 .order-list {
     margin-top:0.3rem;
 }
-.order-express, .order-discount {
+.order-express, .order-discount, .order-change-score {
     background: #fff;
     width: 100%;
     padding: 0 5%;
@@ -897,9 +896,10 @@ body {
     height: 1.8rem;
     border-bottom: solid 1px #C1C1C1;
 }
-.order-express div,.order-discount div {
+.order-express div,.order-discount div, .order-change-score div {
     float:left;
 }
-.order-express div:last-child,.order-discount div:last-child {
+.order-express div:last-child,.order-discount div:last-child,.order-change-score div:last-child {
     float:right;
+    text-align: right;
 }

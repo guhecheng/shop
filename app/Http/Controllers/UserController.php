@@ -34,22 +34,24 @@ class UserController extends Controller {
         $phone = $request->input('phone');
         $pass = $request->input('pass');
         if (empty($phone) || empty($pass)) {
-            return response()->json(['rs'=>0]);
+            return response()->json(['rs'=>0, 'errmsg'=>'手机号或者密码错误']);
         }
         $olduser = DB::table('olduser')
             ->leftJoin('children', 'children.parent_id', '=', 'olduser.id')
             ->where(['phone'=>$phone, 'password'=>$pass])->select('olduser.*', 'children.relate_id')->first();
-        if ($olduser->id) {
-            $rs = DB::table('user')->where(['userid' => $request->session()->get('uid')])
-                ->update([
-                    'phone' => $phone,
-                    'nickname' => $olduser->name,
-                    'child_id' => $olduser->relate_id,
-                    'is_old' => 1
-                ]);
-            return response()->json(['rs' => $rs]);
+        if (empty($olduser->id)) {
+            return response()->json(['rs' => 0, 'errmsg'=>'手机号或者密码错误']);
         }
-        return response()->json(['rs'=>0]);
+        $rs = DB::table('user')->where(['userid' => $request->session()->get('uid')])
+            ->update([
+                'phone' => $phone,
+                'nickname' => $olduser->name,
+                'child_id' => $olduser->relate_id,
+                'is_old' => 1
+            ]);
+        if ($rs)
+            return response()->json(['rs' => 1]);
+        return response()->json(['rs'=>0, 'errmsg'=>'关联失败']);
     }
 
     public function modinfo(Request $request) {
@@ -85,7 +87,7 @@ class UserController extends Controller {
                 break;
             case 'child_sex':
                 $rs = $this->addOrUpdateChild($uid, [
-                    'birth_date' => $content == '男' ? 1 : ($content == '女' ? 2 : 0)
+                    'sex' => $content == '男' ? 1 : ($content == '女' ? 2 : 0)
                 ]);
                 break;
             case 'child_school':
@@ -133,7 +135,7 @@ class UserController extends Controller {
      */
     public function score(Request $request) {
         $page = $request->has('page') ? $request->input('page') : 0;
-        $pagesize = 10;
+        $pagesize = 50;
         $pagenow = $page * $pagesize;
         $scores = DB::table('scorechange')->where('uid', $request->session()->get('uid'))
             ->orderBy('create_time', 'desc')

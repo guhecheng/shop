@@ -125,12 +125,13 @@ class CarController extends Controller {
         $cartid = $request->input('cartid');
         $count = $request->input('count');
         if (empty($cartid) || empty($count))
-            exit;
+            return response()->json(['rs'=>0, 'errmsg'=>'信息错误']);
         $sku = DB::table('cart')->leftJoin('goodssku', 'goodssku.sku_id', '=', 'cart.skuid')
                     ->where('cart.cartid', $cartid)->first();
         if ($sku->num < $count) {
             return response()->json(['rs' => 0, 'max_count'=>$sku->num]);
         }
         DB::table('cart')->where('cartid', $cartid)->update(['goodscount'=>$count]);
+        return response()->json(['rs' => 1]);
     }
 }

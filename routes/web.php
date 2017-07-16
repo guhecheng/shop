@@ -30,6 +30,7 @@ Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/score', 'UserController@score');
     Route::get('/card', 'MemberController@card');
     Route::post('/card/pay', 'MemberController@pay');
+    Route::get('/card/forward', 'MemberController@forward');
 
 
     Route::resource('address', 'AddressController');
@@ -42,10 +43,15 @@ Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/order/create', 'OrderController@create');
     Route::get('/order', 'OrderController@index');
     Route::post('/order/add', 'OrderController@add');
-    Route::get('/order/show', 'OrderController@show');
+    Route::get('/ordershow', 'OrderController@show');
     Route::get('/order/list', 'OrderController@list');
     Route::any('/orderpay', 'OrderController@orderpay');
     Route::any('/order/pay', 'OrderController@pay');
+    Route::any('/order/freepay', 'OrderController@freepay');
+    Route::any('/order/cardpay', 'OrderController@cardpay');
+    Route::any('/order/repay', 'OrderController@repay');
+    Route::any('/order/ajaxGetGoods', 'OrderController@ajaxGetGoods');
+    Route::any('/order/changeorder', 'OrderController@changeorder');
 
     Route::get('/info', 'UserController@info');
     Route::post('/relate', 'UserController@relate');
@@ -97,6 +103,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::post("/goods/upload", 'GoodsController@upload');
     Route::post("/goods/create", 'GoodsController@create');
 
+    Route::get("/card/recharge", 'CardController@recharge');
     Route::resource("card", 'CardController');
     Route::resource('/goods', 'GoodsController');
 

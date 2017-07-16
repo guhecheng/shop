@@ -16,22 +16,22 @@
             <div class="swiper-wrapper">
                 @for($i = 0; $i < 4; $i++)
                 <div class="swiper-slide goods-slide" attr-is-add="0">
-                    @if ($i == $status)
+                    @if ($i == 0 && empty($status))
                     @foreach ($orders as $item)
                     <div class="order-item" attr-id="{{ $item->order_no }}">
                         <div class="order-item-header">
                             <div>{{ $item->order_no }}</div>
                             <div>
                                 @if ($item->status == 1)
-                                    <span style="color:red;">未付款</span>
+                                <span style="color:red;">未付款</span>
                                 @elseif ($item->status == 2)
-                                    待发货
-                                @elsesif ($item->status == 3)
-                                    已发货
+                                待发货
+                                @elseif ($item->status == 3)
+                                已发货
                                 @elseif ($item->status == 4)
-                                    已完成
+                                已完成
                                 @else
-                                    <span style="color:#C1C1C1">已失效</span>
+                                <span style="color:#C1C1C1">已失效</span>
                                 @endif
                             </div>
                         </div>
@@ -57,8 +57,8 @@
                         </div>
                     </div>
                     @endforeach
-                    @endif
                     <br clear="all" />
+                    @endif
                 </div>
                 @endfor
             </div>
@@ -76,12 +76,15 @@
             border-bottom:solid 1px red;
         }
         .order-item {
-            margin-bottom: 1rem;
+            margin-bottom:0.4rem;
             padding: 0;
         }
         .order-item-header, .goods-item, .price {
             padding: 0.2rem 5%;
             width: 100%;
+        }
+        .goods-item {
+            padding: 0.4rem 5%;
         }
         .order-item-header {
             line-height: 1.5rem;
@@ -107,16 +110,27 @@
         }
         .order-item-header,.goods-item { border-bottom: solid 1px #C1C1C1; }
         .order-goods-property { line-height: 1rem; }
-        .order-goods-property div:first-child { float:left; width: 50%;
+        .order-goods-property div:first-child { float:left; width: 70%;
             overflow: hidden;}
-        .order-goods-property div:last-child { float:right; width: 50%; text-align:right;}
+        .order-goods-property div:last-child { float:right; width: 30%; text-align:right;}
         .price div:first-child { float:left; }
         .price div:last-child { float: right; }
+        .price { line-height: 2rem; font-size:0.8rem;}
+        .goods-item-content { width: 80%;}
+        .goods-name { font-size: 0.8rem; }
+        .goods-item-icon {
+            margin-top:0.1rem;
+            width:3.6rem;
+            height: 3.6rem;}
+        .goods-item-content div {
+            height:1.4rem;
+            line-height: 1.4rem;
+        }
     </style>
     <script type="text/javascript">
         $(function() {
             $(document).on("click", ".order-item", function () {
-                location.href = "/order/show?orderno=" + $(this).attr("attr-id");
+                location.href = "/ordershow?orderno=" + $(this).attr("attr-id");
             });
         });
         $.ajaxSetup({
@@ -144,7 +158,7 @@
         function getdata(index) {
             if ($(".goods-slide:eq("+index+")").attr("attr-is-add") == 1) return;
             $.ajax({
-                url: '/order',
+                url: '/order/ajaxGetGoods',
                 data:{'status': index == 0 ? -1 : index},
                 dataType:'json',
                 type:"get",
@@ -157,15 +171,24 @@
                             html += '<div class="order-item" attr-id="' + order.order_no + '">';
                             html += '<div class="order-item-header">';
                             html += '<div>' + order.order_no + '</div>';
-                            html += '<div></div></div>';
+                            html += '<div>';
+                            if (order.status == 1)
+                                html += '未支付';
+                            else if (order.status == 2)
+                                html += '未发货';
+                            else if (order.status == 3)
+                                html += '待收货';
+                            else if (order.status == 4)
+                                html += '已收货';
+
+                            html += '</div></div>';
                             for (var j in order.data) {
                                 var item = order.data[j];
-                                console.log(item);
                                 html += '<div class="goods-item" attr-id="' + item.goodsid + '">';
                                 html += '<div class="goods-item-icon" style="background-image:url(' + item.goodsicon + ')"></div>';
                                 html += '<div class="goods-item-content">';
                                 html += '<div class="goods-name">' + item.goodsname + '</div>';
-                                html += '<div class="goods-price">￥' + item.price + ' 元</div>';
+                                html += '<div class="goods-price">￥' + (item.price / 100) + ' 元</div>';
                                 html += '<div class="order-goods-property">';
                                 html += '<div>' + item.property + '</div>';
                                 html += '<div>' + item.count + '</div>';

@@ -89,8 +89,10 @@
                 @foreach ($scores as $value)
                     <li>
                         <div class="name">
-                            <div class="trans_name">{{ $value->type == 1 ? '微信支付' : '会员卡支付'}}</div>
-                            <div class="trans_score">{{  $value->score }}分</div>
+                            <div class="trans_name">{{--{{ $value->type == 1 ? '微信支付' : '会员卡支付'}}--}}
+                                <?php echo $value->type==0? '购买商品' : $value->type==1? '会员卡充值' : '兑换商品'; ?>
+                            </div>
+                            <div class="trans_score">{{ $value->type == 2 ? '-':'' }}{{  $value->score }}分</div>
                         </div>
                         <div class="time">
                             <div class="trans_time">{{ $value->create_time }}</div>
@@ -102,10 +104,9 @@
         </div>
     </div>
     <script>
-        window.onscroll = function() {
+       /* window.onscroll = function() {
             console.log('jklfasdf');
             if (getScrollTop() + getClientHeight() == getScrollHeight()) {
-                console.log('jfklajfda');
                 var page = parseInt($("#page").val());
                 flag = false;
                 addtrans(page + 1);
@@ -136,7 +137,7 @@
                     }
                 }
             });
-        }
+        }*/
     </script>
 @endif
 </body>

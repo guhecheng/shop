@@ -20,7 +20,7 @@ class UserController extends Controller {
     public function index(Request $request) {
         $users = DB::table('user')->where('is_delete', $this->no_deleted)
             ->orderBy('create_time', 'desc')
-            ->paginate(5);
+            ->paginate(20);
         return view('admin.user.index', ['users' => $users]);
     }
 
