@@ -17,7 +17,7 @@
                         <div class="car-item-content">
                             <div class="car-name">{{ $item->goodsname }}</div>
                             <div class="car-property">
-                                <div class="car-price">￥<span class="car-money">{{ $item->price / 100 }}</span> 元</div>
+                                <div class="car-price">￥<span class="car-money">{{ $item->sku_price / 100 }}</span> 元</div>
                                 <div>{{ $item->property }}</div>
                             </div>
                             <div class="car-num" attr-id="{{ $item->cartid }}">
@@ -138,8 +138,8 @@
         $(".reduce_num").on('click', function() {
             var par = $(this).parent();
             var count = par.find('.car-item-count').val();
+            if (count == 1) return;
             count = count > 1 ? count - 1 : 1;
-            par.find('.car-item-count').val(count);
             $.ajax({
                 url:'/modcar',
                 type:'post',
@@ -151,6 +151,12 @@
                         alert('库存仅剩'+data.max_count);
                         par.find('.car-item-count').val(data.max_count);
                         return;
+                    } else {
+                        par.find('.car-item-count').val(count);
+                        var grand_p = par.parent().parent();
+                        if (grand_p.find(".car-select-type").hasClass("active")) {
+                            $("#total_money").text(parseFloat($("#total_money").text()) - parseFloat($.trim(grand_p.find(".car-money").text())));
+                        }
                     }
                 }
             });
@@ -159,7 +165,6 @@
             var par = $(this).parent();
             var count = par.find('.car-item-count').val();
             count = parseInt(count) + 1;
-            par.find('.car-item-count').val(count);
             $.ajax({
                 url:'/modcar',
                 type:'post',
@@ -170,12 +175,20 @@
                     if (data.rs == 0) {
                         alert('库存仅剩'+data.max_count);
                         par.find('.car-item-count').val(data.max_count);
-                        return;
+                        return false;
+                    } else {
+                        par.find('.car-item-count').val(count);
+                        var grand_p = par.parent().parent();
+                        if (grand_p.find(".car-select-type").hasClass("active")) {
+                            $("#total_money").text(parseFloat($("#total_money").text()) + parseFloat($.trim(grand_p.find(".car-money").text())));
+                        }
+                        /*if (par.)
+                        $("#total_money").val();*/
                     }
                 }
             });
         });
-        $(".car-item-count").on("input propertychange", function () {
+        $(".car-item-count").on("change", function () {
             var value = 0;
             if (isNaN($(this).val())) {
                 value = parseInt($(this).val()) > 0 ? parseInt($(this).val()) : 1;
@@ -195,6 +208,15 @@
                         alert('库存仅剩'+data.max_count);
                         th.val(data.max_count);
                         return;
+                    } else {
+                        var money = 0;
+                        $(".car-select").each(function() {
+                            if ($(this).attr("attr-value") == 1) {
+                                var par = $(this).parent();
+                                money += parseFloat($.trim(par.find(".car-money").text()) * $.trim(par.find(".car-item-count").val()));
+                            }
+                        });
+                        $("#total_money").text(parseFloat(money));
                     }
                 }
             });

@@ -21,6 +21,16 @@ class GoodsController extends Controller {
 
     public function add() {
         $types = DB::table('goodstype')->where('is_delete', 0)->get();
+        if (!empty($types)) {
+            foreach ($types as $key=>$type) {
+                $cnt = DB::table('propertykey')->where([
+                    ['type_id', '=', $type->typeid],
+                    ['is_enum', '=', 1]
+                ])->count('type_id');
+                if (empty($cnt))
+                    unset($types[$key]);
+            }
+        }
         return view('admin.goods.add', ['types' => $types]);
     }
 
@@ -30,6 +40,7 @@ class GoodsController extends Controller {
                     ->where([
                         ['propertykey.type_id', '=', $request->input('typeid')],
                         ['propertykey.is_delete', '=', 0],
+                        ['propertyvalue.is_delete', '=', 0]
                     ])
                     ->select('propertykey.*', 'propertyvalue.value_name', 'propertyvalue.is_delete', 'propertyvalue.value_id')
                     ->get();
@@ -57,43 +68,52 @@ class GoodsController extends Controller {
         $imglist = $request->input('imglist');
         $is_hot = $request->input('is_hot');
         $score_award = $request->input('score_award');
+        $content = $request->input('content');
+        if (empty($goodsname) || empty($goodsprice) || empty($goodstype) || empty($logo)
+            || empty($imglist) || empty($content) || empty($request->input('price')))
+            return redirect('admin/goods')->with();
+
         DB::beginTransaction();
         $goodsid = DB::table('goods')->insertGetId([
             'goodsname' => trim($goodsname),
             'goodsicon' => $logo,
             'goodspic' => $imglist,
-            'is_hot' => $is_hot,
+            'is_hot' => empty($is_hot) ? 0 : $is_hot,
             'typeid' => $goodstype,
             'price' => $goodsprice * 100,
-            'goodsdesc' => $request->input('content'),
-            'is_discount' => $request->input('discount'),
+            'goodsdesc' => $content,
+            'is_discount' => empty($request->input('is_discount')) ? 0 : $request->input('is_discount'),
             'score_award' => empty($score_award) ? 0 : $score_award
         ]);
         if ($goodsid) {
-            foreach ($request->input('common_attr') as $key=>$value) {
-                $value_id = DB::table('propertyvalue')->insertGetId([
-                    'value_name' => $value[0],
-                    'key_id' => $key
-                ]);
-                DB::table('goodsproperty')->insertGetId([
-                    'goods_id' => $goodsid,
-                    'key_id' => $key,
-                    'value_id' => $value_id
-                ]);
-            }
-            foreach ($request->input('add_attr_key') as $key=>$value) {
-                if ($request->input['add_attr_value'][$key]) {
-                    $key_id = DB::table('propertykey')->insertGetId([
-                        'key_name' => $value
-                    ]);
+            if (!empty($request->input('common_attr'))) {
+                foreach ($request->input('common_attr') as $key => $value) {
                     $value_id = DB::table('propertyvalue')->insertGetId([
-                        'value_name' => $this->input['add_attr_value'][$key]
+                        'value_name' => $value[0],
+                        'key_id' => $key
                     ]);
-                    DB::table('goodsproperty')->insert([
-                        'key_id' => $key_id,
-                        'value_id' => $value_id,
-                        'goods_id' => $goodsid
+                    DB::table('goodsproperty')->insertGetId([
+                        'goods_id' => $goodsid,
+                        'key_id' => $key,
+                        'value_id' => $value_id
                     ]);
+                }
+            }
+            if (!empty($request->input('add_attr_key'))) {
+                foreach ($request->input('add_attr_key') as $key=>$value) {
+                    if ($request->input['add_attr_value'][$key]) {
+                        $key_id = DB::table('propertykey')->insertGetId([
+                            'key_name' => $value
+                        ]);
+                        $value_id = DB::table('propertyvalue')->insertGetId([
+                            'value_name' => $this->input['add_attr_value'][$key]
+                        ]);
+                        DB::table('goodsproperty')->insert([
+                            'key_id' => $key_id,
+                            'value_id' => $value_id,
+                            'goods_id' => $goodsid
+                        ]);
+                    }
                 }
             }
 
@@ -149,6 +169,17 @@ class GoodsController extends Controller {
             $rs = DB::table('goods')->where('goodsid', $goodsid)
                 ->update([
                     'is_hot' => $status
+                ]);
+        return response()->json(['rs' => empty($rs) ? 0 : 1]);
+    }
+
+    public function changead(Request $request) {
+        $goodsid = $request->input('goodsid');
+        $status = $request->input('status');
+        if (!empty($goodsid))
+            $rs = DB::table('goods')->where('goodsid', $goodsid)
+                ->update([
+                    'is_ad' => $status
                 ]);
         return response()->json(['rs' => empty($rs) ? 0 : 1]);
     }

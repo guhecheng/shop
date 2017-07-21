@@ -10,7 +10,7 @@
         <div class="user-info-icon-item">
             <div>头像</div>
             <div class="user-info-icon-div2">
-                <div class="user-info-icon" style="background-image:url({{ $user->avatar }})"></div>
+                <div class="user-info-icon" style="background-image:url({{ $user->avatar }});width: 2rem;height:2rem;margin-top:0.4rem;"></div>
                 {{--<div></div>--}}
             </div>
         </div>
@@ -27,10 +27,10 @@
             <div>姓名</div>
             <div class="user-info-link" attr-type="child_name">{{ empty($user->name) ? '添加' : $user->name }}<div></div></div>
         </div>
-        <div class="user-info-item">
+        {{--<div class="user-info-item">
             <div>生日</div>
             <div class="user-info-date-link" attr-type="child_birth_date">{{ empty($user->birth_date) ? '添加' : $user->birth_date }}<div></div></div>
-        </div>
+        </div>--}}
         <div class="user-info-item">
             <div>性别</div>
             <div class="user-info-link" attr-type="child_sex">{{ empty($user->sex) ? '添加':($user->sex==1?'男':'女') }}<div></div></div>
@@ -39,10 +39,10 @@
             <div>学校</div>
             <div class="user-info-link" attr-type="child_school">{{ empty($user->school) ? '添加':$user->school }}<div></div></div>
         </div>
-        <div class="user-info-item">
+        {{--<div class="user-info-item">
             <div>最喜欢的童装品牌</div>
             <div class="user-info-link" attr-type="child_brand">点击选择<div></div></div>
-        </div>
+        </div>--}}
     </div>
     <div class="bg"></div>
     <div class="linkuser">
@@ -60,17 +60,26 @@
         <div class="relate">关联会员</div>
     </div>
     <div class="commarea">
-        <div class="close-commarea"><span class="close-area-btn">关闭</span></div>
+        <div class="close-commarea"><span class="close-area-btn"></span></div>
         <div class="comm-input">
             <div class="content-title"></div>
-            <div class="comm-input-content"><input type="text" name="add-content" class="add-content"/></div>
+            <div class="comm-input-content">
+                <input type="text" name="add-content" class="add-content"/>
+                <select class="select-sex" name="select-sex" style="display: none;">
+                    <option value="男">男</option>
+                    <option value="女">女</option>
+                </select>
+            </div>
             <input type="hidden" name="info-type" class="info-type" value="" />
         </div>
-        <div class="sure-btn">确定</div>
+        <div class="sure-btn" style="font-size:0.8rem;">确 定</div>
     </div>
     <style type="text/css">
+        .select-sex { width:3rem; height:1.5rem; }
         .close-commarea { padding-right: 5%; text-align: right; }
-        .close-area-btn { font-size: 0.8rem;}
+        .close-area-btn { background:url('/images/close.png') no-repeat;width:1.2rem;
+            height:1.2rem;background-size:100%;
+            position: absolute; right: 0.3rem; top:0.3rem;}
         .linkuser,.commarea {
             position: fixed;
             bottom:0 ;
@@ -156,10 +165,8 @@
             float:right;
         }
         .user-info-icon {
-            width: 2rem;
-            height:2rem;
-            border-radius: 2rem;
-            border:solid 1px #C1C1C1;
+
+            border-radius: 3rem;
             margin-top:0.5rem;
             background-size: 100%;
         }
@@ -242,12 +249,23 @@
             $(".info-type").val($(this).attr("attr-type"));
             $(".content-title").text($.trim($(this).parent().find("div").first().text()));
             var content = $.trim($(this).text());
-            $(".add-content").val(content == '添加' ? '' : content);
+            if ($(this).attr('attr-type') == 'child_sex') {
+                $(".select-sex").show();
+                $(".add-content").hide();
+                $(".select-sex").val(content == '' ? '男' : content);
+            } else {
+                $(".select-sex").hide();
+                $(".add-content").show().val(content == '添加' ? '' : content);
+            }
         });
         $(".sure-btn").on('click', function() {
             var index = $('.info-type').val();
-            console.log(index);
-            var content = $(".add-content").val();
+            alert(index);
+            if (index == 'child_sex') {
+                var content = $(".select-sex").val();
+            } else {
+                var content = $(".add-content").val();
+            }
             if (content == '') {
                 alert('不能为空');
                 return false;

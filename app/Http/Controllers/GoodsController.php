@@ -33,7 +33,9 @@ class GoodsController extends Controller {
                             ->where([
                                 ['goodsproperty.is_delete', '=', 0],
                                 ['goodsproperty.goods_id', '=', $goodsid],
-                                ['is_sku', '=', 0]
+                                ['is_sku', '=', 0],
+                                ['propertykey.is_delete', '=', 0],
+                                ['propertyvalue.is_delete', '=', 0]
                             ])
                             ->get();
             // 库存

@@ -18,10 +18,10 @@
         </div>
         <div>
             <div class="swiper-container type-container">
-                <div class="swiper-wrapper type-wrapper">
-                    <div class="swiper-slide type-slide active" attr-is-add="0" attr-id="0">推荐</div>
+                <div class="swiper-wrapper type-wrapper" style="background:#fff;border-bottom:solid 1px #c1c1c1">
+                    <div class="swiper-slide type-slide active" attr-is-add="0" attr-id="0" style="border-bottom:0">推荐</div>
                     @foreach ($types as $key=>$type)
-                    <div class="swiper-slide type-slide" attr-is-add="0" attr-id="{{ $type->typeid }}">
+                    <div class="swiper-slide type-slide" attr-is-add="0" attr-id="{{ $type->typeid }}" style="border-bottom:0">
                         {{ $type->typename }}
                     </div>
                     @endforeach
@@ -65,9 +65,9 @@
             color: red;
         }
         .type-slide {
-            line-height:3rem;
+            line-height:2.6rem;
             text-align: center;
-            font-size: 18px;
+            font-size: 1rem;
             background: #fff;
             border-bottom: solid 1px #C1C1C1;
             /* Center slide text vertically */
@@ -110,9 +110,10 @@
         .goods-pic {
             background-repeat:no-repeat; background-size: 100% 100%;
             height: 9rem;}
-        .index-goods-name { z-index:100;background: #838079; opacity: 0.5;
+        .index-goods-name { z-index:100;background: #838079; opacity: 0.7;
             width: 100%;
-            color: #fff;
+            color: #000;
+            font-weight: bold;
             line-height:1.5rem;
             padding-left: 2%;
             overflow: hidden;

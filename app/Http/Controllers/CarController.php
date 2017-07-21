@@ -14,62 +14,57 @@ use Illuminate\Http\Request;
 class CarController extends Controller {
 
     public function add(Request $request) {
-        $request->session()->put('uid', 1);
         $uid = $request->session()->get('uid');          // 用户id
         $attr = $request->input('attr');        // 属性
         $goodsid = $request->input('goodsid');  // 商品id
-        $validator = Validator::make($request->all(), [
-            'num' => 'required',
-            'attr' => 'required',
-            'goodsid' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return response()
-                ->json(['rs' => 0, 'msg' => '信息不全']);
-        } else {
-            $sql = 'select distinct(a.sku_id) from goodsproperty as a';
-            foreach ($attr as $key=>$value) {
-                if (empty($value)) continue;
-                $sql .= ' left join goodsproperty as p'.$key. ' on a.sku_id= p'.$key.'.sku_id';
-            }
-            $sql .= " where ";
-            foreach ($attr as $key=>$item) {
-                if (empty($item)) continue;
-                $sql .= " p".$key.".value_id=$item and";
-            }
-            $sql .=" a.goods_id=". $goodsid;
-            $rs = DB::select($sql);
-
-            if ($rs[0]->sku_id) {
-                $sku = DB::table('goodssku')->where('sku_id', $rs[0]->sku_id)
-                                            ->first();
-                if ($sku->num < $request->input('num'))
-                    return response()->json(['rs'=>0,
-                                                 'msg'=>'商品仅剩'.$sku->num,
-                                                 'num' => $sku->num]);
-            }
-            $cart = DB::table('cart')->where([
-                ["skuid", '=', $rs[0]->sku_id],
-                ['goodsid', '=', $goodsid],
-                ['is_delete', '=', 0],
-                ['uid', '=', $uid]
-            ])->first();
-            if ($cart) {
-                $add = DB::table('cart')->where('cartid', $cart->cartid)
-                    ->update([
-                        'goodscount' => $cart->goodscount + $request->input('num')
-                    ]);
-            } else {
-                $add = DB::table('cart')->insert([
-                    'goodsid' => $goodsid,
-                    'skuid' => $rs[0]->sku_id,
-                    'uid' => $uid,
-                    'goodscount' => $request->input('num')
-                ]);
-            }
-            if ($add)
-                return response()->json(['rs' => 1]);
+        if (empty($request->input('num'))) {
+            return response()->json(['rs' => 0, 'msg' => '商品数量有错']);
         }
+        if (empty($request->input('attr'))) {
+            return response()->json(['rs'=>0, 'msg' => '属性没有选全']);
+        }
+
+        $sql = 'select distinct(a.sku_id) from goodsproperty as a';
+        foreach ($attr as $key=>$value) {
+            if (empty($value)) continue;
+            $sql .= ' left join goodsproperty as p'.$key. ' on a.sku_id= p'.$key.'.sku_id';
+        }
+        $sql .= " where ";
+        foreach ($attr as $key=>$item) {
+            if (empty($item)) continue;
+            $sql .= " p".$key.".value_id=$item and";
+        }
+        $sql .=" a.goods_id=". $goodsid;
+        $rs = DB::select($sql);
+        if ($rs[0]->sku_id) {
+            $sku = DB::table('goodssku')->where('sku_id', $rs[0]->sku_id)
+                                        ->first();
+            if ($sku->num < $request->input('num'))
+                return response()->json(['rs'=>0,
+                                             'msg'=>'商品仅剩'.$sku->num,
+                                             'num' => $sku->num]);
+        }
+        $cart = DB::table('cart')->where([
+            ["skuid", '=', $rs[0]->sku_id],
+            ['goodsid', '=', $goodsid],
+            ['is_delete', '=', 0],
+            ['uid', '=', $uid]
+        ])->first();
+        if ($cart) {
+            $add = DB::table('cart')->where('cartid', $cart->cartid)
+                ->update([
+                    'goodscount' => $cart->goodscount + $request->input('num')
+                ]);
+        } else {
+            $add = DB::table('cart')->insert([
+                'goodsid' => $goodsid,
+                'skuid' => $rs[0]->sku_id,
+                'uid' => $uid,
+                'goodscount' => $request->input('num')
+            ]);
+        }
+        if ($add)
+            return response()->json(['rs' => 1]);
     }
 
     public function index(Request $request) {
@@ -81,7 +76,8 @@ class CarController extends Controller {
                         'goodssku.num', 'goodssku.price as sku_price')
                     ->where([
                         ['uid', '=', $uid],
-                        ['cart.is_delete', '=', 0]
+                        ['cart.is_delete', '=', 0],
+                        ['goods.is_delete', '=', 0]
                     ])
                     ->get();
         if (!$cars->isEmpty()) {
@@ -99,7 +95,7 @@ class CarController extends Controller {
                 $item->property = '';
                 foreach ($skus as $value) {
                     if ($value->sku_id == $item->skuid) {
-                        $item->property .= $value->key_name .':'.$value->value_name. " ";
+                        $item->property .= $value->value_name. " ";
                     }
                 }
             }

@@ -17,6 +17,11 @@
                     <div class="box-header">
                         <h3 class="box-title">会员卡列表</h3>
                     </div>
+                    <div>
+                        <input type="text" class="form-control" id="search_no" placeholder="订单号" value="{{ $search_no }}" />
+                        <input type="text" class="form-control" id="search_name" placeholder="用户名"  value="{{ $search_name }}"/>
+                        <input type="submit" class="btn btn-primary" id="search_btn" value="查找" />
+                    </div>
                     <!-- /.box-header -->
                     <div class="box-body">
                         <table id="example2" class="table table-bordered table-hover">
@@ -91,7 +96,13 @@
 <script src="/js/fileinput.min.js" type="text/javascript"></script>
 <script src="/js/zh.js" type="text/javascript"></script>
 <script src="/css/admin/themes/explorer/theme.js" type="text/javascript"></script>
-
+<style type="text/css">
+    #search_no, #search_name {
+        width: 200px;
+        float: left;
+        margin-right:20px;
+    }
+</style>
 <script type="text/javascript">
     $.ajaxSetup({
         headers: {
@@ -155,5 +166,13 @@
             })
         });
 
+    });
+    $("#search_btn").on("click", function () {
+        var name = $("#search_name").val();
+        var no = $("#search_no").val();
+        if (name == '' && no == '') {
+            return false;
+        }
+        location.href = "/admin/card/recharge?search_no=" + no + "&search_name=" +name;
     });
 </script>

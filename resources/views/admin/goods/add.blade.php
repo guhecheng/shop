@@ -19,7 +19,7 @@
                         <h3 class="box-title">商品列表</h3>
                     </div>
                     <!-- /.box-header -->
-                    <form enctype="multipart/form-data" method="post" role="form" action="/admin/goods/create">
+                    <form enctype="multipart/form-data" method="post" role="form" action="/admin/goods/create" onsubmit="return checkform()">
                     <div class="box-body">
                         <div class="form-group">
                             <label for="goodsname" class="col-sm-2 control-label">商品名</label>
@@ -125,7 +125,7 @@
                         </div>--}}
                         <div class="form-group">
                             <div class="col-sm-offset-2 col-sm-10">
-                                <button id="create_sku" class="btn btn-default">添加商品</button>
+                                <input type="submit" class="btn btn-default" value="添加商品">
                             </div>
                         </div>
                     </div>
@@ -203,6 +203,24 @@
 </style>
 
 <script type="text/javascript">
+    function checkform() {
+        if ($.trim($("#goodsname").val()) == '') {
+            alert('商品名不能为空');
+            return false;
+        }
+        if ($.trim($("#goodsprice").val()) == '') {
+            alert('基本价不能为空');
+            return false;
+        }
+        if ($("#logo").val()=='') {
+            alert('封面需要图片');
+            return false;
+        }
+        if ($("#imglist").val() == '') {
+            alert('介绍图片不能为空');
+            return false;
+        }
+    }
     $(function() {
         var ue = UE.getEditor('container', {
             toolbars: [['fullscreen', 'source', 'undo', 'redo', 'bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist',
@@ -213,10 +231,10 @@
         $(".img").change(function () {
             var val = $("#imglist").val();
             var len = val.split(",").length;
-            if (len > 4) {
+            /*if (len > 4) {
                 alert("图片上传不超过5张");
                 return false;
-            }
+            }*/
             var formData = new FormData();
             formData.append('img', $(this)[0].files[0]);
             var im = $(this);

@@ -17,15 +17,15 @@
                         <div class="order-state-img" style="background-image:url('/images/has_pay.png')"></div>
                         <div>支付成功，等待发货</div>
                     </div>
-                @elseif ($order->status == 3)
+                @elseif ($order->status == 3 || $order->status == 4)
                     <div class="express-state" style="padding:0.2rem 5%; ">
                         <div class="express" style="margin: 0; width: 50%; margin-right:10%;  ">
-                            <div class="express-company" style="display: block;">
-                                <div style="float:left;">已发货</div>
+                            <div class="express-company" style="display: block;padding-top:0.2rem;">
+                                <div style="float:left;">{{ $order->status == 3 ? '已发货' : '已收货' }}</div>
                                 <div style="float:right;line-height:1rem;font-weight: 400">{{ $order->express_company }}</div>
                                 <br clear="all" />
                             </div>
-                            <div style="display: block; line-height: 0.8rem;">快递单号: {{ $order->express_no }}</div>
+                            <div style="display: block; line-height: 0.8rem;margin-top:0.4rem;">快递单号: {{ $order->express_no }}</div>
                             <!--<div id="express_copy" style="display: block;">复制</div>-->
                         </div>
                         <div style="background-image:url('/images/has_send.png');" class="express-image"></div>
@@ -104,7 +104,7 @@
     </div>
 
     <div class="order-show-act">
-        <div class="order-show-area">
+        <div class="order-show-area" style="padding-top:0.1rem;">
             <div class="order-show-count">
                 共计<?php echo $count; ?>件商品
             </div>
@@ -116,7 +116,7 @@
         @if (intval($order->price / 100))
         <div class="order-get-score">
             <div style="float: left;">获得积分</div>
-            <div style="float: right;">{{ $order->price / 100 }}分</div>
+            <div style="float: right;">{{ intval($order->price / 100) }}分</div>
             <br clear="all" />
         </div>
         @endif
@@ -185,7 +185,7 @@
                 margin-bottom:1rem;}
             .order-show-time div { line-height: 1rem; }
             .order-to-buy, .order-sure-save{ position:fixed; bottom:0; width: 100%;
-                line-height:2rem; font-size:1rem;text-align: center; background:#fff; }
+                line-height:2rem; font-size:0.8rem;text-align: center; background:#fff; }
             #total_money { color: red; }
             .express-image { background-size:100%; width:2rem;
                 height:2rem; margin-top:0.4rem;}

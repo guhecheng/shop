@@ -4,7 +4,7 @@
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <a href="/admin/type"><h2>{{ $typename }}属性列表</h2></a>
+        <a href="/admin/type"><h4>{{ $typename }}属性列表</h4></a>
         <button type="button" class="btn btn-primary add-btn">添加</button>
     </section>
 
@@ -13,9 +13,6 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="box">
-                    <div class="box-header">
-                        <h3 class="box-title">属性列表</h3>
-                    </div>
                     <!-- /.box-header -->
                     <div class="box-body">
                         <table id="example2" class="table table-bordered table-hover">
@@ -28,7 +25,7 @@
                             </thead>
                             <tbody>
                             @foreach($propertys as $property)
-                                <tr>
+                                <tr data-value="{{ $property->key_id }}">
                                     <td>{{ $property->key_name }}</td>
                                     <td>{{ empty($property->is_enum) ? '否' : '是'  }}</td>
                                     <td>
@@ -64,30 +61,28 @@
                     <span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">添加属性</h4>
             </div>
-            <form action="/admin/property/addkey" method="post" >
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="cardname" class="col-sm-2 control-label">属性名</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="keyname" id="keyname" placeholder="请输入属性名">
-                        </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cardname" class="col-sm-2 control-label">属性名</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" name="keyname" id="keyname" placeholder="请输入属性名">
                     </div>
-                    <div class="form-group">
-                        <label for="cardname" class="col-sm-2 control-label">是否选择</label>
-                        <div class="col-sm-10">
-                            <input type="radio" name="is_enum" value="0">否
-                            <input type="radio" name="is_enum" value="1">是
-                        </div>
+                </div>
+                <div class="form-group">
+                    <label for="cardname" class="col-sm-2 control-label">是否选择</label>
+                    <div class="col-sm-10">
+                        <input type="radio" name="is_enum" value="0" checked>否
+                        <input type="radio" name="is_enum" value="1">是
                     </div>
-                    <input type="hidden" name="typeid" value="{{ $typeid }}" />
-                    {{ csrf_field() }}
-                    <br clear="all" />
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-                    <input type="submit" class="btn btn-primary add_type" value="添加" />
-                </div>
-            </form>
+                <input type="hidden" name="typeid" id="add_typeid" value="{{ $typeid }}" />
+                {{ csrf_field() }}
+                <br clear="all" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                <input type="submit" class="btn btn-primary add_type" value="添加" />
+            </div>
         </div>
         <!-- /.modal-content -->
     </div>
@@ -102,31 +97,28 @@
                     <span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">编辑种类</h4>
             </div>
-            <form enctype="multipart/form-data" method="post" action="/admin/property/modifykey">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="cardname" class="col-sm-2 control-label">种类名</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="keyname" id="edit_keyname" placeholder="请输入种类名">
-                        </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cardname" class="col-sm-2 control-label">种类名</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" name="keyname" id="edit_keyname" placeholder="请输入种类名">
                     </div>
-                    <div class="form-group">
-                        <label for="cardname" class="col-sm-2 control-label">是否选择</label>
-                        <div class="col-sm-10">
-                            <input type="radio" name="edit_is_enum" value="0">否
-                            <input type="radio" name="edit_is_enum" value="1">是
-                        </div>
+                </div>
+                <div class="form-group">
+                    <label for="cardname" class="col-sm-2 control-label">是否选择</label>
+                    <div class="col-sm-10">
+                        <input type="radio" name="edit_is_enum" value="0">否
+                        <input type="radio" name="edit_is_enum" value="1">是
                     </div>
-                    <input type="hidden" value="" name="keyid" id="edit_keyid" />
-                    <input type="hidden" value="{{ $typeid }}" name="typeid" />
-                    {{ csrf_field() }}
-                    <br clear="all" />
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-                    <input type="submit" class="btn btn-primary update_card" value="修改" />
-                </div>
-            </form>
+                <input type="hidden" value="" name="keyid" id="edit_keyid" />
+                <input type="hidden" value="{{ $typeid }}" name="typeid" />
+                <br clear="all" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                <input type="submit" class="btn btn-primary update_type" value="修改" />
+            </div>
         </div>
         <!-- /.modal-content -->
     </div>
@@ -179,7 +171,7 @@
             $("#add-modal").modal('show');
         });
 
-        $(".modify-btn").on("click", function () {
+        $(document).on("click", ".modify-btn",  function () {
             var attr_id = $(this).attr("attr-id");
             var par = $(this).parent().parent();
             $("#edit_keyname").val($.trim(par.find("td:eq(0)").text()));
@@ -189,7 +181,7 @@
             $("#mod-modal").modal('show');
         });
 
-        $(".del-btn").on("click", function() {
+        $(document).on("click", ".del-btn", function() {
             if (!confirm('确定删除?')) return ;
             var keyid = $(this).attr("attr-id");
             if (keyid == '' || typeof keyid == 'undefined') return false;
@@ -207,5 +199,72 @@
             })
         });
 
+    });
+    $(".update_type").on("click", function () {
+        var key_name = $("#edit_keyname").val();
+        var is_enum = $("input[name='edit_is_enum']:checked").val();
+        var key_id = $("#edit_keyid").val();
+        if (key_name == '') {
+            alert('属性名不能为空');
+            return false;
+        }
+        $.ajax({
+            url: '/admin/property/modifykey',
+            type:'post',
+            data: {'keyname':key_name, 'edit_is_enum': is_enum, 'typeid':$("#typeid").val(), 'keyid': key_id},
+            dataType:'json',
+            success: function (data) {
+                if (data.rs == 1) {
+                    $("tr").each(function() {
+                        if ($(this).attr("data-value") == key_id) {
+                            $(this).find("td:eq(0)").text($.trim(key_name));
+                            $(this).find("td:eq(1)").text(is_enum == 1 ? '是':'否');
+                            $(this).find(".is_enum").val(is_enum==1? 1 : 0);
+                            if (is_enum == 0)
+                                $(this).find("a").remove();
+                            else {
+                                var html = "<a href='/admin/property/listvalue?keyid="+key_id+"&typeid="+typeid+"'><button type='button' class='btn btn-primary'>添加属性值</button></a>";
+                                $(this).find("td:eq(2)").append(html);
+                            }
+                        }
+                    });
+                    $("#mod-modal").modal('hide');
+                } else {
+                    alert(data.errmsg);
+                }
+            }
+        })
+    });
+    $(".add_type").on("click", function () {
+        var key_name = $("#keyname").val();
+        var typeid = $("#add_typeid").val();
+        var is_enum = $("input[name='is_enum']:checked").val();
+        $.ajax({
+            url: '/admin/property/addkey',
+            type:'post',
+            data: {'typeid':typeid, 'is_enum':is_enum, 'keyname': key_name},
+            dataType: 'json',
+            success: function (data) {
+                if (data.rs == 1) {
+                    var html = "<tr data-value='"+data.id+"'>";
+                        html += '<td>' + key_name + '</td>';
+                        html += '<td>';
+                        html += is_enum == 1 ? '是' : '否';
+                        html += '</td>';
+                        html += '<td><input type="hidden" name="is_enum" class="is_enum" value="'+is_enum+'" />';
+                        html += '<button type="button" class="btn btn-primary modify-btn" attr-id="'+data.id+'">修改</button>';
+                        html += '<button type="button" class="btn btn-primary del-btn" attr-id="'+data.id+'">删除</button>';
+                        if (is_enum == 1) {
+                            html += '<a href="/admin/property/listvalue?keyid='+data.id+'&typeid='+typeid+'">';
+                            html += '<button type="button" class="btn btn-primary" attr-id="'+data.id+'">添加属性值</button></a>';
+                        }
+                        html += "</td></tr>";
+                        $("tbody").append(html);
+                        $("#add-modal").modal('hide');
+                } else {
+                    alert(data.errmsg);
+                }
+            }
+        })
     });
 </script>

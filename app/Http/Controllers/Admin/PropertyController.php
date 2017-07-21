@@ -29,14 +29,19 @@ class PropertyController extends Controller {
         $typeid = $request->input('typeid');
         $propkey = $request->input('keyname');
         $is_enum = $request->input('is_enum');
-        if (!empty($typeid) && !empty($propkey)) {
-            DB::table('propertykey')->insert([
+        if (empty($typeid) || empty($propkey)) {
+            return response()->json(['rs'=>0, 'errmsg' => '信息填写不完整']);
+        }
+
+        $rs = DB::table('propertykey')->insertGetId([
                 'type_id' => $typeid,
                 'key_name' => $propkey,
                 'is_enum' => empty($is_enum) ? 0 : 1,
             ]);
+        if ($rs) {
+            return response()->json(['rs' => 1, 'id' => $rs]);
         }
-        return redirect('/admin/property?typeid=' . $typeid);
+        return response()->json(['rs' => 0, 'errmsg' => '增加失败']);
     }
 
     public function deletekey(Request $request) {
@@ -49,18 +54,22 @@ class PropertyController extends Controller {
     }
 
     public function modifykey(Request $request) {
-        $typeid = $request->input('typeid');
+        //$typeid = $request->input('typeid');
         $keyid = $request->input('keyid');
         $keyname = $request->input('keyname');
         $is_enum = $request->input('edit_is_enum');
-        if (!empty($keyid) && !empty($keyname)) {
-            DB::table('propertykey')->where('key_id', $keyid)
-                ->update([
+        if (empty($keyid) || empty($keyname)) {
+            return response()->json(['rs' => 0, 'errmsg' => '没有填写完整']);
+        }
+        $rs = DB::table('propertykey')->where('key_id', $keyid)
+            ->update([
                 'key_name' => $keyname,
                 'is_enum' => empty($is_enum) ? 0 : 1,
             ]);
-        }
-        return redirect('/admin/property?typeid=' . $typeid);
+        if ($rs)
+            return response()->json(['rs' => 1]);
+
+        return response()->json(['rs' => 0, 'errmsg' => '更新失败']);
     }
 
     public function listvalue(Request $request) {
@@ -78,26 +87,28 @@ class PropertyController extends Controller {
 
     public function addvalue(Request $request) {
         $keyid = $request->input('keyid');
+        $typeid = $request->input('typeid');
         $valuename = $request->input('valuename');
         if (!empty($keyid) && !empty($valuename))
             DB::table('propertyvalue')->insert([
                                     'key_id' => $keyid,
                                     'value_name' => $valuename
                                 ]);
-        return redirect('/admin/property/listvalue?keyid=' . $keyid );
+        return redirect('/admin/property/listvalue?keyid=' . $keyid .'&typeid='.$typeid);
     }
 
     public function modifyvalue(Request $request) {
         $valueid = $request->input('valueid');
         $keyid = $request->input('keyid');
         $valuename = $request->input('valuename');
+        $typeid = $request->input('typeid');
         if (!empty($keyid) && !empty($valuename)) {
             DB::table('propertyvalue')->where('value_id', $valueid)
                 ->update([
                     'value_name' => $valuename,
                 ]);
         }
-        return redirect('/admin/property?keyid=' . $keyid);
+        return redirect('/admin/property/listvalue?keyid=' . $keyid .'&typeid='.$typeid);
     }
 
     public function deletevalue(Request $request) {

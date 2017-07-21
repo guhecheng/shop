@@ -34,14 +34,14 @@
                             @foreach($goods as $good)
                                 <tr>
                                     <td>{{ $good->goodsname }}</td>
-                                    <td><img src="{{ $good->goodsicon }}" /></td>
+                                    <td><img src="{{ $good->goodsicon }}" width="100" height="100"/></td>
                                     <td>{{ $good->price / 100 }}</td>
                                     <td>{{ empty($good->is_hot) ? '否' : '是' }}</td>
                                     <td>
                                         {{--<a href="/admin/goods/modify?goodsid={{ $good->goodsid }}>"><button type="button" class="btn btn-primary modify-btn" attr-id="{{ $good->goodsid}}">修改</button></a>--}}
                                         <button type="button" class="btn btn-primary del-btn" attr-id="{{ $good->goodsid }}">删除</button>
                                         <button type="button" class="btn btn-primary mod-sale" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_sale) ? 0 : 1}}">{{ empty($good->is_sale) ? '上架' : '下架' }}</button>
-                                        <button type="button" class="btn btn-primary mod-ad" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_ad) ? 1 : 0}}">{{ empty($good->is_ad) ? '上广告' : '下广告' }}</button>
+                                        <button type="button" class="btn btn-primary mod-a" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_ad) ? 1 : 0}}">{{ empty($good->is_ad) ? '上广告' : '下广告' }}</button>
                                         <button type="button" class="btn btn-primary mod-hot" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_hot) ? 1 : 0}}">{{ empty($good->is_hot) ? '推荐' : '取消推荐' }}</button>
                                     </td>
                                 </tr>
@@ -170,4 +170,21 @@
                     that.attr('attr-value', 1 - parseInt(status)).text(status == 0 ? '推荐' : '取消推荐');
             }
         })
-    });</script>
+    });
+    $(".mod-a").on("click", function() {
+        var goodsid = $(this).attr("attr-id");
+        var status = $(this).attr("attr-value");
+        if (goodsid == '' || typeof goodsid == 'undefined') return false;
+        var that = $(this);
+        $.ajax({
+            url:'/admin/goods/changead',
+            data: {'goodsid': goodsid, 'status' : status},
+            type:"get",
+            dataType:'json',
+            success: function(data) {
+                if (data.rs == 1)
+                    that.attr('attr-value', 1 - parseInt(status)).text(status == 0 ? '上广告' : '下广告');
+            }
+        })
+    });
+</script>

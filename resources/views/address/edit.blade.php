@@ -35,7 +35,7 @@
             </li>
             <li>
                 <div class="address-location">
-                    <div>详细地址</div>
+                    <div style="margin-top:0.2rem;">详细地址</div>
                     <div>
                         <textarea id="location">{{ $address->location }}</textarea>
                     </div>

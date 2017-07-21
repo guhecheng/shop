@@ -87,4 +87,12 @@ class UserController extends Controller {
         $cards = DB::table('user')->where('card_no', '>', '')->paginate(20);
         return view('admin.user.card', ['cards' => $cards]);
     }
+
+    public function info(Request $request) {
+        $userid = $request->input('userid');
+        if (empty($userid)) exit;
+        $user = DB::table('user')->where('userid', $userid)->first();
+        $child = DB::table('children')->where('relate_id', $user->child_id)->first();
+        return view('admin.user.info', ['user'=>$user, 'child' => $child]);
+    }
 }

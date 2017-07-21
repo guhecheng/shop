@@ -23,10 +23,14 @@ body {
     width: 80%;
 }
 .goods-item-content div {
-    height: 1rem;
+	height: 1rem;
+}
+.goods-item-content div:first-child {
+	height: 1.2rem;
+	line-height: 1.2rem;
 }
 .goods-name {
-    font-size: 0.8rem;
+    font-size: 1rem;
     font-weight:bold;
     overflow: hidden;
     word-break: break-all;
@@ -223,9 +227,9 @@ body {
 }
 .goods-act {
     background: #F2F2F2;
-    border-top: solid 1px red;
     margin-top:0.5rem;
     position: fixed;
+    border-top:s0;
     bottom:0;
     width:100%;
 }
@@ -236,10 +240,7 @@ body {
     line-height: 2.4rem;
     font-size: 1rem;
 }
-.addcar {
-    border-left:1px solid red;
-    border-right: solid 1px red;
-}
+
 .goods-property-icon {
     opacity: 1;
 }
@@ -642,8 +643,7 @@ body {
     height:2.9rem;
     background-size: 100%;
     float:left;
-    margin-top: 0.1rem;
-    border: solid 1px #C1C1C1;;
+    margin-top: 0.4rem;
 }
 .car-property {
     width: 55%;
@@ -690,11 +690,12 @@ body {
     height: 1rem;
     font-size:0.6rem;
     overflow: hidden;
+    color: #9A9898;
 }
 .car-item {
     margin-bottom: 0.5rem;
     background: #fff;
-    padding:0.4rem 0 0.4rem 5%;
+    padding:0.4rem 0 0.4rem 4%;
 }
 .car-price {
     color: red;
@@ -702,9 +703,9 @@ body {
     font-size: 0.7rem;
 }
 .car-name {
-    height: 1.5rem;
-    line-height:0.7rem;
-    font-size:0.7rem;
+    height: 1.6rem;
+    line-height:0.8rem;
+    font-size:0.8rem;
     font-weight:bold;
     overflow: hidden;
 }
@@ -720,7 +721,7 @@ body {
     width: 1rem;
     height:1rem;
     background-size:100%;
-    margin-top: 1.1rem;
+    margin-top: 1.2rem;
 }
 .car-act,.car-act-del {
     position: fixed;
@@ -789,12 +790,12 @@ body {
 /*order/create.blade.php */
 .order-address-info {
     float:left;
-    width: 80%;
+    width: 85%;
     padding-left:5%;
 }
 .order-address-select {
     float:left;
-    width: 20%;
+    width: 10%;
     text-align:center;
     padding:0.6rem 1rem;
 }
@@ -876,13 +877,15 @@ body {
     font-weight:bold;
     overflow: hidden;
     word-break: break-all;
+    font-size: 0.8rem;
 }
 .order-item-num div:first-child {
-    width: 50%;
+    width: 70%;
     overflow: hidden;
+    color: #888888;
 }
 .order-item-num div:last-child {
-    width:50%;
+    width:30%;
     text-align: right;
 }
 .order-list {
@@ -896,10 +899,9 @@ body {
     height: 1.8rem;
     border-bottom: solid 1px #C1C1C1;
 }
-.order-express div,.order-discount div, .order-change-score div {
+.order-express div,.order-discount div,.order-change-score div {
     float:left;
 }
 .order-express div:last-child,.order-discount div:last-child,.order-change-score div:last-child {
     float:right;
-    text-align: right;
 }

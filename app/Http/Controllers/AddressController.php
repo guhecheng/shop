@@ -16,7 +16,10 @@ class AddressController extends Controller
     public function index(Request $request)
     {
         $uid = $request->session()->get('uid');
-        $addresses = DB::table('useraddress')->where('uid', $uid)->get();
+        $addresses = DB::table('useraddress')->where([
+            ['uid', '=', $uid],
+            ['is_delete', '=', 0]
+        ])->get();
         if ($request->input('from_order')) {
             $request->session()->put('orderno', $request->input('orderno'));
         }
@@ -168,5 +171,17 @@ class AddressController extends Controller
             ->update(['is_default' => $flag]);
         return response()->json(['rs' => 1]);
 
+    }
+
+    public function delete(Request $request) {
+        if (empty($id = $request->input('address_id'))) {
+            return response()->json(['rs' => 0]);
+        }
+        if (DB::table("useraddress")->where('address_id', $id)->update([
+            'is_delete'=>1
+        ])) {
+            return response()->json(['rs' => 1]);
+        }
+        return response()->json(['rs' => 0]);
     }
 }

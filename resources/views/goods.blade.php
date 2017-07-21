@@ -45,6 +45,7 @@
                 </div>
                 @endif
             </div>
+            @if (!empty($property))
             <div class="goods-property-list">
                 <ul>
                     @foreach($property as $value)
@@ -52,6 +53,7 @@
                     @endforeach
                 </ul>
             </div>
+            @endif
             <div class="goods-detail">
                 <div class="goods-detail-title">
                     <span>商品详情</span>
@@ -61,7 +63,7 @@
                 </div>
             </div>
         </div>
-        <div class="goods-act">
+        <div class="goods-act" style="border-top: solid 1px #C1C1C1;">
             <div class="lookcar">查看购物车</div>
             <div class="addcar">加入购物车</div>
             <div class="buy">立即购买</div>
@@ -113,7 +115,7 @@
             border-bottom: 0;
         }
         .goods-property-li div{
-            font-weight: 400; line-height: 1.6rem;}
+            font-weight: 400; line-height: 1.8rem;}
         .goods-activity-item1, .goods-activity-item2 {
             float:left;
             width: 50%;
@@ -290,8 +292,10 @@
         function addcar() {
             var attr = [];
             $(".active").each(function() {
+                console.log($(this));
                 attr[$(this).find(".keys").val()] = $(this).find(".values").val();
             });
+            console.log(attr);
             $.ajax({
                 url: '/car/add',
                 type: 'post',

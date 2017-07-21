@@ -72,6 +72,7 @@
                         </div>
                     </div>
                     <input type="hidden" name="keyid" value="{{ $keyid }}" />
+                    <input type="hidden" name="typeid" value="{{ $typeid }}" />
                     {{ csrf_field() }}
                 </div>
                 <div class="modal-footer">
@@ -102,6 +103,7 @@
                         </div>
                     </div>
                     <input type="hidden" value="{{ $keyid }}" name="keyid" />
+                    <input type="hidden" name="typeid" value="{{ $typeid }}" />
                     <input type="hidden" value="" name="valueid" id="edit_valueid" />
                     {{ csrf_field() }}
                 </div>

@@ -24,6 +24,7 @@
                 case 1: $discount = 0.1; break;
                 case 2: $discount = 0.15; break;
                 case 3: $discount = 0.2; break;
+                default : $discount = 0; break;
             }
             ?>
             @foreach ($goods as $item)
@@ -98,11 +99,13 @@
         </div>
         @endif
         <input type="hidden" id="score" value="" />
+        @if ( intval($total) )
         <div class="order-change-score" style="margin-top:0.4rem;">
             <div>获得积分</div>
-            <div><span class="exchange-score">{{ $total }}</span>积分</div>
+            <div><span class="exchange-score">{{ intval($total) }}</span>积分</div>
         </div>
-        <input type="hidden" id="exchange-score" value="{{ $total }}" />
+        <input type="hidden" id="exchange-score" value="{{ intval($total) }}" />
+        @endif
     </div>
     <div></div>
     <div class="order-act">
@@ -120,7 +123,9 @@
 <div class="order-select-type">
     <div class="order-select-title"><div>请选择支付方式</div><div class="order-pay-close"></div></div>
     @if ($user->money/100 >= $total)
-    <div class="card-pay"><div></div><span>会员卡支付</span><span>(余额: {{ $user->money / 100 }})</span></div>
+        <div class="card-pay"><div></div><span>会员卡支付</span><span>(余额: {{ $user->money / 100 }})</span></div>
+    @else
+        <div class="card-no-pay" style="background: #c0c0c0;"><div></div><span>会员卡支付</span><span>(余额不足)</span></div>
     @endif
     <div class="wx-pay"><div></div><span>微信支付</span></div>
     <div class="order-select-blank"></div>
@@ -212,7 +217,7 @@
         width: 100%;
         z-index: 200;
     }
-    .order-select-title,.card-pay,.wx-pay{
+    .order-select-title,.card-pay,.wx-pay,.card-no-pay  {
         background: #fff;
         line-height:2rem;
         padding:0 5%;
@@ -221,10 +226,10 @@
     .order-select-title div:first-child {
         float:left;
     }
-    .order-select-title:after,  .card-pay:after, .wx-pay:after {
+    .order-select-title:after,  .card-pay:after, .wx-pay:after, .card-no-pay:after {
         display:block;clear:both;content:"";visibility:hidden;height:0
     }
-    .card-pay div{
+    .card-pay div,.card-no-pay div{
         background:url('/images/card.png') no-repeat;
         height: 1.2rem;
         width: 1.6rem;
@@ -346,10 +351,12 @@
         $(".bg,.order-score-discount-area").hide();
         var score = $.trim($(".order-select-score").find("span").attr("data-value"));
         var total = $("#total_money").attr("data-value");
-        $("#total_money,.exchange-score").text(total);
+        $("#total_money").text(total);
+        $(".exchange-score").text(parseInt(total));
         $(".order-score-select-type").removeClass("is_active");
         $("#score").val(0);
-        $("#price,#exchange-score").val(total);
+        $("#price").val(total);
+        $("#exchange-score").val(parseInt(total));
     });
     $(".order-buy").on('click', function () {
         if ($("#price").val() == 0) {
@@ -406,14 +413,18 @@
         var score = $.trim($(".order-select-score").find("span").attr("data-value"));
         var total = $("#total_money").attr("data-value");
         if ($(".order-score-select-type").hasClass("is_active")) {
-            $("#total_money,.exchange-score").text(total);
+            $("#total_money").text(total);
+            $(".exchange-score").text(parseInt(total));
             $(".order-score-select-type").removeClass("is_active");
             $("#score").val(0);
-            $("#price,#exchange-score").val(total);
+            $("#price").val(total);
+            $("#exchange-score").val(parseInt(total));
         } else {
             $(".order-score-select-type").addClass("is_active");
-            $("#total_money,.exchange-score").text(total - score);
-            $("#price,#exchange-score").val(total - score);
+            $("#total_money").text(parseFloat(total - score));
+            $(".exchange-score").text(parseInt(total - score));
+            $("#price").val(total - score);
+            $("#exchange-score").val(parseInt(total - score));
             $("#score").val(score * 100);
         }
     });

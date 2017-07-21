@@ -27,7 +27,7 @@
                 <div class="address-create-div" id="picker">
                     <div>地区</div>
                     <div>
-                        <input type="text" id="address" value="四川 成都" readonly=""/>
+                        <input type="text" id="address" value="" readonly=""/>
                         <input id="value1" type="hidden" value="20,234,504"/>
                     </div>
                     <br clear="all" />

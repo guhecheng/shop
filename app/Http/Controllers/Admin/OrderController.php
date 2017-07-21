@@ -28,9 +28,11 @@ class OrderController extends Controller
         'CARD_PAY' => 1
     ];
 
-    public function index() {
+    public function index(Request $request) {
+        $status = empty($request->input('status')) ? $this->state['ORDER_HAS_PAY'] : $request->input('status');
         $orders = DB::table('orderinfo')->leftJoin('order', 'order.order_no', '=', 'orderinfo.order_no')
-            ->where('orderinfo.status', $this->state['ORDER_HAS_PAY'])->orderBy('order.order_no', 'asc')->get();
+            ->select('orderinfo.*', 'order.count', 'order.price as per_price', 'order.skuid')
+            ->where('orderinfo.status', $status )->orderBy('order.order_no', 'asc')->get();
 
         if (empty($orders))
             return view('admin.order.index', ['orders' => null]);
@@ -69,7 +71,7 @@ class OrderController extends Controller
             }
         }
 
-        return view('admin.order.index', ['orders' => $orders]);
+        return view('admin.order.index', ['orders' => $orders, 'status' => $status]);
     }
 
     public function send(Request $request) {
@@ -89,8 +91,9 @@ class OrderController extends Controller
     }
 
     public function export(Request $request) {
+        $status = empty($request->input('status')) ? $this->state['ORDER_HAS_PAY'] : $request->input('status');
         $orders = DB::table('orderinfo')->leftJoin('order', 'order.order_no', '=', 'orderinfo.order_no')
-            ->where('orderinfo.status', $this->state['ORDER_HAS_PAY'])->orderBy('order.order_no', 'asc')->get();
+            ->where('orderinfo.status', $status)->orderBy('order.order_no', 'asc')->get();
 
         if (empty($orders))
             return view('admin.order.index', ['orders' => null]);

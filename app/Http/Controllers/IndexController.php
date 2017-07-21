@@ -64,8 +64,10 @@ class IndexController extends Controller {
                             break;
                         default:
                             $user = DB::table('user')->where("openid", $message->FromUserName)->first();
-                            $request->session()->put('openid', $message->FromUserName);
-                            $request->session()->put('uid', $user->userid);
+                            if ($user) {
+                                $request->session()->put('openid', $message->FromUserName);
+                                $request->session()->put('uid', $user->userid);
+                            }
                             //return '快乐' . date("Y-m-d") . '一天';
                             break;
                     }

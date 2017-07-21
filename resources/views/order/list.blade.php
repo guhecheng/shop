@@ -16,7 +16,7 @@
             <div class="swiper-wrapper">
                 @for($i = 0; $i < 4; $i++)
                 <div class="swiper-slide goods-slide" attr-is-add="0">
-                    @if ($i == 0 && empty($status))
+                    @if ($i == 0 && empty($status) && !empty($orders))
                     @foreach ($orders as $item)
                     <div class="order-item" attr-id="{{ $item->order_no }}">
                         <div class="order-item-header">
@@ -40,10 +40,10 @@
                         <div class="goods-item" attr-id="{{ $value->goodsid }}">
                             <div class="goods-item-icon" style="background-image:url({{ $value->goodsicon }})"></div>
                             <div class="goods-item-content">
-                                <div class="goods-name">{{ $value->goodsname }}</div>
-                                <div class="goods-price">￥{{ $value->price / 100 }} 元</div>
-                                <div class="order-goods-property">
-                                    <div>{{ $value->property }}</div>
+                                <div class="goods-name" style="height:1.6rem; line-height:1.6rem; font-size:1rem;">{{ $value->goodsname }}</div>
+                                <div class="goods-price" style="height:1rem;font-size:0.8rem;">￥{{ $value->price / 100 }} 元</div>
+                                <div class="order-goods-property" style="height: 0.8rem;font-size:0.8rem;padding-top:0.2rem;">
+                                    <div style="color:#888888;">{{ $value->property }}</div>
                                     <div>{{ $value->count }}</div>
                                     <?php $count += $value->count; ?>
                                 </div>
@@ -117,9 +117,9 @@
         .price div:last-child { float: right; }
         .price { line-height: 2rem; font-size:0.8rem;}
         .goods-item-content { width: 80%;}
-        .goods-name { font-size: 0.8rem; }
+        .goods-name { font-size: 0.8rem;  }
         .goods-item-icon {
-            margin-top:0.1rem;
+            margin-top:0.16rem;
             width:3.6rem;
             height: 3.6rem;}
         .goods-item-content div {
@@ -141,6 +141,7 @@
         mySwiper = new Swiper('.swiper-container',{
             initialSlide : {{ empty($status) ? 0 : $status }},
             slideToClickedSlide: true,
+            autoHeight: true,
             onSlideChangeStart: function(swiper){
                 console.log(swiper.activeIndex);
                 var index = swiper.activeIndex;

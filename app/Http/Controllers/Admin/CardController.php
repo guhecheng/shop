@@ -92,7 +92,7 @@ class CardController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $card_name = $request->input("cardname");
+        //$card_name = $request->input("cardname");
         $card_score = $request->input("cardscore");
         $file = $request->file('update_img');
         if (!empty($file) && $file->isValid()) {
@@ -104,15 +104,16 @@ class CardController extends Controller
             if ($bool) {
                 DB::table('card')->where('card_id', $id)
                     ->update([
-                    'card_name' => $card_name,
+                    /*'card_name' => $card_name,*/
                     'card_score' => $card_score,
                     'card_img' => '/uploads/' . $fileName
                 ]);
             }
         } else {
+            if (empty($card_score)) return redirect('/admin/card');
             DB::table('card')->where('card_id', $id)
                 ->update([
-                    'card_name' => $card_name,
+                    /*'card_name' => $card_name,*/
                     'card_score' => $card_score,
                 ]);
         }
@@ -133,9 +134,17 @@ class CardController extends Controller
     }
 
     public function recharge(Request $request) {
+        $search_no = $request->input('search_no');
+        $search_name = $request->input('search_name');
+        $where = [];
+        if (!empty($search_no))
+            $where[] = ['charge_no', '=', $search_no];
+        if (!empty($search_name)) {
+            $where[] = ['user.uname', '=', $search_name];
+        }
         $records = DB::table('cardrecharge')
             ->leftJoin('user', 'cardrecharge.uid', '=', 'user.userid')
-            ->orderBy('pay_time', 'desc')->select('cardrecharge.*', 'user.uname')->paginate(20);
-        return view('/admin/card/recharge', ['records' => $records]);
+            ->orderBy('pay_time', 'desc')->select('cardrecharge.*', 'user.uname')->where($where)->paginate(20);
+        return view('/admin/card/recharge', ['records' => $records, 'search_no'=>$search_no, 'search_name'=>$search_name]);
     }
 }

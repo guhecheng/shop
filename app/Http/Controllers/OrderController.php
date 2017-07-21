@@ -100,7 +100,7 @@ class OrderController extends Controller {
         }
         // 获取商品姓名
         $goods = DB::table('goods')->whereIn('goodsid', $goodsid)
-            ->select('goodsname', 'goodsicon', 'goodsid')->get();
+            ->select('goodsname', 'goodsicon', 'goodsid', 'is_delete')->get();
         // 获取属性
         $property = DB::table('goodsproperty')
             ->leftJoin('propertykey', 'propertykey.key_id', '=', 'goodsproperty.key_id')
@@ -113,12 +113,13 @@ class OrderController extends Controller {
                 if ($item->goodsid = $value->goodsid) {
                     $item->goodsname = $value->goodsname;
                     $item->goodsicon = $value->goodsicon;
+                    $item->goodsdelete = $value->is_delete;
                 }
             }
             $item->property = '';
             foreach ($property as $v) {
                 if ($v->sku_id == $item->skuid) {
-                    $item->property .= $v->key_name . ':' . $v->value_name . ' ';
+                    $item->property .= $v->value_name . ' ';
                 }
             }
         }
@@ -129,6 +130,7 @@ class OrderController extends Controller {
                 }
             }
         }
+        
         return $orders;
     }
 
@@ -153,7 +155,7 @@ class OrderController extends Controller {
         }
         if ($goods) {
             foreach ($goods as &$item) {
-                $true_price = empty($item->sku_price) ? $item->sku_price : $item->price;
+                $true_price = !empty($item->sku_price) ? $item->sku_price : $item->price;
                 DB::table('order')->insert([
                     'order_no' => $orderno,
                     'skuid' => $item->sku_id,
@@ -210,7 +212,7 @@ class OrderController extends Controller {
                     $item->goodsicon = $value->goodsicon;
                     $item->goodsname = $value->goodsname;
                     $item->is_discount = $value->is_discount;
-                    $item->property .= $value->key_name . ':' . $value->value_name . " ";
+                    $item->property .= $value->value_name . " ";
                 }
             }
         }
@@ -240,7 +242,10 @@ class OrderController extends Controller {
         $discount_price = $request->input('discount_price');
         $score = $request->input('score');
         $price = $request->input('price');
-        if (empty($address_id) || empty($order_no) || empty($price)) {
+        if (empty($address_id)) {
+            return response()->json(['rs' => 0, 'errmsg' => "请先选择地址"]);
+        }
+        if( empty($order_no) || empty($price)) {
             return response()->json(['rs' => 0, 'errmsg' => "订单出现异常"]);
         }
         try {
@@ -365,13 +370,17 @@ class OrderController extends Controller {
                     if ($user->level < 3) {
                         $money = DB::table('usertransmoney')->where([
                             ['uid', '=', $user->userid],
-                            ['create_time', '>=', date("Y-m-d H:i:s", strtotime("-1 year"))]
+                            ['create_time', '>=', date("Y-m-d H:i:s", strtotime("-1 year"))],
+                            []
                         ])->sum('trans_money');
                         $card = DB::table('card')->where([
                             ['is_delete', '=>', 0],
                             ['card_score', '<=', $money / 100]
                         ])->orderBy('card_level', 'desc')->select('card_level')->limit(1)->first();
-                        $level = !empty($card) ? $card->card_level : 0;
+                        if (!empty($card->card_level)) {
+                            $level = $user->level > $card->card_level ? $user->level : $card->card_level;
+                        }  else
+                            $level = $user->level;
                     } else
                         $level = $user->level;
 
@@ -507,7 +516,7 @@ class OrderController extends Controller {
                 if ($value->sku_id == $item->skuid) {
                     $item->goodsicon = $value->goodsicon;
                     $item->goodsname = $value->goodsname;
-                    $item->property .= $value->key_name . ':' . $value->value_name . " ";
+                    $item->property .= $value->value_name . " ";
                 }
             }
         }

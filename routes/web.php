@@ -33,8 +33,9 @@ Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/card/forward', 'MemberController@forward');
 
 
-    Route::resource('address', 'AddressController');
     Route::post('/address/setdefault', 'AddressController@setdefault');
+    Route::get('/address/del', 'AddressController@delete');
+    Route::resource('address', 'AddressController');
 
     Route::post('/car/add', 'CarController@add');
     Route::get('/car', 'CarController@index');
@@ -98,6 +99,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::get("/goods/add", 'GoodsController@add');
     Route::get("/goods/delete", 'GoodsController@delete');
     Route::get("/goods/changehot", 'GoodsController@changehot');
+    Route::get("/goods/changead", 'GoodsController@changead');
     Route::get("/goods/changesale", 'GoodsController@changesale');
     Route::get("/goods/getproperty", 'GoodsController@getproperty');
     Route::post("/goods/upload", 'GoodsController@upload');
@@ -116,6 +118,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
 
     Route::any('/userexport', 'UserController@userExport');
     Route::any('/user/upload', 'UserController@upload');
+    Route::get('/user/info', 'UserController@info');
 
     Route::get('/message', 'MessageController@index');
     Route::get('/message/delete', 'MessageController@delete');

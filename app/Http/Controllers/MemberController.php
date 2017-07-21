@@ -108,12 +108,14 @@ class MemberController extends Controller {
                     if (!$trans['insert'])
                         throw new \Exception('操作失败');
 
-                    $score = DB::table('scorechange')->insert([
-                        'type' => 1,
-                        'paytype' => 1,
-                        'score' => intval($order->money / 100),
-                        'uid' => $order->uid
-                    ]);
+                    if (!empty($add_score = intval($order->money / 100))) {
+                        $score = DB::table('scorechange')->insert([
+                            'type' => 1,
+                            'paytype' => 1,
+                            'score' => $add_score,
+                            'uid' => $order->uid
+                        ]);
+                    }
                     $user = DB::table('user')->where("userid", $order->uid)->first();
                     if (empty($user)) {
                         throw new \Exception('用户不存在');
@@ -128,7 +130,10 @@ class MemberController extends Controller {
                             ['is_delete', '=>', 0],
                             ['card_score', '<=', $money / 100]
                         ])->orderBy('card_level', 'desc')->select('card_level')->limit(1)->first();
-                        $level = !empty($card) ? $card->card_level : 0;
+                        if (!empty($card->card_level)) {
+                            $level = $user->level > $card->card_level ? $user->level : $card->card_level;
+                        }  else
+                            $level = $user->level;
                     } else
                         $level = $user->level;
 
@@ -147,8 +152,6 @@ class MemberController extends Controller {
                         'score' => $user->score + intval($order->money / 100),
                         'card_no' => $card_no
                     ]);
-                    var_dump($user->money);
-                    var_dump($order->money);
                     if (!$user_rs) {
                         throw new \Exception("修改用户金额失败");
                     }

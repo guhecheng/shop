@@ -22,6 +22,7 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>
+                                <th>用户ID</th>
                                 <th>微信名</th>
                                 <th>等级</th>
                                 <th>手机号码</th>
@@ -34,6 +35,7 @@
                             <tbody>
                             @foreach($users as $user)
                                 <tr>
+                                    <td>{{ $user->userid }}</td>
                                     <td>{{ $user->uname }}</td>
                                     <td>@if ($user->level == 1)
                                             黄金会员
@@ -53,7 +55,7 @@
 {{--
                                         <button type="button" class="btn btn-primary modify-btn" attr-id="{{ $user->userid}}">修改</button>
 --}}
-                                        <button type="button" class="btn btn-primary del-btn" attr-id="{{ $user->userid }}">删除</button>
+                                        <a href="/admin/user/info?userid={{ $user->userid }}"><button type="button" class="btn btn-primary">查看</button></a>
                                     </td>
                                 </tr>
                             @endforeach

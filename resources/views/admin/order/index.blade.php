@@ -19,14 +19,21 @@
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
-                        <a href="/admin/order/export"><button class="btn btn-primary">导出</button></a>
+                        <ul class="nav navbar-nav">
+                            <li>
+                                <a href="/admin/order?status=2" style="{{ $status == 2 ? 'color:red' : '' }}">未发货</a>
+                            </li>
+                            <li>
+                                <a href="/admin/order?status=3" style="{{ $status == 3 ? 'color:red' : '' }}">已发货</a>
+                            </li>
+                        </ul>
+                        <a href="/admin/order/export?status={{ $status }}"><button class="btn btn-primary" style="margin-left: 2rem;">导出</button></a>
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>
                                 <th>订单编号</th>
                                 <th>物品名</th>
                                 <th>物品属性</th>
-                                <th>物品图片</th>
                                 <th>购买数量</th>
                                 <th>支付金额</th>
                                 <th>收货人</th>
@@ -34,7 +41,11 @@
                                 <th>联系地址</th>
                                 <th>支付时间</th>
                                 <th>支付总额</th>
+                                @if ($status == 2)
                                 <th>操作</th>
+                                @elseif ($status == 3)
+                                <th>快递信息</th>
+                                @endif
                             </tr>
                             </thead>
                             <tbody>
@@ -51,9 +62,8 @@
                                             {{ $order->goodsname }}
                                         </td>
                                         <td>{{ $order->property }}</td>
-                                        <td><img src="{{ $order->goodsicon }}" width="80" height="80" /></td>
                                         <td>{{ $order->count }}</td>
-                                        <td>{{ $order->price * $order->count }}</td>
+                                        <td>{{ $order->per_price * $order->count / 100 }}</td>
                                         @if ($order_no != $order->order_no)
                                         <td rowspan="{{ $order->times }}">
                                             {{ $order->recv_name }}
@@ -70,12 +80,16 @@
                                         @endif
                                         @if ($order_no != $order->order_no)
                                         <td rowspan="{{ $order->times }}">
-                                            {{ $order->price }}
+                                            {{ $order->price / 100}}
                                         </td>
                                         @endif
                                         @if ($order_no != $order->order_no)
                                         <td rowspan="{{ $order->times }}" >
-                                            <button class="btn btn-primary send-goods" attr-id="{{ $order->order_no }}">发货</button>
+                                            @if ($order->status == 2)
+                                                <button class="btn btn-primary send-goods" attr-id="{{ $order->order_no }}">发货</button>
+                                            @elseif ($order->status == 3)
+                                                {{ $order->express_company }}<br />{{ $order->express_no }}
+                                            @endif
                                         </td>
                                         @endif
                                     </tr>
@@ -87,7 +101,7 @@
                             </tbody>
                             <tfoot>
                             <tr>
-                                <td rowspan="4">
+                                <td rowspan="12">
                                 </td>
                             </tr>
                             </tfoot>

@@ -108,6 +108,9 @@ class UserController extends Controller {
     private function addOrUpdateChild($uid, $data) {
         $user = DB::table('user')->where('userid', $uid)->select('child_id')->first();
         if (empty($user->child_id)) {
+
+        }
+        if (empty($user->child_id)) {
             return DB::table('children')->where('relate_id', $user->child_id)->insert($data);
         } else {
             return DB::table('children')->where('relate_id', $user->child_id)->update($data);
@@ -137,7 +140,10 @@ class UserController extends Controller {
         $page = $request->has('page') ? $request->input('page') : 0;
         $pagesize = 50;
         $pagenow = $page * $pagesize;
-        $scores = DB::table('scorechange')->where('uid', $request->session()->get('uid'))
+        $scores = DB::table('scorechange')->where([
+                ['uid', '=', $request->session()->get('uid')],
+                ['score', '>', 0]
+            ])
             ->orderBy('create_time', 'desc')
             ->paginate($pagesize);
         return $request->has('page') ? response()->json(['scores' => $scores]) : view('score', ['scores' => $scores]);
