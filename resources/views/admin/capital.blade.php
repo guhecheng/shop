@@ -20,6 +20,9 @@
                     <div>
                         <input type="text" class="form-control" id="search_no" placeholder="订单号" value="{{ $search_no }}" />
                         <input type="text" class="form-control" id="search_name" placeholder="用户名"  value="{{ $search_name }}"/>
+                        <div style="float:left;">时间:</div>
+                        <input type="text" class="form-control" name="start_date" id="start_date" value="{{ $start_date }}" style="display:inline;width:140px;margin-right:10px;float: left;">
+                        <input type="text" class="form-control" name="end_date" id="end_date" value="{{ $end_date }}" style="display:inline;width:140px;float: left;">
                         <input type="submit" class="btn btn-primary" id="search_btn" value="查找" />
                     </div>
                     <!-- /.box-header -->
@@ -93,6 +96,7 @@
 <script src="/css/admin/dist/js/app.min.js"></script>
 <!-- AdminLTE for demo purposes -->
 <script src="/css/admin/dist/js/demo.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>
 
 <link href="/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css"/>
 <link href="/css/admin/themes/explorer/theme.css" media="all" rel="stylesheet" type="text/css"/>
@@ -100,6 +104,10 @@
 <script src="/js/fileinput.min.js" type="text/javascript"></script>
 <script src="/js/zh.js" type="text/javascript"></script>
 <script src="/css/admin/themes/explorer/theme.js" type="text/javascript"></script>
+<link href="/css/daterangepicker.css" media="all" rel="stylesheet" type="text/css"/>
+<link href="/css/datepicker3.css" media="all" rel="stylesheet" type="text/css"/>
+<script src="/js/daterangepicker.js" type="text/javascript"></script>
+<script src="/js/bootstrap-datepicker.js" type="text/javascript"></script>
 <style type="text/css">
     #search_no, #search_name {
         width: 200px;
@@ -108,12 +116,22 @@
     }
 </style>
 <script type="text/javascript">
+    $(function () {
+        $('#start_date').datepicker({
+            autoclose: true
+        });
+        $('#end_date').datepicker({
+            autoclose: true
+        });
+    });
     $("#search_btn").on("click", function () {
         var name = $("#search_name").val();
         var no = $("#search_no").val();
-        if (name == '' && no == '') {
+        var start_date = $("#start_date").val();
+        var end_date = $("#end_date").val();
+   /*     if (name == '' && no == '') {
             return false;
-        }
-        location.href = "/admin/capital?search_no=" + no + "&search_name=" +name;
+        }*/
+        location.href = "/admin/capital?search_no=" + no + "&search_name=" +name+"&start_date=" + start_date + "&end_date=" + end_date;
     });
 </script>

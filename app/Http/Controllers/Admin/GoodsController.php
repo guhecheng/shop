@@ -69,6 +69,8 @@ class GoodsController extends Controller {
         $is_hot = $request->input('is_hot');
         $score_award = $request->input('score_award');
         $content = $request->input('content');
+        $discount_num = $request->input('discount_num');
+        $act_price = $request->input('act_price');
         if (empty($goodsname) || empty($goodsprice) || empty($goodstype) || empty($logo)
             || empty($imglist) || empty($content) || empty($request->input('price')))
             return redirect('admin/goods')->with();
@@ -83,7 +85,9 @@ class GoodsController extends Controller {
             'price' => $goodsprice * 100,
             'goodsdesc' => $content,
             'is_discount' => empty($request->input('is_discount')) ? 0 : $request->input('is_discount'),
-            'score_award' => empty($score_award) ? 0 : $score_award
+            'score_award' => empty($score_award) ? 0 : $score_award,
+            'discount' => empty($discount_num) ? 0 : $discount_num,
+            'act_price' => empty($act_price) ? 0 : $act_price * 100
         ]);
         if ($goodsid) {
             if (!empty($request->input('common_attr'))) {
@@ -122,7 +126,7 @@ class GoodsController extends Controller {
                 $sku_id = DB::table('goodssku')->insertGetId([
                     'goods_id' => $goodsid,
                     'num' => $request->input('num')[$key],
-                    'price' => empty($value) ? $goodsprice * 100 : $value * 100
+                    'price' => empty($value) ? (empty($act_price) ? $goodsprice * 100 : $act_price * 100 ) : $value * 100
                 ]);
                 for($i = 1, $len = $request->input('len'); $i <= $len; $i++) {
                     DB::table('goodsproperty')->insert([

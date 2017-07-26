@@ -22,19 +22,25 @@
                     <form enctype="multipart/form-data" method="post" role="form" action="/admin/goods/create" onsubmit="return checkform()">
                     <div class="box-body">
                         <div class="form-group">
-                            <label for="goodsname" class="col-sm-2 control-label">商品名</label>
+                            <label for="goodsname" class="col-sm-2 control-label">商品名 <span class="is_must">*</span></label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="goodsname" name="goodsname" placeholder="请输入名字">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="price" class="col-sm-2 control-label">基本价</label>
+                            <label for="price" class="col-sm-2 control-label">基本价 <span class="is_must">*</span></label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="goodsprice" name="goodsprice" placeholder="请输入价格（元)">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="price" class="col-sm-2 control-label">封面</label>
+                            <label for="price" class="col-sm-2 control-label">活动价</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="act_price" name="act_price" placeholder="请输入价格（元)">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="price" class="col-sm-2 control-label">封面 <span class="is_must">*</span></label>
                             <div class="col-sm-10" id="logo_append_area">
                                 <div  class="logo_upload" style="width:80px;height: 80px;border:solid 1px #CCCCCC;position:relative;">
                                     <input type="file" class="img_logo" style="opacity: 0;width:78px;height:78px;">
@@ -42,7 +48,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="price" class="col-sm-2 control-label">介绍图片</label>
+                            <label for="price" class="col-sm-2 control-label">介绍图片 <span class="is_must">*</span></label>
                             <div class="col-sm-10" id="img_append_area">
                                 <div  class="img_upload">
                                     <input type="file" class="img" style="opacity: 0;width:78px;height:78px;">
@@ -66,6 +72,12 @@
                             <br clear="all" />
                         </div>
                         <div class="form-group">
+                            <label for="price" class="col-sm-2 control-label">折扣</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="discount_num" name="discount_num" placeholder="折扣">
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label for="lastname" class="col-sm-2 control-label">积分倍数</label>
                             <div class="col-sm-10">
                                 <select name="score_award" id="score_award">
@@ -77,10 +89,10 @@
                             <br clear="all" />
                         </div>
                         <div class="form-group">
-                            <label for="lastname" class="col-sm-2 control-label">选择类目</label>
+                            <label for="lastname" class="col-sm-2 control-label">选择类目 <span class="is_must">*</span></label>
                             <div class="col-sm-10">
                                 <select id="goodstype" name="goodstype">
-                                    <option value="0">请选择类目</option>
+                                    <option value="0">请选择类目 <span class="is_must">*</span></option>
                                     @foreach ($types as $type)
                                         <option value="{{ $type->typeid }}">{{ $type->typename }}</option>
                                     @endforeach
@@ -200,6 +212,7 @@
         min-height:400px;
     }
     #add_property { margin-right: 10px;}
+    .is_must { color: red; font-size:16px; margin-left: 5px;}
 </style>
 
 <script type="text/javascript">

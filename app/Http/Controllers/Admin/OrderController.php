@@ -30,12 +30,22 @@ class OrderController extends Controller
 
     public function index(Request $request) {
         $status = empty($request->input('status')) ? $this->state['ORDER_HAS_PAY'] : $request->input('status');
+        $start_date = !empty($request->input('start_date')) ? date("Y-m-d", strtotime($request->input('start_date'))) : '';
+        $end_date = !empty($request->input('start_date')) ? date("Y-m-d", strtotime($request->input('end_date'))) : '';
+        $where[] = ['orderinfo.status', '=', $status];
+        var_dump($start_date);
+        if (!empty($start_date)) {
+            $where[] = ['orderinfo.pay_time', '>=', $start_date];
+        }
+        if (!empty($end_date)) {
+            $where[] = ['orderinfo.pay_time', '<=', $end_date];
+        }
         $orders = DB::table('orderinfo')->leftJoin('order', 'order.order_no', '=', 'orderinfo.order_no')
             ->select('orderinfo.*', 'order.count', 'order.price as per_price', 'order.skuid')
-            ->where('orderinfo.status', $status )->orderBy('order.order_no', 'asc')->get();
+            ->where($where)->orderBy('order.order_no', 'asc')->get();
 
         if (empty($orders))
-            return view('admin.order.index', ['orders' => null]);
+            return view('admin.order.index', ['orders' => null, 'status' => $status, 'start_date'=>$start_date, 'end_date'=>$end_date]);
         // 没有获取到数据
         $skuids = $order_no_items = [];
         foreach ($orders as $item) {
@@ -47,7 +57,7 @@ class OrderController extends Controller
         }
 
         if (empty($skuids))
-            return view('admin.order.index', ['orders' => null]);
+            return view('admin.order.index', ['orders' => null, 'status' => $status, 'start_date'=>$start_date, 'end_date'=>$end_date]);
 
         $sql = "select * from goodsproperty as gp
                 left join propertykey as pk on pk.key_id=gp.key_id
@@ -71,7 +81,7 @@ class OrderController extends Controller
             }
         }
 
-        return view('admin.order.index', ['orders' => $orders, 'status' => $status]);
+        return view('admin.order.index', ['orders' => $orders, 'status' => $status, 'start_date'=>$start_date, 'end_date'=>$end_date]);
     }
 
     public function send(Request $request) {

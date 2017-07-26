@@ -136,15 +136,18 @@ class CardController extends Controller
     public function recharge(Request $request) {
         $search_no = $request->input('search_no');
         $search_name = $request->input('search_name');
+        $where[] = ['cardrecharge.status', '=', 1];
         $where = [];
         if (!empty($search_no))
             $where[] = ['charge_no', '=', $search_no];
         if (!empty($search_name)) {
             $where[] = ['user.uname', '=', $search_name];
         }
-        $records = DB::table('cardrecharge')
+        /*$records = DB::table('cardrecharge')
             ->leftJoin('user', 'cardrecharge.uid', '=', 'user.userid')
-            ->orderBy('pay_time', 'desc')->select('cardrecharge.*', 'user.uname')->where($where)->paginate(20);
+            ->orderBy('pay_time', 'desc')->select('cardrecharge.*', 'user.uname')->where($where)->paginate(20);*/
+        $records = DB::table('user')->leftJoin("cardrecharge", 'cardrecharge.uid', '=', 'user.userid')->where($where)->orderBy('cardrecharge.pay_time', 'desc')->groupBy('cardrecharge.uid')
+                    ->select('user.*', 'cardrecharge.pay_time')->paginate(20);
         return view('/admin/card/recharge', ['records' => $records, 'search_no'=>$search_no, 'search_name'=>$search_name]);
     }
 }

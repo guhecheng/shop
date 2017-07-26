@@ -18,10 +18,10 @@
         </div>
         <div>
             <div class="swiper-container type-container">
-                <div class="swiper-wrapper type-wrapper" style="background:#fff;border-bottom:solid 1px #c1c1c1">
-                    <div class="swiper-slide type-slide active" attr-is-add="0" attr-id="0" style="border-bottom:0">推荐</div>
+                <div class="swiper-wrapper type-wrapper" style="background:#fff;">
+                    <div class="swiper-slide type-slide active" attr-is-add="0" attr-id="0" >推荐</div>
                     @foreach ($types as $key=>$type)
-                    <div class="swiper-slide type-slide" attr-is-add="0" attr-id="{{ $type->typeid }}" style="border-bottom:0">
+                    <div class="swiper-slide type-slide" attr-is-add="0" attr-id="{{ $type->typeid }}">
                         {{ $type->typename }}
                     </div>
                     @endforeach
@@ -135,6 +135,9 @@
             background-color: #F2F2F2;
         }
         .swiper-slide,.swiper-container,.swiper-wrapper {  width: 100%; }
+        .is_act_price { border:solid 1px red; width: 3rem; line-height: 1.5rem;
+            text-align: center; float:right;
+            background: red; color:#fff; border-radius: 0.1rem; }
     </style>
     <script>
         var typeSwiper = new Swiper('.type-container', {
@@ -205,8 +208,13 @@
                             html += '<div class="goods-item-icon" style="background-image:url('+goods.goodsicon+')"></div>';
                             html += '<div class="goods-item-content">';
                             html += '<div class="goods-name">'+goods.goodsname+'</div>';
-                            html += '<div></div>';
-                            html += '<div class="goods-price">￥ '+goods.price / 100+' 元</div>';
+                            if (goods.act_price == 0) {
+                                html += '<div></div>';
+                                html += '<div class="goods-price">￥ '+goods.price / 100+' 元</div>';
+                            } else {
+                                html += '<div>原价 : '+goods.price/100+' 元</div>';
+                                html += '<div class="goods-price">￥ '+goods.act_price / 100+' 元<div class="is_act_price">特价</div></div>';
+                            }
                             html += '</div><br clear="all" /></div>';
                         }
                         $(".goods-slide:eq("+index+")").attr('attr-is-add', 1).append(html);

@@ -102,7 +102,7 @@
         @if ( intval($total) )
         <div class="order-change-score" style="margin-top:0.4rem;">
             <div>获得积分</div>
-            <div><span class="exchange-score">{{ intval($total) }}</span>积分</div>
+            <div><span class="exchange-score">{{ intval($total)  }}</span>积分</div>
         </div>
         <input type="hidden" id="exchange-score" value="{{ intval($total) }}" />
         @endif

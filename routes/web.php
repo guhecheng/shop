@@ -80,11 +80,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::get('/user', 'UserController@index');
     Route::get('/user/delete', 'UserController@delete');
     Route::get('/user/usercard', 'UserController@usercard');
+    Route::post('/user/addremark', 'UserController@addremark');
 
     Route::get('/type', 'TypeController@index');
     Route::post('/type/add', 'TypeController@add');
     Route::get('/type/delete', 'TypeController@delete');
     Route::post('/type/modify', 'TypeController@modify');
+    Route::post('/type/changeorder', 'TypeController@changeorder');
 
     Route::get('/property', 'PropertyController@index');
     Route::post('/property/addkey', 'PropertyController@addkey');
@@ -126,7 +128,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::post('/message/update', 'MessageController@update');
     Route::get('/message/send', 'MessageController@send');
 
-    Route::get('/order', 'OrderController@index');
+    Route::any('/order', 'OrderController@index');
     Route::post('/order/send', 'OrderController@send');
     Route::get('/order/export', 'OrderController@export');
 

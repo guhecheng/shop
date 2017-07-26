@@ -27,9 +27,11 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>
-                                <th>充值ID</th>
-                                <th>充值人</th>
-                                <th>充值余额(元)</th>
+                                <th>卡号ID</th>
+                                <th>用户ID</th>
+                                <th>用户姓名</th>
+                                <th>会员卡等级</th>
+                                <th>会员卡余额</th>
                                 <th>充值时间</th>
                             </tr>
                             </thead>
@@ -37,8 +39,17 @@
                             @if (!empty($records))
                             @foreach($records as $record)
                                 <tr>
-                                    <td>{{ $record->charge_no }}</td>
+                                    <td>{{ $record->card_no }}</td>
+                                    <td>{{ $record->userid }}</td>
                                     <td>{{ $record->uname }}</td>
+                                    <td><?php
+                                            switch ($record->level) {
+                                                case 1: '黄金会员'; break;
+                                                case 2: '铂金会员'; break;
+                                                case 3: '钻石会员'; break;
+                                                default: '非会员'; break;
+                                            }
+                                        ?></td>
                                     <td>{{ $record->money / 100 }}</td>
                                     <td>{{ $record->pay_time }}</td>
                                 </tr>

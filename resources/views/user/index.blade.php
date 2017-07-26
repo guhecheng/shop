@@ -48,6 +48,7 @@
             <br clear="both" />
         </div>
         <a href="/address"><div class="address">地址管理</div></a>
+        <a href="#"><div class="address">我参加过的活动</div></a>
         <a href="/aboutme"><div class="aboutme">关于我们</div></a>
         <br clear="all" />
         @endif

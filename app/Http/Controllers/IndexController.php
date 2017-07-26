@@ -31,6 +31,14 @@ class IndexController extends Controller {
         $userService = $this->app->user;
         $server->setMessageHandler(function ($message) use ($request, $userService) {
             Log::info($message);
+            $user = DB::table('user')->where("openid", $message->FromUserName)->first();
+            if ($user) {
+                DB::table('user')->where('userid', $user->userid)->update([
+                    'last_login_time' => date("Y-m-d H:i:s")
+                ]);
+                $request->session()->put('openid', $message->FromUserName);
+                $request->session()->put('uid', $user->userid);
+            }
             switch ($message->MsgType) {
                 case 'event':
                     switch ($message->Event) {
@@ -63,11 +71,7 @@ class IndexController extends Controller {
                             ]);
                             break;
                         default:
-                            $user = DB::table('user')->where("openid", $message->FromUserName)->first();
-                            if ($user) {
-                                $request->session()->put('openid', $message->FromUserName);
-                                $request->session()->put('uid', $user->userid);
-                            }
+
                             //return '快乐' . date("Y-m-d") . '一天';
                             break;
                     }
@@ -113,6 +117,7 @@ class IndexController extends Controller {
         	}
     	}
         $types = DB::table('goodstype')->where('is_delete', 0)
+                            ->orderBy('sort', 'asc')
                             ->get();
         $goods = DB::table('goods')->where([
             ['is_delete', '=', 0],
@@ -142,15 +147,21 @@ class IndexController extends Controller {
                 "url"  => "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxd8b6b83c91c44ac3&redirect_uri=http%3A%2F%2Fwww.jingyuxuexiao.com%2F&response_type=code&scope=snsapi_userinfo&state=cd16a43a0a6e5b6d007c942c8850a111#wechat_redirect"
             ],
             [
-                "type"      => "view",
                 "name"      => "会员卡",
-                "url"       => $this->url . "/card"
-            ],
-            [
-                "type"      => "view",
-                "name"      => "我的",
-                "url"       => $this->url . "/my"
-            ],
+                "sub_button" => [
+                    [
+                    "type" => 'view',
+                    'name' => '会员卡',
+                    'url' => $this->url . '/card'
+                    ],
+                    [
+                        'type' => 'view',
+                        'name' => '我的',
+                        'url' => $this->url .'/my'
+
+                    ]
+                ]
+            ]
         ];
         $menu->add($buttons);
     }

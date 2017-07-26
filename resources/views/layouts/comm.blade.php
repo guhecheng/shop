@@ -10,7 +10,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="/css/home.css">
     <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/layer_mobile/need/layer.css">
     <script src="//code.jquery.com/jquery-latest.min.js"></script>
+    <script src="/layer_mobile/layer.js"></script>
 </head>
 <body>
 @yield('content')

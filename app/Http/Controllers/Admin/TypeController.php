@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 class TypeController extends Controller {
 
     public function index() {
-        $types = DB::table('goodstype')->where('is_delete', 0)->orderBy('sort', 'desc')->paginate(5);
+        $types = DB::table('goodstype')->where('is_delete', 0)->orderBy('sort', 'asc')->paginate(5);
         return view('admin.type.index', ['types' => $types]);
     }
 
@@ -46,5 +46,15 @@ class TypeController extends Controller {
             return response()->json(['rs' => 1]);
         }
         return response()->json(['rs' => 0]);
+    }
+
+    public function changeorder(Request $request) {
+        $type_ids = $request->input('type_ids');
+        $orders = $request->input('orders');
+        $type_arr = explode(",", $type_ids);
+        $order_arr = explode(",", $orders);
+        foreach ($type_arr as $key => $value) {
+            DB::table('goodstype')->where('typeid', $value)->update(['sort'=>$order_arr[$key]]);
+        }
     }
 }

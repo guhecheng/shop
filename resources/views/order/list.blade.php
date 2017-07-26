@@ -16,7 +16,7 @@
             <div class="swiper-wrapper">
                 @for($i = 0; $i < 4; $i++)
                 <div class="swiper-slide goods-slide" attr-is-add="0">
-                    @if ($i == 0 && empty($status) && !empty($orders))
+                    @if ($i == 0 && empty($status) && !($orders->isEmpty()))
                     @foreach ($orders as $item)
                     <div class="order-item" attr-id="{{ $item->order_no }}">
                         <div class="order-item-header">

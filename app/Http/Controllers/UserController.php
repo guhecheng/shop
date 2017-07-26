@@ -94,7 +94,7 @@ class UserController extends Controller {
                 $rs = $this->addOrUpdateChild($uid, ['school' => $content]);
                 break;
             case 'child_brand':
-                $rs = $this->addOrUpdateChild($uid, ['like_brandss' => $content]);
+                $rs = $this->addOrUpdateChild($uid, ['like_brands' => rtrim($content, ',')]);
                 break;
         }
         return response()->json(['rs' => $rs]);
@@ -106,12 +106,11 @@ class UserController extends Controller {
      * @param $data
      */
     private function addOrUpdateChild($uid, $data) {
-        $user = DB::table('user')->where('userid', $uid)->select('child_id')->first();
+        $user = DB::table('user')->where('userid', $uid)->select('child_id', 'userid')->first();
         if (empty($user->child_id)) {
-
-        }
-        if (empty($user->child_id)) {
-            return DB::table('children')->where('relate_id', $user->child_id)->insert($data);
+            //return DB::table('children')->where('relate_id', $user->child_id)->insert($data);
+           $id = DB::table("children")->insertGetId($data);
+           return DB::table('user')->where('userid', $user->userid)->update(['child_id' => $id]);
         } else {
             return DB::table('children')->where('relate_id', $user->child_id)->update($data);
         }

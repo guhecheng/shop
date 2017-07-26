@@ -27,6 +27,12 @@
                                 <a href="/admin/order?status=3" style="{{ $status == 3 ? 'color:red' : '' }}">已发货</a>
                             </li>
                         </ul>
+                        <form action="/admin/order?status={{ $status }}" method="post" style="display: inline;">
+                            {{ csrf_field() }}
+                            <input type="text" class="form-control" name="start_date" id="start_date" value="{{ $start_date }}" style="display:inline;width:140px;margin-right:10px;float: left;">
+                            <input type="text" class="form-control" name="end_date" id="end_date" value="{{ $end_date }}" style="display:inline;width:140px;float: left;">
+                            <input type="submit" class="btn btn-primary" style="margin-left: 2rem;" value="查询" />
+                        </form>
                         <a href="/admin/order/export?status={{ $status }}"><button class="btn btn-primary" style="margin-left: 2rem;">导出</button></a>
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
@@ -181,14 +187,19 @@
 <script src="/css/admin/dist/js/app.min.js"></script>
 <!-- AdminLTE for demo purposes -->
 <script src="/css/admin/dist/js/demo.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>
 
 <link href="/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css"/>
 <link href="/css/admin/themes/explorer/theme.css" media="all" rel="stylesheet" type="text/css"/>
+<link href="/css/daterangepicker.css" media="all" rel="stylesheet" type="text/css"/>
+<link href="/css/datepicker3.css" media="all" rel="stylesheet" type="text/css"/>
 <script src="/js/plugins/sortable.js" type="text/javascript"></script>
 <script src="/js/fileinput.min.js" type="text/javascript"></script>
 <script src="/js/zh.js" type="text/javascript"></script>
+<script src="/js/zh.js" type="text/javascript"></script>
+<script src="/js/daterangepicker.js" type="text/javascript"></script>
+<script src="/js/bootstrap-datepicker.js" type="text/javascript"></script>
 <script src="/css/admin/themes/explorer/theme.js" type="text/javascript"></script>
-
 <script type="text/javascript">
     $.ajaxSetup({
         headers: {
@@ -199,6 +210,12 @@
         $(".send-goods").on("click", function() {
             $("#add-modal").modal('show');
             $("#add_order_no").val($(this).attr('attr-id'));
+        });
+        $('#start_date').datepicker({
+            autoclose: true
+        });
+        $('#end_date').datepicker({
+            autoclose: true
         });
     });
     $(".add_btn").on("click", function() {

@@ -93,6 +93,61 @@ class UserController extends Controller {
         if (empty($userid)) exit;
         $user = DB::table('user')->where('userid', $userid)->first();
         $child = DB::table('children')->where('relate_id', $user->child_id)->first();
-        return view('admin.user.info', ['user'=>$user, 'child' => $child]);
+
+        $orders = DB::table('orderinfo')->leftJoin('order', 'order.order_no', '=', 'orderinfo.order_no')
+            ->select('orderinfo.*', 'order.count', 'order.price as per_price', 'order.skuid')
+            ->where(['uid' => $userid, 'orderinfo.status'=>2] )->orderBy('order.order_no', 'asc')->get();
+
+        if (empty($orders))
+            return view('admin.order.index', ['orders' => null]);
+        // 没有获取到数据
+        $skuids = $order_no_items = [];
+        foreach ($orders as $item) {
+            $skuids[] = $item->skuid;
+            if (key_exists($item->order_no, $order_no_items)) {
+                $order_no_items[$item->order_no] += 1;
+            } else
+                $order_no_items[$item->order_no] = 1;
+        }
+
+        if (!empty($skuids)) {
+            $sql = "select * from goodsproperty as gp
+                left join propertykey as pk on pk.key_id=gp.key_id
+                left join propertyvalue as pv on pv.value_id=gp.value_id
+                left join goods on goods.goodsid=gp.goods_id
+                where gp.sku_id in (".implode(',', $skuids).")";
+            $skus = DB::select($sql);
+            foreach ($orders as &$item) {
+                foreach ($order_no_items as $k=>$v) {
+                    if ($k == $item->order_no) {
+                        $item->times = $v;
+                    }
+                }
+                $item->property = '';
+                foreach ($skus as $value) {
+                    if ($value->sku_id == $item->skuid) {
+                        $item->goodsicon = $value->goodsicon;
+                        $item->goodsname = $value->goodsname;
+                        $item->property .= $value->key_name . ':' . $value->value_name . " ";
+                    }
+                }
+            }
+        }
+
+        $scores = DB::table("scorechange")->where("uid", $userid)->get();
+
+        return view('admin.user.info', ['userid'=> $userid,'user'=>$user,
+                                        'child' => $child,
+                                        'orders'=>$orders,
+                                        'scores' => $scores]);
+    }
+
+
+    public function addremark(Request $request) {
+        $userid = $request->input("userid");
+        $remark = $request->input('remark');
+        if (empty($remark) || empty($userid))
+            return response()->json(['rs' => 0, 'errmsg' => '信息不全']);
+        return DB::table("user")->where("userid", $userid)->update(['remark'=>trim($remark)]);
     }
 }

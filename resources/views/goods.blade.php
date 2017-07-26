@@ -19,7 +19,14 @@
             <div class="goods-header">
                 <div class="goods-content-header">
                     <div class="goods-content-name">{{ $goods->goodsname }}</div>
-                    <div class="goods-content-price"><span>￥ {{ $goods->price / 100 }}</span></div>
+                    <div class="goods-content-price">
+                        @if (empty($goods->act_price))
+                        <span>￥ {{ $goods->price / 100 }}</span>
+                        @else
+                        <span>￥ {{ $goods->act_price / 100 }}</span>
+                        <span style="margin-left:0.2rem;color:#000;font-size: 0.6rem;">原价: {{ $goods->price/100 }}</span>
+                        @endif
+                    </div>
                     <div class="goods-content-detail">
                         <div>满1000包邮</div>
                         <div></div>
@@ -65,7 +72,7 @@
         </div>
         <div class="goods-act" style="border-top: solid 1px #C1C1C1;">
             <div class="lookcar">查看购物车</div>
-            <div class="addcar">加入购物车</div>
+            <div class="addcar" style="border-left:solid 1px #C1C1C1;border-right:solid 1px #C1C1C1">加入购物车</div>
             <div class="buy">立即购买</div>
             <br clear="all" />
         </div>
@@ -305,9 +312,15 @@
                 dataType: 'json',
                 success: function(data) {
                     if (data.rs == 1) {
-                        alert('添加购物车成功');
+                        layer.open({
+                            content: '添加购物车成功'
+                            ,btn: '确定'
+                        });
                     } else {
-                        alert(data.msg);
+                        layer.open({
+                            content: data.msg
+                            ,btn: '确定'
+                        });
                         if (data.num)
                             $("#goods_num").val(data.num);
                     }
@@ -328,7 +341,10 @@
                 dataType: 'json',
                 success: function(data) {
                     if (data.rs == 0) {
-                        alert('信息不完整');
+                        layer.open({
+                            content: '信息不完整'
+                            ,btn: '确定'
+                        });
                         return false;
                     }
                     location.href = '/order/create?num=' + $("#goods_num").val() + "&goodsid=" + $("#goodsid").val() + "&skuid=" + data.sku_id;

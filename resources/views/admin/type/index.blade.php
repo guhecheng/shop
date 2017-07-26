@@ -27,9 +27,9 @@
                                 <th>操作</th>
                             </tr>
                             </thead>
-                            <tbody class="type_tbody">
+                            <tbody class="type_tbody" id="type_tbody">
                             @foreach($types as $type)
-                                <tr>
+                                <tr data-id="{{ $type->typeid }}">
                                     <td>{{ $type->typename }}</td>
                                     <td>
                                         <button type="button" class="btn btn-primary modify-btn" attr-id="{{ $type->typeid }}">修改</button>
@@ -151,6 +151,7 @@
 <script src="/js/fileinput.min.js" type="text/javascript"></script>
 <script src="/js/zh.js" type="text/javascript"></script>
 <script src="/css/admin/themes/explorer/theme.js" type="text/javascript"></script>
+<script src="/js/jquery.dragsort-0.5.2.min.js"></script>
 
 <script type="text/javascript">
     $.ajaxSetup({
@@ -188,6 +189,24 @@
                 }
             })
         });
+
+        $("#type_tbody").dragsort({ dragSelector: "tr", dragSelectorExclude: "button", dragBetween: true,
+            dragEnd: function() {
+                var orders = type_ids = '';
+                $("#type_tbody").find("tr").each(function(item,value) {
+                    type_ids += $(this).attr("data-id") + ",";
+                    orders += (item+1) + ",";
+                });
+                $.ajax({
+                    url: '/admin/type/changeorder',
+                    data: {'type_ids':type_ids, 'orders':orders},
+                    datatype:'json',
+                    type:"post",
+                    success:function (data) {
+
+                    }
+                });
+            }});
 
     });
     $(".add_type").on("click", function() {

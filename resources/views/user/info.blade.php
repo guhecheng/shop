@@ -39,10 +39,21 @@
             <div>学校</div>
             <div class="user-info-link" attr-type="child_school">{{ empty($user->school) ? '添加':$user->school }}<div></div></div>
         </div>
-        {{--<div class="user-info-item">
+        <div style="border-bottom:solid 1px #C1C1C1">
+        <div class="user-info-item" style="border:0">
             <div>最喜欢的童装品牌</div>
             <div class="user-info-link" attr-type="child_brand">点击选择<div></div></div>
-        </div>--}}
+
+        </div>
+            @if (!empty($user->like_brands))
+                <div class="brands_show_area" style="padding:0 5% 0.4rem;">
+                    @foreach (explode(",", $user->like_brands) as $item)
+                        <span style="margin-right:0.2rem;">{{ $item }}</span>
+                    @endforeach
+                </div>
+            @endif
+            <input type="hidden" id="brands" value="{{ $user->like_brands }}" />
+        </div>
     </div>
     <div class="bg"></div>
     <div class="linkuser">
@@ -74,10 +85,37 @@
         </div>
         <div class="sure-btn" style="font-size:0.8rem;">确 定</div>
     </div>
+    <div class="like_brands">
+        <div class="close-brands"><span class="close-brand-btn"></span></div>
+        <div class="select_brands_area">
+            <div class="select-brands">耐克</div>
+            <div class="select-brands">addidas</div>
+            <div class="select-brands">安踏</div>
+            <div class="select-brands">贵人鸟</div>
+            <div class="select-brands">361</div>
+            <div class="select-brands">其他</div>
+        </div>
+        <div class="sure_add_brands">确 定</div>
+    </div>
     <style type="text/css">
+        .sure_add_brands {
+            position: absolute; bottom: 0; width:100%;line-height:2rem;left:0;
+            text-align: center; background: #C1C1C1; font-size: 1rem; }
+        .like_brands { position: fixed; top:0;left:0;
+            width:100%;background:#fff;
+            height:100%;
+            display: none;}
+        .select_brands_area { padding: 5%; }
+        .select-brands { border:solid 1px #C1C1C1; width: 30%; line-height: 2rem;
+            text-align: center; float:left; margin-top: 2rem;margin-left: 5%;}
+        .select-brands:nth-of-type(odd) {
+            margin-right: 10%;
+            margin-left: 10%;
+        }
+        .select-brands.active { border: solid 1px red; }
         .select-sex { width:3rem; height:1.5rem; }
         .close-commarea { padding-right: 5%; text-align: right; }
-        .close-area-btn { background:url('/images/close.png') no-repeat;width:1.2rem;
+        .close-area-btn, .close-brand-btn { background:url('/images/close.png') no-repeat;width:1.2rem;
             height:1.2rem;background-size:100%;
             position: absolute; right: 0.3rem; top:0.3rem;}
         .linkuser,.commarea {
@@ -197,12 +235,21 @@
         .close-linkuser {text-align:right;
             line-height:2rem;padding-right:1rem;font-size:0.8rem;}
     </style>
+    <link rel="stylesheet" href="/layer_mobile/need/layer.css">
+    <script src="/layer_mobile/layer.js"></script>
     <script type="text/javascript">
         $(function() {
             $(".bg").height($(window).height());
             /*$("#my-input").calendar({
                 value: ['2015-12-05']
             });*/
+        });
+        $(".select-brands").on("touchstart", function () {
+            if ($(this).hasClass("active")) {
+                $(this).removeClass("active");
+            } else {
+                $(this).addClass("active");
+            }
         });
         $.ajaxSettings = $.extend($.ajaxSettings, {
             headers: {
@@ -223,7 +270,11 @@
             var phone = $("#phone").val();
             var pass = $("#pass").val();
             if (phone == '' || pass == '') {
-                alert('手机号或密码不能为空');
+                //alert('手机号或密码不能为空');
+                layer.open({
+                    content: '手机号码或密码不能为空'
+                    ,btn: '确定'
+                });
                 return false;
             }
             $.ajax({
@@ -233,17 +284,35 @@
                 dataType:'json',
                 success: function (data) {
                     if (data.rs == 1) {
-                        alert('关联成功');
-                        location.reload();
+                        layer.open({
+                            content: '关联成功'
+                            ,btn: '确定',
+                            yes: function() {
+                                location.reload();
+                            }
+                        });
                     } else {
                         alert(data.errmsg);
+                        layer.open({
+                            content: data.errmsg
+                            ,btn: '确定'
+                        });
                         return false;
                     }
                 }
             })
         });
         $(".user-info-link").on("click", function(item, index) {
-            console.log($(this).attr("attr-type"));
+            if ($(this).attr('attr-type') == 'child_brand') {
+                $(".like_brands").show();
+                var brands_arr = $("#brands").val().split(",");
+                $(".select-brands").each(function () {
+                    if (brands_arr.indexOf($.trim($(this).text())) >= 0) {
+                        $(this).addClass("active");
+                    }
+                });
+                return ;
+            }
             $(".commarea,.bg").show();
             var par = $(this).parent();
             $(".info-type").val($(this).attr("attr-type"));
@@ -260,18 +329,26 @@
         });
         $(".sure-btn").on('click', function() {
             var index = $('.info-type').val();
-            alert(index);
+            console.log(index);
             if (index == 'child_sex') {
                 var content = $(".select-sex").val();
             } else {
                 var content = $(".add-content").val();
             }
             if (content == '') {
-                alert('不能为空');
+                //alert('不能为空');
+                layer.open({
+                    content: '没有填写信息'
+                    ,btn: '确定'
+                });
                 return false;
             }
-            if (index == 1 && !(/^1[34578]\d{9}$/.test(content))) {
-                alert('手机号码错误');
+            if (index == 'phone' && !(/^1[34578]\d{9}$/.test(content))) {
+                //alert('手机号码错误');
+                layer.open({
+                    content: '手机号码错误'
+                    ,btn: '确定'
+                });
                 return false;
             }
             $.ajax({
@@ -284,7 +361,10 @@
                         location.reload();
                         //$(".commarea,.bg").hide();
                     } else {
-                        alert('修改失败');
+                        layer.open({
+                            content: '填写失败'
+                            ,btn: '确定'
+                        });
                         return false;
                     }
                 }
@@ -292,6 +372,38 @@
         });
         $(".close-area-btn").on("click", function() {
             $(".commarea,.bg").hide();
+        });
+        $(".close-brand-btn").on("click", function () {
+            $(".like_brands").hide();
+        });
+
+        $(".sure_add_brands").on("click", function () {
+            var brands = '';
+            $(".select-brands").each(function () {
+                if ($(this).hasClass("active"))
+                    brands += $.trim($(this).text()) + ",";
+            });
+            if (brands == '') {
+                layer.open({ content: '没有选择品牌', btn: '确定' });
+                return false;
+            }
+            $.ajax({
+                url: '/modinfo',
+                data: {'index':'child_brand', 'content': brands },
+                dataType:'json',
+                type:'post',
+                success: function (data) {
+                    if (data.rs == 1) {
+                        location.reload();
+                    } else {
+                        layer.open({
+                            content: '添加失败'
+                            ,btn: '确定'
+                        });
+                        return false;
+                    }
+                }
+            })
         });
     </script>
 @endsection

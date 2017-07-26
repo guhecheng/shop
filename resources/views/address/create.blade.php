@@ -103,10 +103,10 @@
                     url: '/address',
                     success: function(data) {
                         if (data.rs == 1) {
-                            alert("添加成功，返回列表页");
+                            $.toast('添加成功，返回列表页');
                             history.back();
                         } else {
-                            alert('添加失败');
+                            $.toast('添加失败');
                             if (data.num)
                                 $("#goods_num").val(data.num);
                         }

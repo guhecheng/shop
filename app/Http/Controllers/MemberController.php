@@ -140,8 +140,7 @@ class MemberController extends Controller {
                     if (empty($user->card_no)) {
                         $card_no = DB::table("user")->max("card_no");
                         if (empty($card_no)) {
-                            $no = 1;
-                            $card_no = str_pad(1, 8, "0", STR_PAD_LEFT);
+                            $card_no = str_pad(intval($card_no) + 1, 8, "0", STR_PAD_LEFT);
                         }
                     } else {
                         $card_no = $user->card_no;

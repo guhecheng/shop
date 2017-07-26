@@ -105,7 +105,7 @@
                     url: '/address',
                     success: function(data) {
                         if (data.rs == 1) {
-                            alert("添加成功，返回列表页");
+                            //alert("添加成功，返回列表页");
                             location.href = '/address';
                         }
                     }

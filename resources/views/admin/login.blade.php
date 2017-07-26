@@ -95,7 +95,7 @@
                 dataType: 'json',
                 success: function(data) {
                     if (data.rs == 1) {
-                        location.href = "/admin"
+                        location.href = "/admin/goods";
                     } else {
                         alert('账号或密码错误');
                         return false;
