@@ -62,7 +62,7 @@ class IndexController extends Controller {
                             }
                             $request->session()->put('openid', $message->FromUserName);
                             $request->session()->put('uid', empty($id) ? $user->userid : $id);
-                            return '欢迎来到温江童马儿童高端服务';
+                            return '欢迎来到童马儿童生活';
                             break;
                         case 'unsubscribe':
                             DB::table('user')->where('openid', $message->FromUserName)->update([
@@ -113,7 +113,6 @@ class IndexController extends Controller {
         			if ($uid) 
         				$request->session()->put("uid", $uid);
         		}
-
         	}
     	}
         $types = DB::table('goodstype')->where('is_delete', 0)
@@ -165,5 +164,4 @@ class IndexController extends Controller {
         ];
         $menu->add($buttons);
     }
-
 }

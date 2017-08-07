@@ -64,7 +64,7 @@
                             <br clear="all" />
                         </div>
                         <div class="form-group">
-                            <label for="lastname" class="col-sm-2 control-label">是否折扣</label>
+                            <label for="lastname" class="col-sm-2 control-label">是否会员卡打折</label>
                             <div class="col-sm-10">
                                 <input type="radio" name="is_discount" value="0" />否
                                 <input type="radio" name="is_discount" value="1" />是

@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Excel;
 use EasyWeChat\Foundation\Application;
+use Illuminate\Support\Facades\Redis;
 
 class MessageController extends Controller {
     const HAS_SEND = 1;
     const HAS_NOT_SEND= 0;
+    const MSG_TYPE = 'msg:wait:send';
 
 	public function index(Request $request) {
 		$messages = DB::table('message')->where('is_delete', 0)->orderBy('create_time', 'desc')
@@ -21,7 +23,6 @@ class MessageController extends Controller {
 	    $message_id = $request->input("id");
 	    if (empty($message_id))
             return response()->json(['rs' => 0]);
-
 	    $rs = DB::table("message")->where('id', $message_id)->update(['is_delete' => 1]);
         return response()->json(['rs' => $rs]);
     }

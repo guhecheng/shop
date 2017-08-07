@@ -139,7 +139,7 @@ class CardController extends Controller
         $where[] = ['cardrecharge.status', '=', 1];
         $where = [];
         if (!empty($search_no))
-            $where[] = ['charge_no', '=', $search_no];
+            $where[] = ['user.card_no', '=', $search_no];
         if (!empty($search_name)) {
             $where[] = ['user.uname', '=', $search_name];
         }

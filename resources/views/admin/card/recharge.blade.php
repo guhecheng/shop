@@ -18,7 +18,7 @@
                         <h3 class="box-title">会员卡列表</h3>
                     </div>
                     <div>
-                        <input type="text" class="form-control" id="search_no" placeholder="订单号" value="{{ $search_no }}" />
+                        <input type="text" class="form-control" id="search_no" placeholder="会员卡号" value="{{ $search_no }}" />
                         <input type="text" class="form-control" id="search_name" placeholder="用户名"  value="{{ $search_name }}"/>
                         <input type="submit" class="btn btn-primary" id="search_btn" value="查找" />
                     </div>
@@ -58,7 +58,7 @@
                             </tbody>
                             <tfoot>
                             <tr>
-                                <td rowspan="4">
+                                <td rowspan="6">
                                     {{ $records->links() }}
                                 </td>
                             </tr>

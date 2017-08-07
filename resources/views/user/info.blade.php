@@ -27,10 +27,12 @@
             <div>姓名</div>
             <div class="user-info-link" attr-type="child_name">{{ empty($user->name) ? '添加' : $user->name }}<div></div></div>
         </div>
-        {{--<div class="user-info-item">
+        <div class="user-info-item">
             <div>生日</div>
-            <div class="user-info-date-link" attr-type="child_birth_date">{{ empty($user->birth_date) ? '添加' : $user->birth_date }}<div></div></div>
-        </div>--}}
+            <input type="text" data-field="date" value="{{ empty($user->birth_date) ? '' : $user->birth_date }}" placeholder="请选择日期" style="float:right;margin-top:0.5rem;text-align: right" id="child_date"/>
+            <div id="SJHPicker" style="display:none;"></div>
+            <!--<div class="user-info-date-link" attr-type="child_birth_date">{{ empty($user->birth_date) ? '添加' : $user->birth_date }}<div></div></div>-->
+        </div>
         <div class="user-info-item">
             <div>性别</div>
             <div class="user-info-link" attr-type="child_sex">{{ empty($user->sex) ? '添加':($user->sex==1?'男':'女') }}<div></div></div>
@@ -57,7 +59,7 @@
     </div>
     <div class="bg"></div>
     <div class="linkuser">
-        <div class="close-linkuser"><span class="close-btn">关闭</span></div>
+        <div class="close-linkuser"><span class="close-btn"></span></div>
         <div class="phone">
             <div>手机号</div>
             <div><input type="text" name="phone" id="phone" /></div>
@@ -115,7 +117,7 @@
         .select-brands.active { border: solid 1px red; }
         .select-sex { width:3rem; height:1.5rem; }
         .close-commarea { padding-right: 5%; text-align: right; }
-        .close-area-btn, .close-brand-btn { background:url('/images/close.png') no-repeat;width:1.2rem;
+        .close-area-btn, .close-brand-btn,.close-btn { background:url('/images/close.png') no-repeat;width:1.2rem;
             height:1.2rem;background-size:100%;
             position: absolute; right: 0.3rem; top:0.3rem;}
         .linkuser,.commarea {
@@ -125,48 +127,47 @@
             height: auto;
             z-index: 200;
             background: #fff;
-            padding-bottom: 2rem;
             display:none;
         }
         .sure-btn {
             line-height:1.8rem;
-            width: 50%;
+            width: 100%;
             margin: 0 auto;
             text-align:center;
-            border: solid 1px #C1C1C1;
+            border-top: solid 1px #C1C1C1;
+            margin-top:1rem;
+            background: #C1C1C1;
+            font-size:0.8rem;
         }
         .content-title { width: 30%; line-height:1.8rem;}
 
         .comm-input {
             width: 100%;
-            padding:1rem 20%;
+            padding:1rem 10%;
         }
         .comm-input:after {
             display:block;clear:both;content:"";visibility:hidden;height:0
         }
-        .comm-input div {
-            float:left;
-        }
         .comm-input-content {
-            width: 60%;
+            width: 80%;
+            margin-left: 10%;
         }
         .add-content { width: 100%; padding:0 5%; border:solid 1px #C1C1C1;
             line-height:1.8rem;}
         .phone,.pass {
-            margin-bottom: 1rem;
-            padding: 0 20%;
+            padding: 0 10%;
         }
         .phone div, .pass div {
-            float:left;
             line-height: 2rem;
         }
-        .phone div:first-child,.pass div:first-child  {
+            .phone div:first-child,.pass div:first-child  {
             width: 30%;
             font-size: 0.8rem;
             color: #000;
         }
         .phone div:last-child,.pass div:last-child  {
-            width: 70%;
+            width: 100%;
+            padding:0 15%;
         }
         #phone, #pass {
             width: 100%;
@@ -175,11 +176,10 @@
             padding:0 0.2rem;
             font-size:0.7rem;
         }
-        .relate { width: 50%; margin: 0.1rem auto; border:solid 1px #C1C1C1;
-            line-height:2rem;
-            text-align: center;
-            font-size: 0.8rem;
+        .relate { width: 100%; line-height:2rem; text-align: center; font-size: 0.8rem;
             color: #000;
+            background:#c1c1c1;
+            margin-top: 1rem;
         }
         .user-info { background: #fff; }
         .user-info-children {
@@ -232,17 +232,27 @@
         .user-info-icon-div2 div:last-child { margin-top:1rem;}
         .bg { position:absolute;z-index:100;
             display: none; top:0; background: #000; opacity: 0.2; width: 100%; height: 100%;}
-        .close-linkuser {text-align:right;
-            line-height:2rem;padding-right:1rem;font-size:0.8rem;}
+        .close-linkuser {
+            height:1.5rem; }
     </style>
     <link rel="stylesheet" href="/layer_mobile/need/layer.css">
+    <link rel="stylesheet" type="text/css" href="/css/SJHPicker.min.css">
     <script src="/layer_mobile/layer.js"></script>
+    <script src="/js/SJHPicker-zepto.min.js"></script>
+    <script src="/js/zepto-touch.min.js"></script>
     <script type="text/javascript">
         $(function() {
             $(".bg").height($(window).height());
             /*$("#my-input").calendar({
                 value: ['2015-12-05']
             });*/
+            SJHPicker.init({				       //初始化控件
+                max_date: new Date('{{ date("Y-m-d") }}'),  //日期上限
+                min_date: new Date('1990-08-13'),  //日期下限
+                start_day: 1,					   //周开始日，0为周日，1-6为周一至周六
+                selected_date: new Date('{{ empty($user->birth_date) ? date("Y-m-d") : $user->birth_date }}'),
+                format: 'yyyy-MM-dd'		       //输出日期格式
+            });
         });
         $(".select-brands").on("touchstart", function () {
             if ($(this).hasClass("active")) {

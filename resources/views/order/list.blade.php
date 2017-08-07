@@ -21,7 +21,7 @@
                     <div class="order-item" attr-id="{{ $item->order_no }}">
                         <div class="order-item-header">
                             <div>{{ $item->order_no }}</div>
-                            <div>
+                            <div class="order-item-status">
                                 @if ($item->status == 1)
                                 <span style="color:red;">未付款</span>
                                 @elseif ($item->status == 2)
@@ -130,6 +130,7 @@
     <script type="text/javascript">
         $(function() {
             $(document).on("click", ".order-item", function () {
+                if ($.trim($(this).find(".order-item-status").text()) == '已失效') return;
                 location.href = "/ordershow?orderno=" + $(this).attr("attr-id");
             });
         });

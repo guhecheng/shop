@@ -108,7 +108,7 @@
             border-bottom: solid 1px red;
         }
         .goods-pic {
-            background-repeat:no-repeat; background-size: 100% 100%;
+            background-repeat:no-repeat; background-size: 100%;
             height: 9rem;}
         .index-goods-name { z-index:100;background: #838079; opacity: 0.7;
             width: 100%;
