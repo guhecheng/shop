@@ -343,3 +343,55 @@ create table if not exists usersendmsg (
   PRIMARY KEY (id),
   INDEX openid(openid)
 ) engine=innodb charset=utf8mb4;
+
+/*品牌*/
+DROP TABLE IF EXISTS brands;
+CREATE TABLE IF NOT EXISTS brands (
+  id INT NOT NULL AUTO_INCREMENT,
+  brand_name varchar(100) NOT NULL DEFAULT '' COMMENT '品牌名',
+  brand_img varchar(255) NOT NULL DEFAULT '' COMMENT '品牌图片',
+  sort int NOT NULL  DEFAULT 0 COMMENT '排序',
+  common_discount int not null DEFAULT 0 COMMENT '普通用户折扣',
+  ordinary_discount int not null default 0 comment '普通会员折扣',
+  golden_discount int not null default 0 comment '黄金会员折扣',
+  platinum_discount int not null default 0 comment '铂金会员折扣',
+  diamond_discount int not null default 0 comment '钻石会员折扣',
+  is_del TINYINT NOT NULL DEFAULT 0 comment '是否删除',
+  create_time TIMESTAMP DEFAULT current_timestamp,
+  PRIMARY KEY (id),
+  KEY (brand_name)
+) ENGINE=innodb CHARSET = utf8;
+
+/*优惠券*/
+DROP TABLE IF EXISTS coupon;
+CREATE TABLE IF NOT EXISTS coupon (
+  id INT NOT NULL AUTO_INCREMENT,
+  goods_price int not null DEFAULT 0 comment '商品价格',
+  discount_price int not NULL DEFAULT 0 COMMENT '减少价格',
+  brand_id INT NOT NULL DEFAULT 0 COMMENT '品牌id',
+  start_date date COMMENT '开始时间',
+  end_date DATE COMMENT '结束时间',
+  user_type varchar(100) not null DEFAULT '' COMMENT '使用人类型 用,隔开',
+  create_time TIMESTAMP DEFAULT current_timestamp COMMENT '创建时间',
+  PRIMARY KEY (id)
+) ENGINE = innodb CHARSET = utf8;
+
+/*优惠券对应品牌*/
+DROP TABLE IF EXISTS coupon_brand;
+CREATE TABLE IF NOT EXISTS coupon_brand (
+  id INT NOT NULL AUTO_INCREMENT,
+  coupon_id INT NOT NULL DEFAULT 0 COMMENT '优惠券id',
+  brand_id INT NOT NULL DEFAULT 0 COMMENT '品牌id',
+  create_time TIMESTAMP DEFAULT current_timestamp COMMENT '创建时间',
+  PRIMARY KEY (id)
+) ENGINE = innodb CHARSET = utf8;
+
+/*会员优惠券记录*/
+DROP TABLE IF EXISTS user_coupon;
+CREATE TABLE IF NOT EXISTS user_coupon (
+  id INT NOT NULL AUTO_INCREMENT,
+  user_id INT NOT NULL DEFAULT 0 COMMENT '用户id',
+  coupon_id INT NOT NULL DEFAULT 0 COMMENT '优惠券id',
+  num int not NULL DEFAULT 1 COMMENT '优惠券数量',
+  PRIMARY KEY (id)
+) ENGINE = innodb CHARSET = utf8;

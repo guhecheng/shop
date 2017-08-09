@@ -135,4 +135,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::post("/modify", 'AdminController@modify');
 
     Route::get('/capital', 'CapitalController@index');
+
+    Route::get('/brand', 'BrandController@index');
+    Route::get('/coupon', 'CouponController@index');
+    Route::any('/coupon/add', 'CouponController@add');
 });
