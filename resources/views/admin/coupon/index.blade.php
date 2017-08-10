@@ -24,27 +24,53 @@
                             <thead>
                             <tr>
                                 <th>序号</th>
-                                <th>图片</th>
-                                <th>操作</th>
+                                <th>发放时间</th>
+                                <th>类型</th>
+                                <th>使用范围</th>
+                                <th>使用时间</th>
+                                <th>使用者</th>
+                                <th>发放者</th>
                             </tr>
                             </thead>
                             <tbody class="type_tbody" id="type_tbody">
                             @if (!$coupons->isEmpty())
                                 @foreach($coupons as $coupon)
-                                    <tr data-id="{{ $coupon->coupon_name }}">
-                                        <td><img src="{{ $coupon->coupon_img }}" width="80" height="80"/></td>
+                                    <tr data-id="{{ $coupon->id }}">
+                                        <td>{{ $coupon->id }}</td>
+                                        <td>{{ $coupon->create_time }}</td>
+                                        <td>满{{ $coupon->goods_price }}减{{ $coupon->discount_price }}</td>
                                         <td>
-                                            <button type="button" class="btn btn-primary modify-btn" attr-id="{{ $coupon->id }}">修改</button>
-                                            <button type="button" class="btn btn-primary del-btn" attr-id="{{ $coupon->id }}">删除</button>
-                                            <a href="/admin/property?typeid={{ $coupon->id }}"><button type="button" class="btn btn-primary" attr-id="{{ $type->typeid }}">属性操作</button></a>
+                                            <?php
+                                                if (!empty($coupon->brand)) {
+                                                    $coupon_brand = explode(',', $coupon->brand . ',');
+                                                    foreach ($brands as $brand) {
+                                                        foreach ($coupon_brand as $item) {
+                                                            if ($item == $brand->id)
+                                                                echo $brand->brand_name, "&nbsp;&nbsp;";
+                                                        }
+                                                    }
+                                                }
+                                            ?>
                                         </td>
+                                        <td>
+                                            <?php
+                                                $user_type = explode(',', $coupon->user_type);
+                                                foreach ($type as $key=>$item) {
+                                                    foreach ($user_type as $value)
+                                                        if ($value == $key)
+                                                            echo $item, "&nbsp;&nbsp;";
+                                                }
+                                            ?>
+                                        </td>
+                                        <td>{{ $coupon->start_date }}至{{ $coupon->end_date }}</td>
+                                        <td>{{ $coupon->name }}</td>
                                     </tr>
                                 @endforeach
                             @endif
                             </tbody>
                             <tfoot>
                             <tr>
-                                <td rowspan="3">
+                                <td rowspan="6d">
                                     {{ $coupons->links() }}
                                 </td>
                             </tr>

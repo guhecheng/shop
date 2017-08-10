@@ -15,11 +15,38 @@ use Mockery\Exception;
 
 class CouponController extends Controller
 {
+    private $type = [
+        0 => '普通用户',
+        1 => '普通会员',
+        2 => '黄金会员',
+        3 => '铂金会员',
+        4 => '钻石会员'
+    ];
     public function index() {
-        $coupons = DB::table('coupon')->paginate(10);
+        $coupons = DB::table('coupon')
+            ->leftJoin('adminuser', 'adminuser.admin_id', '=', 'coupon.add_uid')
+            ->orderBy('id', 'desc')
+            ->select('coupon.*', 'adminuser.name')
+            ->paginate(10);
+        if (!empty($coupons)) {
+            $ids = [];
+            foreach ($coupons as $coupon) {
+                $ids[] = $coupon->id;
+            }
+            $sql = "select group_concat(brand_id) brands,coupon_id from coupon_brand where coupon_id in (".implode(',', $ids).") group by coupon_id";
+            $coupon_brand = DB::select($sql);
+            if ($coupon_brand) {
+                foreach ($coupons as &$coupon) {
+                    foreach ($coupon_brand as $brand) {
+                        var_dump($brand);
+                        if ($brand->coupon_id == $coupon->id)
+                            $coupon->brand = $brand->brands;
+                    }
+                }
+            }
+        }
         $brands = DB::table('brands')->where('is_del', '0')->orderBy('sort')->get();
-
-        return view('admin.coupon.index', ['coupons' => $coupons, 'brands' => $brands]);
+        return view('admin.coupon.index', ['coupons' => $coupons, 'brands' => $brands, 'type'=>$this->type]);
     }
 
 
@@ -40,7 +67,8 @@ class CouponController extends Controller
                 'discount_price' => trim($discount_price) * 100,
                 'start_date' => date("Y-m-d", strtotime(trim($start_date))),
                 'end_date' => date("Y-m-d", strtotime(trim($end_date))),
-                'user_type' => implode(",", $user_type)
+                'user_type' => implode(",", $user_type),
+                'add_uid' => session("sysuid")
             ]);
             if (empty($id))
                 throw new Exception('优惠券创建失败');

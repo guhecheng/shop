@@ -31,12 +31,13 @@
                             <tbody class="type_tbody" id="type_tbody">
                             @if (!$brands->isEmpty())
                             @foreach($brands as $brand)
-                                <tr data-id="{{ $brand->brand_name }}">
+                                <tr data-id="">
+                                    <td>{{ $brand->brand_name }}</td>
                                     <td><img src="{{ $brand->brand_img }}" width="80" height="80"/></td>
                                     <td>
                                         <button type="button" class="btn btn-primary modify-btn" attr-id="{{ $brand->id }}">修改</button>
                                         <button type="button" class="btn btn-primary del-btn" attr-id="{{ $brand->id }}">删除</button>
-                                        <a href="/admin/property?typeid={{ $brand->id }}"><button type="button" class="btn btn-primary" attr-id="{{ $type->typeid }}">属性操作</button></a>
+                                        <a href="/admin/property?typeid={{ $brand->id }}"><button type="button" class="btn btn-primary" attr-id="{{ $brand->id }}">属性操作</button></a>
                                     </td>
                                 </tr>
                             @endforeach

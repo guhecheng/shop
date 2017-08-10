@@ -372,6 +372,7 @@ CREATE TABLE IF NOT EXISTS coupon (
   start_date date COMMENT '开始时间',
   end_date DATE COMMENT '结束时间',
   user_type varchar(100) not null DEFAULT '' COMMENT '使用人类型 用,隔开',
+  add_uid int NOT NULL DEFAULT 0 COMMENT '添加者id',
   create_time TIMESTAMP DEFAULT current_timestamp COMMENT '创建时间',
   PRIMARY KEY (id)
 ) ENGINE = innodb CHARSET = utf8;
