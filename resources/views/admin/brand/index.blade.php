@@ -73,6 +73,7 @@
                 <h4 class="modal-title">添加品牌</h4>
             </div>
             <div class="modal-body">
+                <form action="/admin/brand/add" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="cardname" class="col-sm-2 control-label">品牌名</label>
                     <div class="col-sm-10">
@@ -81,9 +82,10 @@
                     <br clear="all" />
                 </div>
                 <div class="form-group">
-                    <label for="cardname" class="col-sm-2 control-label">品牌名</label>
+                    <label for="cardname" class="col-sm-2 control-label">品牌图片</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" name="brand_name" id="brand_name" placeholder="请输入品牌名">
+                        <input type="file" name="img" id="img" />
+                        <img src="" id="image_show" width="200px" height="100px">
                     </div>
                     <br clear="all" />
                 </div>
@@ -128,6 +130,7 @@
                 <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
                 <input type="submit" class="btn btn-primary add_type" value="添加" />
             </div>
+            </form>
         </div>
         <!-- /.modal-content -->
     </div>
@@ -140,24 +143,67 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">编辑种类</h4>
+                <h4 class="modal-title">添加品牌</h4>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label for="cardname" class="col-sm-2 control-label">种类名</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" name="typename" id="edit_typename" placeholder="请输入种类名">
+                <form action="/admin/brand/add" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="cardname" class="col-sm-2 control-label">品牌名</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="brand_name" id="brand_name" placeholder="请输入品牌名">
+                        </div>
+                        <br clear="all" />
                     </div>
-                </div>
-                <input type="hidden" id="typeid" value="" name="typeid" />
-                <input type="hidden" id="item" value="" name="item" />
+                    <div class="form-group">
+                        <label for="cardname" class="col-sm-2 control-label">品牌图片</label>
+                        <div class="col-sm-10">
+                            <input type="file" name="img" id="img" />
+                            <img src="" id="image_show" width="200px" height="100px">
+                        </div>
+                        <br clear="all" />
+                    </div>
+                    <div class="form-group">
+                        <label for="cardname" class="col-sm-2 control-label">普通用户折扣</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="common_discount" id="common_discount" placeholder="请输入折扣">
+                        </div>
+                        <br clear="all" />
+                    </div>
+                    <div class="form-group">
+                        <label for="cardname" class="col-sm-2 control-label">普通会员折扣</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="ordinary_discount" id="ordinary_discount" placeholder="请输入折扣">
+                        </div>
+                        <br clear="all" />
+                    </div>
+                    <div class="form-group">
+                        <label for="cardname" class="col-sm-2 control-label">黄金会员折扣</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="golden_discount" id="golden_discount" placeholder="请输入折扣">
+                        </div>
+                        <br clear="all" />
+                    </div>
+                    <div class="form-group">
+                        <label for="cardname" class="col-sm-2 control-label">铂金会员折扣</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="platinum_discount" id="platinum_discount" placeholder="请输入折扣">
+                        </div>
+                        <br clear="all" />
+                    </div>
+                    <div class="form-group">
+                        <label for="cardname" class="col-sm-2 control-label">钻石会员折扣</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="diamond_discount" id="diamond_discount" placeholder="请输入折扣">
+                        </div>
+                        <br clear="all" />
+                    </div>
                 {{ csrf_field() }}
-                <br clear="all" />
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-                <input type="submit" class="btn btn-primary update_btn" value="修改" />
+                <input type="submit" class="btn btn-primary add_type" value="添加" />
             </div>
+            </form>
         </div>
         <!-- /.modal-content -->
     </div>
@@ -201,14 +247,40 @@
 <script src="/js/jquery.dragsort-0.5.2.min.js"></script>
 
 <script type="text/javascript">
+    function getFileUrl(sourceId) {
+        var url;
+        if (navigator.userAgent.indexOf("MSIE")>=1) { // IE
+            url = document.getElementById(sourceId).value;
+        } else if(navigator.userAgent.indexOf("Firefox")>0) { // Firefox
+            url = window.URL.createObjectURL(document.getElementById(sourceId).files.item(0));
+        } else if(navigator.userAgent.indexOf("Chrome")>0) { // Chrome
+            url = window.URL.createObjectURL(document.getElementById(sourceId).files.item(0));
+        }
+        return url;
+    }
+
+    /**
+     * 将本地图片 显示到浏览器上
+     */
+    function preImg(sourceId, targetId) {
+        var url = getFileUrl(sourceId);
+        var imgPre = document.getElementById(targetId);
+        imgPre.src = url;
+    }
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
     $(function() {
+        $("#img").on("change", function () {
+            preImg("img", "image_show");
+        });
         $(".add-btn").on("click", function() {
             $("#add-modal").modal('show');
+        });
+        $(document).on("click", ".del-btn", function () {
+
         });
         $(document).on("click", ".modify-btn", function () {
             var attr_id = $(this).attr("attr-id");
@@ -221,13 +293,12 @@
 
         $(document).on("click", ".del-btn", function() {
             if (!confirm('确定删除?')) return ;
-            var typeid = $(this).attr("attr-id");
-            if (typeid == '' || typeof typeid == 'undefined') return false;
+            var brand_id = $(this).attr("attr-id");
+            if (brand_id == '' || typeof brand_id == 'undefined') return false;
             var that = $(this);
-
             $.ajax({
-                url:'/admin/type/delete',
-                data: {'typeid': typeid},
+                url:'/admin/brand/del',
+                data: {'brand_id': brand_id},
                 type:"get",
                 dataType:'json',
                 success: function(data) {
