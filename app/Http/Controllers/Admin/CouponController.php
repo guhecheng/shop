@@ -33,6 +33,7 @@ class CouponController extends Controller
             foreach ($coupons as $coupon) {
                 $ids[] = $coupon->id;
             }
+            if (empty($ids)) exit('没有添加品牌');
             $sql = "select group_concat(brand_id) brands,coupon_id from coupon_brand where coupon_id in (".implode(',', $ids).") group by coupon_id";
             $coupon_brand = DB::select($sql);
             if ($coupon_brand) {
