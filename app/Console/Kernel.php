@@ -35,10 +35,11 @@ class Kernel extends ConsoleKernel
             file_put_contents('cron.log', date("Y-m-d H:i:s") . var_export($orders, true) . PHP_EOL, FILE_APPEND);
             if ($orders->isEmpty()) return;
             foreach ($orders as $order) {
+                DB::table('orderinfo')->where('order_no', $order->order_no)->update(['status' => 6]);
+                DB::table('user')->where('userid', $order->uid)->increment('score', $order->score);
                 $item = DB::table('order')->where('order_no', $order->order_no)->select('skuid', 'count')->get();
                 foreach ($item as $key=>$value) {
                     DB::table('goodssku')->where('sku_id', $value->skuid)->increment('num', $value->count);
-                    DB::table('orderinfo')->where('order_no', $order->order_no)->update(['status' => 5]);
                 }
             }
         })->everyTenMinutes();

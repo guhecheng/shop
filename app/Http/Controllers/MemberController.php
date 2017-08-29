@@ -18,12 +18,9 @@ use Illuminate\Support\Facades\Log;
 class MemberController extends Controller {
     private $card_redis = 'card:list';
     public function card(Request $request) {
-        $uid = $request->session()->get('uid');
-        $user = DB::table("user")->where('userid', $uid)->first();
+        $user = DB::table("user")->where('userid', $request->session()->get('uid'))->first();
         $card = DB::table('card')->select('card_img')->where([ ['is_delete', '=',  0], ['card_level', '=', $user->level]])->first();
-        return view('card', ['card_no'=>$user->card_no,
-            'level' => $user->level,
-            'card' => $card]);
+        return view('card', ['card_no'=>$user->card_no,  'level' => $user->level, 'card' => $card]);
     }
 
     public function collect(Request $request) {
@@ -120,15 +117,17 @@ class MemberController extends Controller {
                     if (empty($user)) {
                         throw new \Exception('用户不存在');
                     }
-                    $level = 0;
-                    if ($user->level < 3) {
+
+                    if ($user->level < 4) {
                         $money = DB::table('usertransmoney')->where([
                             ['uid', '=', $user->userid],
+                            ['trans_type', '=', 1],
                             ['create_time', '>=', date("Y-m-d H:i:s", strtotime("-1 year"))]
                         ])->sum('trans_money');
                         $card = DB::table('card')->where([
-                            ['is_delete', '=>', 0],
-                            ['card_score', '<=', $money / 100]
+                            ['is_delete', '=', 0],
+                            ['card_id', '!=', 5],
+                            ['card_score', '<=', intval($money / 100)]
                         ])->orderBy('card_level', 'desc')->select('card_level')->limit(1)->first();
                         if (!empty($card->card_level)) {
                             $level = $user->level > $card->card_level ? $user->level : $card->card_level;
@@ -139,9 +138,10 @@ class MemberController extends Controller {
 
                     if (empty($user->card_no)) {
                         $card_no = DB::table("user")->max("card_no");
-                        if (empty($card_no)) {
+                        if (!empty($card_no)) {
                             $card_no = str_pad(intval($card_no) + 1, 8, "0", STR_PAD_LEFT);
-                        }
+                        } else
+                            $card_no = '00000001';
                     } else {
                         $card_no = $user->card_no;
                     }

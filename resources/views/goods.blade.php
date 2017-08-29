@@ -20,17 +20,34 @@
                 <div class="goods-content-header">
                     <div class="goods-content-name">{{ $goods->goodsname }}</div>
                     <div class="goods-content-price">
-                        @if (empty($goods->act_price))
-                        <span>￥ {{ $goods->price / 100 }}</span>
-                        @else
-                        <span>￥ {{ $goods->act_price / 100 }}</span>
-                        <span style="margin-left:0.2rem;color:#000;font-size: 0.6rem;">原价: {{ $goods->price/100 }}</span>
+                        <div>
+                            <span>￥ {{ $goods->price / 100 }}</span>
+                            @if (!empty($goods->act_price))
+                            <span style="margin-left:0.2rem;color:#000;font-size: 0.6rem;">原价: {{ $goods->act_price /100 }}</span>
+                            @endif
+                        </div>
+                        <div>库存 {{ $count }}</div>
+                    </div>
+                    @if ($goods->ordinary_discount && $goods->golden_discount && $goods->platinum_discount && $goods->diamond_discount)
+                    <div class="goods-content-discount">
+                        @if ($goods->ordinary_discount)
+                        <div>普通会员<span style="color:red;">{{ $goods->ordinary_discount / 10 }}折: {{ $goods->ordinary_discount / 100 * $goods->price / 100 }}</span></div>
+                        @endif
+                        @if ($goods->golden_discount)
+                        <div>黄金会员<span style="color:red;">{{ $goods->golden_discount / 10 }}折: {{ $goods->golden_discount / 100 * $goods->price / 100 }}</span></div>
+                        @endif
+                        @if ($goods->platinum_discount)
+                        <div>铂金会员<span style="color:red;">{{ $goods->platinum_discount / 10 }}折: {{ $goods->platinum_discount / 100 * $goods->price / 100 }}</span></div>
+                        @endif
+                        @if ($goods->diamond_discount)
+                        <div>钻石会员<span style="color:red;">{{ $goods->diamond_discount / 10 }}折: {{ $goods->diamond_discount / 100 * $goods->price / 100 }}</span></div>
                         @endif
                     </div>
+                    @endif
                     <div class="goods-content-detail">
-                        <div>满1000包邮</div>
+                        <div>满1000包邮|<span style="color:red;">充值会员全场包邮</span></div>
                         <div></div>
-                        <div>库存 {{ $count }}</div>
+
                         <br clear="both" />
                     </div>
                 </div>
@@ -102,6 +119,14 @@
         </div>
     </div>
     <style type="text/css">
+        .goods-content-price div:first-child {
+            float: left;
+        }
+        .goods-content-price div:last-child {
+            float: right; }
+        .goods-content-price:after, .goods-content-discount:after {
+            display:block;clear:both;content:"";visibility:hidden;height:0
+        }
         .goods-detail { margin-bottom: 3.2rem;}
         .goods_num {
             margin-bottom:1rem;}
@@ -184,10 +209,7 @@
         }
         body {
             position: relative;}
-        .goods-content-detail div {
-            float: left;
-            width: 33%;
-        }
+        .goods-content-detail div { float: left; line-height: 2rem; }
     </style>
     <script>
         $(function() {

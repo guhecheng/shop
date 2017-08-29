@@ -25,6 +25,7 @@ Route::any('/card/notify', 'MemberController@notify');
 Route::any('/order/wxnotify', 'OrderController@wxnotify');
 
 Route::group(['middleware' => 'userlogin'], function (){
+    Route::get('/type', 'IndexController@type');
     Route::get('/my', 'UserController@index');
     Route::get('/money', 'UserController@money');
     Route::get('/score', 'UserController@score');
@@ -53,12 +54,14 @@ Route::group(['middleware' => 'userlogin'], function (){
     Route::any('/order/repay', 'OrderController@repay');
     Route::any('/order/ajaxGetGoods', 'OrderController@ajaxGetGoods');
     Route::any('/order/changeorder', 'OrderController@changeorder');
+    Route::any('/order/getcoupons', 'OrderController@getCoupons');
 
     Route::get('/info', 'UserController@info');
     Route::post('/relate', 'UserController@relate');
     Route::post('/modinfo', 'UserController@modinfo');
 
     Route::post('/modcar', 'CarController@modcar');
+    Route::get('/coupon', 'CouponController@index');
 });
 Route::get('/goods', 'GoodsController@index');
 Route::get('/goods/property', 'GoodsController@property');
@@ -81,6 +84,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::get('/user/delete', 'UserController@delete');
     Route::get('/user/usercard', 'UserController@usercard');
     Route::post('/user/addremark', 'UserController@addremark');
+    Route::post('/user/addmoney', 'UserController@addmoney');
 
     Route::get('/type', 'TypeController@index');
     Route::post('/type/add', 'TypeController@add');
@@ -106,6 +110,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::get("/goods/getproperty", 'GoodsController@getproperty');
     Route::post("/goods/upload", 'GoodsController@upload');
     Route::post("/goods/create", 'GoodsController@create');
+    Route::any('/goods/edit', 'GoodsController@edit');
 
     Route::get("/card/recharge", 'CardController@recharge');
     Route::resource("card", 'CardController');
@@ -121,6 +126,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::any('/userexport', 'UserController@userExport');
     Route::any('/user/upload', 'UserController@upload');
     Route::get('/user/info', 'UserController@info');
+    Route::post('/user/addmoney', 'UserController@addmoney');
 
     Route::get('/message', 'MessageController@index');
     Route::get('/message/delete', 'MessageController@delete');
@@ -131,13 +137,20 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::any('/order', 'OrderController@index');
     Route::post('/order/send', 'OrderController@send');
     Route::get('/order/export', 'OrderController@export');
+    Route::post('/order/getcoupons', 'OrderController@getCoupons');
 
     Route::post("/modify", 'AdminController@modify');
 
     Route::get('/capital', 'CapitalController@index');
+    Route::get('/capital/backup', 'CapitalController@backup');
 
     Route::get('/brand', 'BrandController@index');
     Route::any('/brand/add', 'BrandController@add');
+    Route::any('/brand/mod', 'BrandController@mod');
+    Route::get('/brand/getbrand', 'BrandController@getBrand');
+    Route::get('/brand/del', 'BrandController@del');
     Route::get('/coupon', 'CouponController@index');
     Route::any('/coupon/add', 'CouponController@add');
+
+    Route::post('/goods/gettypesbybrand', 'GoodsController@getTypesByBrand');
 });

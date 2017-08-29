@@ -37,7 +37,7 @@
                                 <td><img src="{{ $card->card_img }}" width="60" height="60"/></td>
                                 <td>
                                     <button type="button" class="btn btn-primary modify-btn" attr-id="{{ $card->card_id }}">修改</button>
-                                    <button type="button" class="btn btn-primary del-btn" attr-id="{{ $card->card_id }}">删除</button>
+                                    <!--<button type="button" class="btn btn-primary del-btn" attr-id="{{ $card->card_id }}">删除</button>-->
                                 </td>
                             </tr>
                             @endforeach
@@ -151,7 +151,9 @@
 
 <div class="control-sidebar-bg"></div>
 </div>
-
+<style type="text/css">
+    .modal-body:after,.form-group:after { display:block;clear:both;content:"";visibility:hidden;height:0 }
+</style>
 <script src="/css/admin/plugins/jQuery/jquery-2.2.3.min.js"></script>
 <!-- Bootstrap 3.3.6 -->
 <script src="/css/admin/bootstrap/js/bootstrap.min.js"></script>

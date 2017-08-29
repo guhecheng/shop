@@ -7,7 +7,7 @@
  */
 namespace App\Http\Controllers;
 
-use Illuminate\Pagination\Paginator;
+use model\parter\emp\emp;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -142,12 +142,14 @@ class OrderController extends Controller {
         $orderno = date("Ymd") . mt_rand(1000, 9999) . ($count + 1);
 
         if ($request->input('skuid')) {
-            $sql = "select goods.goodsname, goods.goodsicon, goods.is_delete as goods_delete, goods.price, goods.is_discount,
+            $sql = "select goods.goodsname, goods.goodsicon, goods.is_delete as goods_delete, goods.price, goods.is_discount,goods.brand_id,
+                    goods.common_discount, goods.ordinary_discount, goods.golden_discount, goods.platinum_discount, goods.diamond_discount,
                     goodssku.num, goodssku.price as sku_price, goods.goodsid,goodssku.sku_id from goods left join goodssku on goods.goodsid=goodssku.goods_id
                     where goods.goodsid=".$request->input('goodsid') . " and goodssku.sku_id=".$request->input('skuid');
             $goods = DB::select($sql);
         } else {
-            $sql = "select cart.*, goods.goodsname, goods.goodsicon, goods.is_delete as goods_delete, goods.price, goods.is_discount,
+            $sql = "select cart.*, goods.goodsname, goods.goodsicon, goods.is_delete as goods_delete, goods.price, goods.is_discount,goods.brand_id,
+                goods.common_discount, goods.ordinary_discount, goods.golden_discount, goods.platinum_discount, goods.diamond_discount,
                 goodssku.num, goodssku.price as sku_price,goodssku.sku_id from cart left join goods on goods.goodsid=cart.goodsid 
                 left join goodssku on goodssku.sku_id=cart.skuid where cart.uid=$uid and cart.is_delete=0 and 
                 cart.cartid in (".rtrim($car_ids,',').")";
@@ -205,6 +207,7 @@ class OrderController extends Controller {
                 left join goods on goods.goodsid=gp.goods_id
                 where gp.sku_id in (".implode(',', $skuids).")";
         $skus = DB::select($sql);
+        $brand_ids = [];
         foreach ($goods as &$item) {
             $item->property = '';
             foreach ($skus as $value) {
@@ -212,11 +215,17 @@ class OrderController extends Controller {
                     $item->goodsicon = $value->goodsicon;
                     $item->goodsname = $value->goodsname;
                     $item->is_discount = $value->is_discount;
+                    $item->brand_id = $value->brand_id;
+                    $item->common_discount = $value->common_discount;
+                    $item->ordinary_discount = $value->ordinary_discount;
+                    $item->golden_discount = $value->golden_discount;
+                    $item->platinum_discount = $value->platinum_discount;
+                    $item->diamond_discount = $value->diamond_discount;
                     $item->property .= $value->value_name . " ";
+                    $item->brands = DB::table('brands')->where('id', $value->brand_id)->first();
                 }
             }
         }
-
         $user = DB::table('user')->where('userid', $request->session()->get('uid'))->first();
         return view('order.create', ['goods' => $goods, 'user'=>$user, 'address'=>$address, 'orderno' => $orderno, 'order'=>$order]);
     }
@@ -239,9 +248,10 @@ class OrderController extends Controller {
         $address_id = $request->input('address_id');
         $order_no = $request->input('order_no');
         $express_price = $request->input('express_price');
-        $discount_price = $request->input('discount_price');
         $score = $request->input('score');
         $price = $request->input('price');
+        $coupon_id = $request->input('coupon_id');
+        $coupon_discount = $request->input('coupon_discount');
         if (empty($address_id)) {
             return response()->json(['rs' => 0, 'errmsg' => "请先选择地址"]);
         }
@@ -254,13 +264,7 @@ class OrderController extends Controller {
             if (!$order || $order->status != $this->state['ORDER_CREATE']) {
                 throw new \Exception("订单不存在");
             }
-            if (!empty($order->car_ids)) {
-                $rs = DB::table('cart')->whereIn('cartid', explode(",", rtrim($order->car_ids, ',')))->update([
-                    'is_delete' => 1
-                ]);
-                if (!$rs)
-                    throw new \Exception("删除购物车失败");
-            }
+
             $address = DB::table('useraddress')->where('address_id', $address_id)->first();
             if (!$address) {
                 throw new \Exception("地址信息错误");
@@ -273,18 +277,26 @@ class OrderController extends Controller {
                 'pay_type' => 0,
                 'status' => $this->state['ORDER_WAIT_PAY'],
                 'pay_time' => date("Y-m-d H:i:s"),
-                'exchange_score' => empty($score) ? 0 : $score,
                 'price' => $price * 100,
+                'score' => empty($score) ? 0 : $score,
                 'express_price' => empty($express_price) ? 0 : $express_price,
-                'discount_price' => empty($discount_price) ? 0 : $discount_price,
-                'discount' => $user->level == 1 ? 90 : ($user->level ==2 ? 85 : $user->level ==3 ? 80 : 0),
                 'recv_name' => $address->name,
                 'phone' => $address->phone,
-                'location' => $address->location
+                'location' => $address->location,
+                'coupon_id' => empty($coupon_id) ? 0 : $coupon_id
             ]);
             if (!$rs)
                 throw new \Exception('修改订单状态失败');
 
+            if (!empty($coupon_id)) {
+                DB::table('user_coupon')->where(['user_id'=>$request->session()->get("uid"), "coupon_id" => $coupon_id])->update(['status'=>1]);
+            }
+            if (!empty($score)) {
+                if ($user->score < $score)
+                    throw new \Exception('积分不够');
+
+                DB::table('user')->where('userid', $user->userid)->decrement('score', $score);
+            }
             DB::commit();
         } catch (\Exception $e) {
             Log::info($e->getMessage());
@@ -317,26 +329,32 @@ class OrderController extends Controller {
     public function wxnotify(Request $request) {
         $response = $this->app->payment->handleNotify(function($notify, $successful){
             // 使用通知里的 "微信支付订单号" 或者 "商户订单号" 去自己的数据库找到订单
-            //$order = 查询订单($notify->out_trade_no);
             $order = DB::table('orderinfo')->where('order_no', $notify->out_trade_no)->first();
             if (!$order) { // 如果订单不存在
-                return 'Order not exist.'; // 告诉微信，我已经处理完了，订单没找到，别再通知我了
+                return 'Order not exist.';
             }
             // 如果订单存在
             // 检查订单是否已经更新过支付状态
-            if ($order->status == $this->state['ORDER_WAIT_SEND']) { // 假设订单字段“支付时间”不为空代表已经支付
+            if ($order->status == $this->state['ORDER_WAIT_SEND']) {
                 return true; // 已经支付成功了就不再更新了
             }
             // 用户是否支付成功
             if ($successful) {
+                DB::beginTransaction();
                 try {
-                    DB::beginTransaction();
                     $info = DB::table('orderinfo')->where('info_id', $order->info_id)->update([
                         'status' => $this->state['ORDER_WAIT_SEND'],
                         'pay_time' => date("Y-m-d H:i:s"),
                     ]);
                     if (!$info) {
                         throw new \Exception("修改订单状态失败");
+                    }
+                    if (!empty($info->car_ids)) {
+                        $rs = DB::table('cart')->whereIn('cartid', explode(",", rtrim($order->car_ids, ',')))->update([
+                            'is_delete' => 1
+                        ]);
+                        if (!$rs)
+                            throw new \Exception("删除购物车失败");
                     }
                     $trans['insert'] = DB::table('usertransmoney')->insert([
                         'uid'   => $order->uid,
@@ -347,52 +365,17 @@ class OrderController extends Controller {
                     if (!$trans['insert'])
                         throw new \Exception('操作失败');
 
-                    if (!empty($order->exchange_score)) {
-                        $score = DB::table('scorechange')->insert([
-                            'type' => 2,
-                            'score' => $order->exchange_score,
-                            'uid' => $order->uid
-                        ]);
-                    }
-
-                    $score = DB::table('scorechange')->insert([
-                        'type' => 0,
-                        'paytype' => 1,
-                        'score' => intval($order->price / 100),
-                        'uid' => $order->uid
-                    ]);
-
                     $user = DB::table('user')->where("userid", $order->uid)->first();
                     if (empty($user)) {
                         throw new \Exception('用户不存在');
-                    }
-                    $level = 0;
-                    if ($user->level < 3) {
-                        $money = DB::table('usertransmoney')->where([
-                            ['uid', '=', $user->userid],
-                            ['create_time', '>=', date("Y-m-d H:i:s", strtotime("-1 year"))],
-                            []
-                        ])->sum('trans_money');
-                        $card = DB::table('card')->where([
-                            ['is_delete', '=>', 0],
-                            ['card_score', '<=', $money / 100]
-                        ])->orderBy('card_level', 'desc')->select('card_level')->limit(1)->first();
-                        if (!empty($card->card_level)) {
-                            $level = $user->level > $card->card_level ? $user->level : $card->card_level;
-                        }  else
-                            $level = $user->level;
                     } else
-                        $level = $user->level;
+                        DB::table('user')->where('userid', $order->uid)->decrement('score', $order->score);
 
-                    $user_rs = DB::table('user')->where("userid", $order->uid)->update([
-                        'level' => $level,
-                        'score' => $user->score + $order->price
-                    ]);
-                    if (!$user_rs) {
-                        throw new \Exception("修改用户金额失败");
-                    }
+                    if (!empty($score)) DB::table('scorechange')->insert([ 'uid'=>$order->uid, 'score'=>$score, 'type'=>2, 'paytype'=>1 ]);
+
                     DB::commit();
                 } catch (\Exception $e) {
+                    Log::info($e->getMessage());
                     DB::rollback();
                 }
             } else { // 用户支付失败
@@ -407,14 +390,16 @@ class OrderController extends Controller {
         $address_id = $request->input('address_id');
         $order_no = $request->input('order_no');
         $express_price = $request->input('express_price');
-        $discount_price = $request->input('discount_price');
         $score = $request->input('score');
-        $price = $request->input('price');
+        $price = $request->input('price');              // 金额
+        $coupon_id = $request->input('coupon_id');      // 优惠券id
+
         if (empty($address_id) || empty($order_no) || empty($price)) {
             return response()->json(['rs' => 0, 'errmsg' => "订单出现异常"]);
         }
+
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
             $order = DB::table('orderinfo')->where('order_no', $order_no)->first();
             if (!$order || $order->status >= $this->state['ORDER_WAIT_SEND']) {
                 throw new \Exception("订单不存在");
@@ -426,62 +411,49 @@ class OrderController extends Controller {
                 if (!$rs)
                     throw new \Exception("删除购物车失败");
             }
-            $address = DB::table('useraddress')->where('address_id', $address_id)->first();
-
-            if (!$address) {
+            if (! $address = DB::table('useraddress')->where('address_id', $address_id)->first())
                 throw new \Exception("地址信息错误");
-            }
-            $user = DB::table("user")->where("userid", $order->uid)->first();
-            if (!$user) {
+
+            if (!($user = DB::table("user")->where("userid", $order->uid)->first())) {
                 throw new \Exception('用户不存在');
             }
             $rs = DB::table('orderinfo')->where('info_id', $order->info_id)->update([
                 'pay_type' => 1,
                 'status' => $this->state['ORDER_WAIT_SEND'],
                 'pay_time' => date("Y-m-d H:i:s"),
-                'exchange_score' => empty($score) ? 0 : $score,
                 'price' => $price * 100,
+                'score' => empty($score) ? 0 : $score,
                 'express_price' => empty($express_price) ? 0 : $express_price,
-                'discount_price' => empty($discount_price) ? 0 : $discount_price,
-                'discount' => $user->level == 1 ? 90 : ($user->level ==2 ? 85 : $user->level ==3 ? 80 : 0),
                 'recv_name' => $address->name,
                 'phone' => $address->phone,
-                'location' => $address->location
+                'location' => $address->location,
+                'coupon_id' => empty($coupon_id) ? 0 : $coupon_id
             ]);
+
             if (!$rs)
                 throw new \Exception('修改订单状态失败');
+
             $trans['insert'] = DB::table('usertransmoney')->insert([
                 'uid'   => $order->uid,
                 'trans_type'    => 0,
                 'trans_money' => $order->price,
                 'order_no' => $order_no
             ]);
-            $score = DB::table('scorechange')->insert([
-                'type' => 0,
-                'paytype' => 2,
-                'score' => intval($order->price / 100),
-                'uid' => $order->uid
-            ]);
-            if (!empty($score)) {
-                if ($user && $user->score >= $score) {
-                    $rs = DB::table('user')->where('userid', $order->uid)->update([
-                        'score' => $user->score + ($price - $score) * 100                                                                 ,
-                        'money' => $user->money - $price * 100
-                    ]);
-                    if (!$rs)
-                        throw new \Exception('修改订单状态失败');
-                    $score = DB::table('scorechange')->insert([
-                        'type' => 2,
-                        'score' => $score,
-                        'uid' => $order->uid
-                    ]);
-                }
+            if (!$trans['insert'])
+                throw new \Exception('操作失败');
 
-                if (!$trans['insert'])
-                    throw new \Exception('操作失败');
-
-
+            if (!empty($price)) {
+                if (!DB::table('user')->where('userid', $order->uid)->update([
+                        'money' => $user->money - $price * 100,
+                        'score' => $user->score - $score
+                    ]))
+                    throw new \Exception('修改订单状态失败');
             }
+
+            if (!empty($coupon_id)) {
+                DB::table('user_coupon')->where(['user_id' => $order->uid, 'coupon_id' => $coupon_id])->update(['status' => 1]);
+            }
+            if (!empty($score)) DB::table('scorechange')->insert([ 'uid'=>$order->uid, 'score'=>$score, 'type'=>2, 'paytype'=>2 ]);
             DB::commit();
             return response()->json(['rs' => 1]);
         } catch (\Exception $e) {
@@ -496,10 +468,9 @@ class OrderController extends Controller {
         if (empty($orderno)) {
             exit('订单已失效');
         }
-        $order = DB::table('orderinfo')->where('order_no', $orderno)->first();
-
+        $order = DB::table('orderinfo')->leftJoin('coupon', 'coupon.id', '=', 'orderinfo.coupon_id')
+            ->select('orderinfo.*', 'coupon.discount_price')->where('order_no', $orderno)->first();
         $goods = DB::table('order')->where('order.order_no', $orderno)->get();
-        $skuids = '';
         $skuids = [];
         foreach ($goods as $item) {
             $skuids[] = $item->skuid;
@@ -517,12 +488,17 @@ class OrderController extends Controller {
                     $item->goodsicon = $value->goodsicon;
                     $item->goodsname = $value->goodsname;
                     $item->property .= $value->value_name . " ";
+                    $item->common_discount = $value->common_discount;
+                    $item->ordinary_discount = $value->ordinary_discount;
+                    $item->golden_discount = $value->golden_discount;
+                    $item->platinum_discount = $value->platinum_discount;
+                    $item->diamond_discount = $value->diamond_discount;
                 }
             }
         }
-
+        $coupon = DB::table('coupon')->where('id', $order->coupon_id)->first();
         $user = DB::table('user')->where('userid', $request->session()->get('uid'))->first();
-        return view('order.show', ['order'=>$order, 'goods'=>$goods, 'user'=>$user]);
+        return view('order.show', ['order'=>$order, 'goods'=>$goods, 'user'=>$user, 'coupon' => $coupon]);
     }
 
     /**
@@ -531,14 +507,13 @@ class OrderController extends Controller {
      * @param Request $request
      */
     public function freepay(Request $request) {
-        exit;
         $address_id = $request->input('address_id');
         $order_no = $request->input('order_no');
         $express_price = $request->input('express_price');
-        $discount_price = $request->input('discount_price');
+        $brand_id = $request->input('brand_id');
         $score = $request->input('score');
         $price = $request->input('price');
-        var_dump($score);
+        $coupon_id = $request->input('coupon_id');
         if (empty($address_id) || empty($order_no)) {
             return response()->json(['rs' => 0, 'errmsg' => "订单出现异常"]);
         }
@@ -570,14 +545,12 @@ class OrderController extends Controller {
                 'pay_type' => 2,
                 'status' => $this->state['ORDER_WAIT_SEND'],
                 'pay_time' => date("Y-m-d H:i:s"),
-                'exchange_score' => empty($score) ? 0 : $score,
                 'price' => 0,
                 'express_price' => empty($express_price) ? 0 : $express_price,
-                'discount_price' => empty($discount_price) ? 0 : $discount_price,
-                'discount' => $user->level == 1 ? 90 : ($user->level ==2 ? 85 : $user->level ==3 ? 80 : 0),
                 'recv_name' => $address->name,
                 'phone' => $address->phone,
-                'location' => $address->location
+                'location' => $address->location,
+                'coupon_id' => $coupon_id
             ]);
             if (!$rs)
                 throw new \Exception('修改订单状态失败');
@@ -658,6 +631,40 @@ class OrderController extends Controller {
             return response()->json(['rs'=>0, 'errmsg'=>'操作失败']);
         }
         return response()->json(['rs'=>1]);
+    }
+
+    /**
+     * 获取对应用户的优惠券
+     */
+    public function getCoupons(Request $request) {
+        $brand_ids = $request->input('brand_ids');
+        $uid = $request->session()->get('uid');
+        $price = $request->input('price');
+        if (empty($brand_ids) || empty($uid) || empty($price)) exit;
+        $brand_ids = explode(',', $brand_ids);
+        $prices = explode(',', $price);
+        $today = date("Y-m-d");
+        $coupons = [];
+        foreach ($brand_ids as $key=>$brand_id) {
+            $where = "user_coupon.user_id={$uid} and coupon_brand.brand_id = ({$brand_id}) and status=0 and end_date>='{$today}' and start_date <='{$today}' and goods_price<={$prices[$key]}*100";
+            $brands = DB::table('brands')->where('is_del', 0)->get();
+            $sql = "select `user_coupon`.*, `coupon`.*, group_concat(coupon_brand.brand_id) as brand_ids from `user_coupon` left join `coupon` on `coupon`.`id` = `user_coupon`.`coupon_id` left join `coupon_brand` on `coupon_brand`.`coupon_id` = `coupon`.`id` where ({$where}) group by `coupon_brand`.`coupon_id` order by `coupon`.`start_date` desc";
+            $rs = DB::select($sql);
+            if (!empty($rs)) {
+                $coupon = $rs[0];
+                $ids = explode(',', $coupon->brand_ids);
+                $brand_names = [];
+                foreach ($brands as $brand) {
+                    if (in_array($brand->id, $ids))
+                        $brand_names[] = $brand->brand_name;
+                }
+                $coupon->brand_names = !empty($brand_names) ? implode(',', $brand_names) : '';
+                $coupon->start_date = date("Y年m月d日", strtotime($coupon->start_date));
+                $coupon->end_date = date("Y年m月d日", strtotime($coupon->end_date));
+                $coupons[] = $coupon;
+            }
+        }
+        return response()->json(['coupons'=>!empty($coupons) ? $coupons : '']);
     }
 
 }

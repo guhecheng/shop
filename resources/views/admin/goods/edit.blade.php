@@ -20,136 +20,137 @@
                     </div>
                     <!-- /.box-header -->
                     <form enctype="multipart/form-data" method="post" role="form" action="/admin/goods/create" onsubmit="return checkform()">
-                    <div class="box-body">
-                        <div class="form-group">
-                            <label for="goodsname" class="col-sm-2 control-label">商品名 <span class="is_must">*</span></label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="goodsname" name="goodsname" placeholder="请输入名字">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label for="goodsname" class="col-sm-2 control-label">商品名 <span class="is_must">*</span></label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="goodsname" name="goodsname" placeholder="请输入名字" value="{{ $goods->goodsname }}">
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="price" class="col-sm-2 control-label">售价 <span class="is_must">*</span></label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="goodsprice" name="goodsprice" placeholder="请输入价格（元)">
+                            <div class="form-group">
+                                <label for="price" class="col-sm-2 control-label">基本价 <span class="is_must">*</span></label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="goodsprice" name="goodsprice" value="{{ $goods->price / 100 }}" placeholder="请输入价格（元)">
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="price" class="col-sm-2 control-label">原价</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="act_price" name="act_price" placeholder="请输入价格（元)">
+                            <div class="form-group">
+                                <label for="price" class="col-sm-2 control-label">原价(可不填)</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="act_price" name="act_price" value="{{ $goods->act_price/100 }}"  placeholder="请输入价格（元)">
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="price" class="col-sm-2 control-label">封面 <span class="is_must">*</span></label>
-                            <div class="col-sm-10" id="logo_append_area">
-                                <div  class="logo_upload" style="width:80px;height: 80px;border:solid 1px #CCCCCC;position:relative;">
-                                    <input type="file" class="img_logo" style="opacity: 0;width:78px;height:78px;">
+                            <div class="form-group">
+                                <label for="price" class="col-sm-2 control-label">封面 <span class="is_must">*</span></label>
+                                <div class="col-sm-10" id="logo_append_area">
+                                    <div  class="logo_upload" style="width:80px;height: 80px;border:solid 1px #CCCCCC;position:relative;">
+                                        <input type="file" class="img_logo" style="opacity: 0;width:78px;height:78px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="price" class="col-sm-2 control-label">介绍图片 <span class="is_must">*</span></label>
+                                <div class="col-sm-10" id="img_append_area">
+                                    <div  class="img_upload">
+                                        <input type="file" class="img" style="opacity: 0;width:78px;height:78px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastname" class="col-sm-2 control-label">是否推荐</label>
+                                <div class="col-sm-10">
+                                    <input type="radio" name="is_hot" value="0" />否
+                                    <input type="radio" name="is_hot" value="1" />是
+                                </div>
+                                <br clear="all" />
+                            </div>
+                            <div class="form-group">
+                                <label for="lastname" class="col-sm-2 control-label">折扣</label>
+                                <div class="col-sm-10">
+                                    <div style="margin-bottom: 10px;">
+                                        <input type="text" id="common_discount" name="common_discount" placeholder="普通用户折扣" value="{{ $goods->common_discount ? $goods->common_discount / 10 : '' }}" style="margin-right:30px;" />
+                                        <input type="text" id="ordinary_discount" name="ordinary_discount" placeholder="普通会员折扣" value="{{ $goods->ordinary_discount ? $goods->ordinary_discount / 10 : '' }}"/>
+                                    </div>
+                                    <div style="margin-bottom: 10px;">
+                                        <input type="text" id="golden_discount" name="golden_discount" placeholder="黄金会员折扣" value="{{ $goods->golden_discount ? $goods->golden_discount / 10 : '' }}" style="margin-right:30px;"/>
+                                        <input type="text" id="platinum_discount" name="platinum_discount" placeholder="铂金会员折扣" value="{{ $goods->platinum_discount ? $goods->platinum_discount / 10 : ''}}"/>
+                                    </div>
+                                    <div style="margin-bottom: 10px;">
+                                        <input type="text" id="diamond_discount" name="diamond_discount" placeholder="钻石会员折扣" value="{{ $goods->diamond_discount ? $goods->diamond_discount / 10 : '' }}"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastname" class="col-sm-2 control-label">选择类目 <span class="is_must">*</span></label>
+                                <div class="col-sm-10">
+                                    <select id="goodsbrand" name="goodsbrand">
+                                        <option value="0">请选择品牌</option>
+                                        @foreach ($brands as $brand)
+                                        <option value="{{ $brand->id }}" {{ $brand->id == $goods->brand_id?'selected':'' }}>{{ $brand->brand_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <br clear="all" />
+                            </div>
+                            <div class="form-group">
+                                <label for="lastname" class="col-sm-2 control-label">选择类目 <span class="is_must">*</span></label>
+                                <div class="col-sm-10">
+                                    <select id="goodstype" name="goodstype">
+                                        <option value='0'>请选择类目</option>
+                                        @if (!$types->isEmpty())
+                                            @foreach ($types as $type)
+                                                <option value="{{ $type->typeid }}" {{ $type->typeid==$goods->typeid ?'selected' : '' }}>{{ $type->typename }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <table id="example2" class="table table-bordered table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>属性名</th>
+                                        <th>属性值</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="show_property">
+
+                                    </tbody>
+                                    <tfoot class="add_foot">
+
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <div class="form-group">
+                                <table id="sku_table" class="table table-bordered table-hover" style="display: none;">
+                                    <thead>
+                                    <tr class="table-title">
+                                    </tr>
+                                    </thead>
+                                    <tbody id="show_sku">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="form-group">
+                                @include('UEditor::head')
+                                <script id="container" name="content" type="text/plain"><?php echo htmlspecialchars_decode($goods->goodsdesc);?></script>
+                            </div>
+                            {{--<div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <button id="create_sku" class="btn btn-default">添加对应库存</button>
+                                </div>
+                            </div>--}}
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <input type="submit" class="btn btn-default" value="添加商品">
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="price" class="col-sm-2 control-label">介绍图片 <span class="is_must">*</span></label>
-                            <div class="col-sm-10" id="img_append_area">
-                                <div  class="img_upload">
-                                    <input type="file" class="img" style="opacity: 0;width:78px;height:78px;">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="lastname" class="col-sm-2 control-label">是否推荐</label>
-                            <div class="col-sm-10">
-                                <input type="radio" name="is_hot" value="0" />否
-                                <input type="radio" name="is_hot" value="1" />是
-                            </div>
-                            <br clear="all" />
-                        </div>
-                        <!--<div class="form-group">
-                            <label for="lastname" class="col-sm-2 control-label">是否会员卡打折</label>
-                            <div class="col-sm-10">
-                                <input type="radio" name="is_discount" value="0" />否
-                                <input type="radio" name="is_discount" value="1" />是
-                            </div>
-                            <br clear="all" />
-                        </div>-->
-                        <div class="form-group">
-                            <label for="lastname" class="col-sm-2 control-label">选择品牌 <span class="is_must">*</span></label>
-                            <div class="col-sm-10">
-                                <select id="goodsbrand" name="goodsbrand">
-                                    <option value="0">请选择品牌</option>
-                                    @foreach ($brands as $brand)
-                                    <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <br clear="all" />
-                        </div>
-                        <div class="form-group">
-                            <label for="lastname" class="col-sm-2 control-label">折扣</label>
-                            <div class="col-sm-10 discount-set-area">
-                                <input type="text" id="common_discount" name="common_discount" placeholder="普通用户折扣"/>
-                                <input type="text" id="ordinary_discount" name="ordinary_discount" placeholder="普通会员折扣"/>
-                                <br />
-                                <input type="text" id="golden_discount" name="golden_discount" placeholder="黄金会员折扣"/>
-                                <input type="text" id="platinum_discount" name="platinum_discount" placeholder="铂金会员折扣"/>
-                                <br />
-                                <input type="text" id="diamond_discount" name="diamond_discount" placeholder="钻石会员折扣"/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="lastname" class="col-sm-2 control-label">选择类目 <span class="is_must">*</span></label>
-                            <div class="col-sm-10">
-                                <select id="goodstype" name="goodstype">
-                                    <option value='0'>请选择类目</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                        <table id="example2" class="table table-bordered table-hover">
-                            <thead>
-                            <tr>
-                                <th>属性名</th>
-                                <th>属性值</th>
-                            </tr>
-                            </thead>
-                            <tbody id="show_property">
-
-                            </tbody>
-                            <tfoot class="add_foot">
-
-                            </tfoot>
-                        </table>
-                        </div>
-                        <div class="form-group">
-                            <table id="sku_table" class="table table-bordered table-hover" style="display: none;">
-                                <thead>
-                                <tr class="table-title">
-                                </tr>
-                                </thead>
-                                <tbody id="show_sku">
-
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="form-group">
-                            @include('UEditor::head')
-                            <script id="container" name="content" type="text/plain"></script>
-                        </div>
-                        {{--<div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <button id="create_sku" class="btn btn-default">添加对应库存</button>
-                            </div>
-                        </div>--}}
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <input type="submit" class="btn btn-default" value="添加商品">
-                            </div>
-                        </div>
-                    </div>
-                    <!-- /.box-body -->
-                    {{ csrf_field() }}
-                    <input type="hidden" id="logo" name="logo" value="" />
-                    <input type="hidden" id="imglist" name="imglist" value="" />
-                    <input type="hidden" id="len" name="len" value="" />
+                        <!-- /.box-body -->
+                        {{ csrf_field() }}
+                        <input type="hidden" id="logo" name="logo" value="" />
+                        <input type="hidden" id="imglist" name="imglist" value="" />
+                        <input type="hidden" id="len" name="len" value="" />
                 </div>
                 </form>
                 <!-- /.box -->
@@ -179,7 +180,6 @@
 </div>
 <style type="text/css">
     .form-group:after { display:block;clear:both;content:"";visibility:hidden;height:0 }
-    .discount-set-area input { margin-bottom: 10px;margin-left: 20px; }
 </style>
 <script src="/css/admin/plugins/jQuery/jquery-2.2.3.min.js"></script>
 <!-- Bootstrap 3.3.6 -->
@@ -256,10 +256,6 @@
         $(".img").change(function () {
             var val = $("#imglist").val();
             var len = val.split(",").length;
-            /*if (len > 4) {
-                alert("图片上传不超过5张");
-                return false;
-            }*/
             var formData = new FormData();
             formData.append('img', $(this)[0].files[0]);
             var im = $(this);
@@ -303,11 +299,11 @@
                     dataType:'json',
                     success: function (data) {
                         console.log(data);
-                        $("#common_discount").val(data.brand.common_discount / 10);
-                        $("#ordinary_discount").val(data.brand.ordinary_discount / 10);
-                        $("#golden_discount").val(data.brand.golden_discount / 10);
-                        $("#platinum_discount").val(data.brand.platinum_discount / 10);
-                        $("#diamond_discount").val(data.brand.diamond_discount / 10);
+                        $("#common_discount").val(data.brand.common_discount);
+                        $("#ordinary_discount").val(data.brand.ordinary_discount);
+                        $("#golden_discount").val(data.brand.golden_discount);
+                        $("#platinum_discount").val(data.brand.platinum_discount);
+                        $("#diamond_discount").val(data.brand.diamond_discount);
                         $("#goodstype").empty();
                         var html = "<option value='0'>请选择类目</option>";
                         if (data.types != '') {

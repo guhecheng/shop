@@ -13,17 +13,22 @@ use Illuminate\Support\Facades\DB;
 
 class TypeController extends Controller {
 
-    public function index() {
-        $types = DB::table('goodstype')->where('is_delete', 0)->orderBy('sort', 'asc')->paginate(5);
-        return view('admin.type.index', ['types' => $types]);
+    public function index(Request $request) {
+        $brand_id = $request->input("brand_id");
+        if (empty($brand_id)) exit;
+        $brand = DB::table('brands')->where('id', $brand_id)->first();
+        $types = DB::table('goodstype')->where([ 'is_delete' => 0, 'brand_id' => $brand_id])->orderBy('sort', 'asc')->paginate(5);
+        return view('admin.type.index', ['types' => $types, 'brand_id' => $brand_id, 'brand' => $brand]);
     }
 
     public function add(Request $request) {
         $typename = $request->input('typename');
-        if (empty($typename))
+        $brand_id = $request->input('brand_id');
+        if (empty($typename) || empty($brand_id))
             return response()->json(['rs' => 0]);
         $id = DB::table('goodstype')->insertGetId([
-            'typename' => $typename
+            'typename' => trim($typename),
+            'brand_id' => $brand_id
         ]);
         return response()->json(['rs'=>$id>0?1:0, 'typeid'=>$id]);
     }

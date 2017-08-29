@@ -130,7 +130,7 @@
     <script type="text/javascript">
         $(function() {
             $(document).on("click", ".order-item", function () {
-                if ($.trim($(this).find(".order-item-status").text()) == '已失效') return;
+                //if ($.trim($(this).find(".order-item-status").text()) == '已失效') return;
                 location.href = "/ordershow?orderno=" + $(this).attr("attr-id");
             });
         });

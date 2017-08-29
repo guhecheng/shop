@@ -11,7 +11,7 @@ namespace App\Http\Controllers\Admin;
 use DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Mockery\Exception;
+use Log;
 
 class CouponController extends Controller
 {
@@ -33,15 +33,15 @@ class CouponController extends Controller
             foreach ($coupons as $coupon) {
                 $ids[] = $coupon->id;
             }
-            if (empty($ids)) exit('没有添加品牌');
-            $sql = "select group_concat(brand_id) brands,coupon_id from coupon_brand where coupon_id in (".implode(',', $ids).") group by coupon_id";
-            $coupon_brand = DB::select($sql);
-            if ($coupon_brand) {
-                foreach ($coupons as &$coupon) {
-                    foreach ($coupon_brand as $brand) {
-                        var_dump($brand);
-                        if ($brand->coupon_id == $coupon->id)
-                            $coupon->brand = $brand->brands;
+            if (!empty($ids)) {
+                $sql = "select group_concat(brand_id) brands,coupon_id from coupon_brand where coupon_id in (".implode(',', $ids).") group by coupon_id";
+                $coupon_brand = DB::select($sql);
+                if ($coupon_brand) {
+                    foreach ($coupons as &$coupon) {
+                        foreach ($coupon_brand as $brand) {
+                            if ($brand->coupon_id == $coupon->id)
+                                $coupon->brand = $brand->brands;
+                        }
                     }
                 }
             }
@@ -58,9 +58,15 @@ class CouponController extends Controller
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
         $user_type = $request->input('user_type');
-
         if (empty($goods_price) || empty($discount_price) || empty($brands) || empty($start_date) || empty($end_date) || empty($user_type))
-            exit('信息不全');
+            return back()->with('coupon_info', '信息填写不完整');
+
+        if ($discount_price > $goods_price) {
+            return back()->with('coupon_info', '商品价小于优惠价');
+        }
+        if (strtotime($start_date) >= strtotime($end_date))
+            return back()->with('coupon_info', '日期选择错误');
+
         DB::beginTransaction();
         try {
             $id = DB::table('coupon')->insertGetId([
@@ -73,17 +79,35 @@ class CouponController extends Controller
             ]);
             if (empty($id))
                 throw new Exception('优惠券创建失败');
+            // 获取到对应的用户
+            $users = DB::table('user')->whereIn('level', $user_type)->get();
+
             $data = [];
+            $insert_user_coupon = [];
             foreach ($brands as $brand) {
                 $data[] = ['coupon_id' => $id, 'brand_id' => $brand];
             }
-            $rs = DB::table('coupon_brand')->insert($data);
-            if (!$rs)
+
+            if (!empty($users)) {
+                foreach ($users as $user) {
+                    $insert_user_coupon[] = ['user_id'=>$user->userid, 'coupon_id' => $id];
+                }
+            }
+
+            if (!DB::table('coupon_brand')->insert($data))
                 throw new Exception('优惠券创建失败');
+
+            if (!DB::table('user_coupon')->insert($insert_user_coupon))
+                throw new Exception('分配优惠券失败');
+
             DB::commit();
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             DB::rollback();
             exit($e->getMessage());
+            return back()->with('coupon_info', '增加优惠券失败');
         }
+        return back()->with('coupon_info', '添加成功');
     }
+
 }

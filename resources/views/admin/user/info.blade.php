@@ -28,10 +28,12 @@
                             <tr>
                                 <td>等级</td>
                                 <td>@if ($user->level == 1)
-                                        黄金会员
+                                        普通会员
                                     @elseif ($user->level == 2)
-                                        铂金会员
+                                        黄金会员
                                     @elseif ($user->level == 3)
+                                        铂金会员
+                                    @elseif ($user->level == 4)
                                         钻石会员
                                     @else
                                         非会员
@@ -47,7 +49,11 @@
                                 <td><img src="{{ $user->avatar }}" widtd="80" height="80" /></td>
                             <tr>
                                 <td>余额(元)</td>
-                                <td>{{ $user->money / 100 }}</td>
+                                <td>
+                                    <span id="balance" data-value="{{ $user->money / 100 }}">{{ $user->money / 100 }}</span>
+                                    <input type="text" name="money" id="money" placeholder="填写增加金额" />
+                                    <button class="btn btn-primary" id="add_money">添加</button>
+                                </td>
                             </tr>
                             <tr>
                                 <td>积分</td>
@@ -89,19 +95,23 @@
                                 <td>生日</td>
                                 <td>{{ $child->birth_date }}</td>
                             </tr>
+                            <tr>
+                                <td>最喜欢的品牌</td>
+                                <td>{{ $child->like_brands }}</td>
+                            </tr>
                             @endif
                             </tbody>
                             <tfoot>
                             </tfoot>
                         </table>
                         @if (!empty($user->last_login_time))
-                        <h5>用户休眠时间: {{ number_format((time()-strtotime($user->last_login_time)) / 3600 / 24) }}
+                        <h5>用户休眠时间:
                             <?php
-                                $last_login_time = strotime($user->last_login_time);
+                                $last_login_time = strtotime($user->last_login_time);
                                 $day = intval((time() - $last_login_time) / 3600 / 24);
                                 $hour = (time() - $last_login_time) / 3600 % 24;
                                 ?>
-                            <?php echo $day; ?>天<?php echo $hour; ?>时
+                            <?php echo $day; ?>天<?php echo $hour; ?>小时
                         </h5>
                         @endif
                         <table  class="table table-bordered table-hover">
@@ -234,15 +244,33 @@
 <script src="/css/admin/dist/js/demo.js"></script>
 
 <link href="/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css"/>
-<link href="/css/admin/tdemes/explorer/tdeme.css" media="all" rel="stylesheet" type="text/css"/>
 <script src="/js/plugins/sortable.js" type="text/javascript"></script>
 <script src="/js/fileinput.min.js" type="text/javascript"></script>
 <script src="/js/zh.js" type="text/javascript"></script>
-<script src="/css/admin/tdemes/explorer/tdeme.js" type="text/javascript"></script>
 <script type="text/javascript">
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    $("#add_money").on("click", function () {
+        var money = parseInt($.trim($("#money").val()));
+        if (money != '') {
+            if (!confirm('确认给用户充值' + money +'元?'))
+                return false;
+            $.ajax({
+                url:'/admin/user/addmoney',
+                type:'post',
+                dataType:'json',
+                data:{'money': money, 'userid':{{ $userid }} },
+                success: function (data) {
+                    if (data.rs == 1) {
+                        var add_money = parseFloat($("#balance").attr('data-value')) + money;
+                        $("#balance").text(add_money).attr('data-value', add_money);
+                    } else
+                        alert('添加失败');
+                }
+            })
         }
     });
     $("#remark").on("blur", function () {

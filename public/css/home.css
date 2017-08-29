@@ -56,13 +56,28 @@ body {
 .goods-content-header {
     background: #fff;
     border-bottom:solid 1px #C1C1C1;
-    padding: 0.5rem 5%;
+    padding-top: 0.5rem;
     width: 100%;
 }
 .goods-content-name {
     font-weight: bold;
     font-size: 1rem;
     margin-bottom: 0.1rem;
+}
+.goods-content-price, .goods-content-name,.goods-content-detail {
+    padding:0 5%;
+
+}
+.goods-content-price { padding:0.4rem 5%; border-bottom: solid 1px #C1C1C1; }
+.goods-content-discount {
+    padding: 0.2rem 5%;
+    border-bottom: solid 1px #C1C1C1; }
+.goods-content-discount div {
+    float:left;
+    width: 50%;
+}
+.goods-content-discount div:nth-of-type(even) {
+    padding-left: 10%;
 }
 .goods-content-price span {
     color: red;
@@ -283,12 +298,21 @@ body {
     font-size: 1rem;
     text-align: center;
 }
-.user_index .address,.order,.aboutme{
+.user_index .address,.order,.aboutme,.coupon{
     line-height:2.4rem;
     font-size:1rem;
     color: #232323;
-    padding-left:6%;
+    padding:0 6%;
     width: 100%;
+}
+.address:after, .order:after, .aboutme:after, .coupon:after {
+    display:block;clear:both;content:"";visibility:hidden;height:0
+}
+.address div:first-child, .coupon div:first-child, .aboutme div:first-child, .coupon div:first-child {
+    float:left;
+}
+.address div:last-child, .coupon div:last-child, .aboutme div:last-child, .coupon div:last-child {
+    float:right;
 }
 .user_info {
     position: relative;
@@ -335,7 +359,7 @@ body {
     background: #FFFFFF;
     margin-bottom:0.4rem;
 }
-.user_index .order,.user_index .address,.user_index .aboutme {
+.user_index .order,.user_index .address,.user_index .aboutme,.user_index .coupon{
     background: #fff;
     margin-bottom: 0.4rem;
 }
@@ -892,7 +916,7 @@ body {
 .order-list {
     margin-top:0.3rem;
 }
-.order-express, .order-discount, .order-change-score {
+.order-express, .order-discount, .order-change-score, .order-coupon {
     background: #fff;
     width: 100%;
     padding: 0 5%;
@@ -900,9 +924,9 @@ body {
     height: 1.8rem;
     border-bottom: solid 1px #C1C1C1;
 }
-.order-express div,.order-discount div,.order-change-score div {
+.order-express div,.order-discount div,.order-change-score div,.order-coupon div {
     float:left;
 }
-.order-express div:last-child,.order-discount div:last-child,.order-change-score div:last-child {
+.order-express div:last-child,.order-discount div:last-child,.order-change-score div:last-child,.order-coupon div:last-child {
     float:right;
 }

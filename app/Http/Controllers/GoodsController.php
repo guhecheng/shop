@@ -63,10 +63,12 @@ class GoodsController extends Controller {
 
     public function getgoods(Request $request) {
         $typeid = $request->input('typeid');
+        $brand_id = $request->input('brand_id');
         $goods = DB::table('goods')->where([
             ['is_delete', '=', 0],
             ['typeid', '=', $typeid],
-            ['is_sale', '=', 1]
+            ['is_sale', '=', 1],
+            ['brand_id', '=', $brand_id]
         ])
             ->limit(8)
             ->get();
@@ -103,8 +105,7 @@ class GoodsController extends Controller {
         }
         $sql .=" a.goods_id=". $goodsid;
         $rs = DB::select($sql);
-
-        if ($rs[0]->sku_id) {
+        if (!empty($rs)&&  !empty($rs[0]->sku_id)) {
             $sku = DB::table('goodssku')->where('sku_id', $rs[0]->sku_id)
                 ->first();
             if ($sku->num < $request->input('num'))

@@ -36,4 +36,12 @@ class CapitalController extends Controller {
         return view('admin.capital', ['data' => $data, 'search_no'=>$search_no,
                                         'search_name'=>$search_name, 'start_date'=>$start_date, 'end_date'=>$end_date]);
     }
+
+    public function backup(Request $request) {
+        $data = DB::table('add_money_log')->leftJoin('user', 'user.userid', '=', 'add_money_log.userid')
+                ->leftJoin('adminuser', 'adminuser.admin_id', '=', 'add_money_log.act_user')
+                ->select('add_money_log.*', 'user.uname', 'adminuser.name')
+                ->orderBy('create_time', 'desc')->paginate(20);
+        return view('admin.backup', ['data' => $data]);
+    }
 }

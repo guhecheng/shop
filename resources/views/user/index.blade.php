@@ -8,24 +8,35 @@
             <div class="icon" style="background-image:url('{{ $user->avatar }}')"></div>
             </a>
             <div>{{ $user->uname }}</div>
+            @if ($user->level == 2)
+            <div class="user-level" style="background-image:url('/images/golden_member.png')"></div>
+            @elseif ($user->level == 3)
+            <div class="user-level" style="background-image:url('/images/platinum_ member.png')"></div>
+            @elseif ($user->level == 4)
+            <div class="user-level" style="background-image:url('/images/diamond_member.png')"></div>
+            @elseif ($user->level == 1)
+            <div class="user-level" style="background-image:url('/images/ordinary_member.png')"></div>
+            @endif
         </div>
         <div class="user_info">
             <a href="/score">
                 <div class="user_info_score">
                     <div>{{ $user->score }}</div>
                     <div>积分</div>
+                    <div>Points</div>
                 </div>
             </a>
             <a href="/money">
                 <div class="user_info_money">
                     <div>￥{{ $user->money / 100 }}元</div>
                     <div>账户余额</div>
+                    <div>Balance</div>
                 </div>
             </a>
             <div class="user_info_center"></div>
             <br clear="all" />
         </div>
-        <a href="/order"><div class="order">全部订单</div></a>
+        <a href="/order"><div class="order"><div>全部订单</div><div>All Orders</div></div></a>
         <div class="order-state-list">
             <a href="/order?status=1">
                 <div class="order-state-list-item">
@@ -47,9 +58,10 @@
             </a>
             <br clear="both" />
         </div>
-        <a href="/address"><div class="address">地址管理</div></a>
-        <a href="#"><div class="address">我参加过的活动</div></a>
-        <a href="/aboutme"><div class="aboutme">关于我们</div></a>
+        <a href="/address"><div class="address"><div>地址管理</div><div>Address Management</div></div></a>
+        <a href="/coupon"><div class="coupon"><div>我的券包</div><div>My Coupon</div></div></a>
+        <a href="#"><div class="address"><div>我的足迹</div><div>My Activities</div></div></a>
+        <a href="/aboutme"><div class="aboutme"><div>关于我们</div><div>About Us</div></div></a>
         <br clear="all" />
         @endif
     </div>
@@ -64,5 +76,15 @@
             margin: 0 auto;
             background-size: 100% 100%;
         }
+        .user-level {
+            width: 2.2rem;
+            height: 2rem;
+            -webkit-background-size: 100% 100%;
+            background-size: 100% 100%;
+            background-repeat:no-repeat;
+            margin: 0 auto;
+        }
+        .order div:first-child { float:left; }
+        .order div:last-child { float:right; }
     </style>
 @endsection

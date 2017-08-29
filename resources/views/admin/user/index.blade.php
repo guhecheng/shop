@@ -14,8 +14,9 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="box">
-                    <div class="box-header">
-                        <h3 class="box-title">会员卡列表</h3>
+                    <div style="margin-top:10px; margin-left:10px;">
+                        <input type="text" id="user_name" class="form-control" placeholder="用户名" style="width:200px;float:left;" value="{{ $user_name }}"/>
+                        <button id="search_btn" class="btn btn-primary">查找</button>
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
@@ -38,10 +39,12 @@
                                     <td>{{ $user->userid }}</td>
                                     <td>{{ $user->uname }}</td>
                                     <td>@if ($user->level == 1)
-                                            黄金会员
+                                            普通会员
                                         @elseif ($user->level == 2)
-                                            铂金会员
+                                            黄金会员
                                         @elseif ($user->level == 3)
+                                            铂金会员
+                                        @elseif ($user->level == 4)
                                             钻石会员
                                         @else
                                             非会员
@@ -203,6 +206,12 @@
     $(function() {
         $(".add-btn").on("click", function() {
             $("#add-modal").modal('show');
+        });
+        $("#search_btn").on("click",function () {
+            var user_name = $.trim($("#user_name").val());
+            if (user_name == '')
+                location.href = '/admin/user';
+            location.href = '/admin/user?user_name=' + user_name;
         });
         //initFileInput("add_img", "/admin/card/upload");
         $("#add_img").fileinput({

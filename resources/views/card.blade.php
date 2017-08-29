@@ -9,12 +9,13 @@
             <div class="card_no">卡号:{{ $card_no }}</div>
             <div class="level">
                 @if ($level == 1)
-                    黄金会员
+                    普通会员
                 @elseif ($level == 2)
-                    铂金会员
+                    黄金会员
                 @elseif ($level == 3)
+                    铂金会员
+                @elseif ($level == 4)
                     钻石会员
-                @else
                 @endif
             </div>
         </div>
@@ -45,14 +46,14 @@
         </div>
         <div class="card-money">
             <div class="card-money-area">
-                <div data-value="0.01" class="select-money">0.01元</div>
-                <div data-value="0.02" class="select-money">0.02元</div>
-                {{--<div data-value="100" class="select-money">100元</div>
+                <!--<div data-value="0.01" class="select-money">0.01元</div>
+                <div data-value="0.02" class="select-money">0.02元</div>-->
+                <div data-value="100" class="select-money">100元</div>
                 <div data-value="200" class="select-money">200元</div>
                 <div data-value="500" class="select-money">500元</div>
                 <div data-value="1000" class="select-money">1000元</div>
                 <div data-value="2000" class="select-money">2000元</div>
-                <div data-value="3000" class="select-money">3000元</div>--}}
+                <div data-value="3000" class="select-money">3000元</div>
             </div>
             <br clear="all" />
         </div>

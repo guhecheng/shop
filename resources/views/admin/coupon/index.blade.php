@@ -7,7 +7,6 @@
         <h1>
             优惠券列表
         </h1>
-        <button type="button" class="btn btn-primary add-btn">添加优惠券</button>
     </section>
 
     <!-- Main content -->
@@ -15,8 +14,11 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="box">
+                    <button type="button" class="btn btn-primary add-btn" style="margin-left:10px; margin-top:10px;">添加优惠券</button>
                     <div class="box-header">
-                        <h3 class="box-title">优惠券列表</h3>
+                        @if (!empty(session('coupon_info')))
+                        <h4 style="color: red;">{{ session('coupon_info') }}</h4>
+                        @endif
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
@@ -38,7 +40,7 @@
                                     <tr data-id="{{ $coupon->id }}">
                                         <td>{{ $coupon->id }}</td>
                                         <td>{{ $coupon->create_time }}</td>
-                                        <td>满{{ $coupon->goods_price }}减{{ $coupon->discount_price }}</td>
+                                        <td>满{{ $coupon->goods_price/100 }}减{{ $coupon->discount_price/100 }}</td>
                                         <td>
                                             <?php
                                                 if (!empty($coupon->brand)) {
@@ -95,7 +97,7 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">添加品牌</h4>
+                <h4 class="modal-title">添加优惠券</h4>
             </div>
             <div class="modal-body">
                 <form action="/admin/coupon/add" method="post">
@@ -103,9 +105,9 @@
                     <label for="cardname" class="col-sm-2 control-label">类型</label>
                     <div class="col-sm-10">
                         满
-                        <input type="text" class="form-control" name="goods_price" id="goods_price" placeholder="请输入金额">
+                        <input type="text" class="form-control" name="goods_price" id="goods_price" placeholder="请输入金额" style="display: inline;width:150px;">
                         减
-                        <input type="text" class="form-control" name="discount_price" id="discount_price" placeholder="请输入金额">
+                        <input type="text" class="form-control" name="discount_price" id="discount_price" placeholder="请输入金额" style="display: inline;width:150px;">
                     </div>
                     <br clear="all" />
                 </div>
@@ -121,9 +123,9 @@
                 <div class="form-group">
                     <label for="cardname" class="col-sm-2 control-label">使用时间</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" name="start_date" id="start_date" placeholder="请输入开始时间">
+                        <input type="text" class="form-control" name="start_date" id="start_date" placeholder="请输入开始时间" style="display: inline;width:150px;">
                         至
-                        <input type="text" class="form-control" name="end_date" id="end_date" placeholder="请输入结束时间">
+                        <input type="text" class="form-control" name="end_date" id="end_date" placeholder="请输入结束时间" style="display: inline;width:150px;">
                     </div>
                     <br clear="all" />
                 </div>
@@ -193,6 +195,13 @@
      immediately after the control sidebar -->
 <div class="control-sidebar-bg"></div>
 </div>
+<style type="text/css">
+    .main-header { z-index: 3 }
+    .modal-backdrop {
+        z-index: 4;
+    }
+    .modal { z-index: 8; }
+</style>
 
 <script src="/css/admin/plugins/jQuery/jquery-2.2.3.min.js"></script>
 <!-- Bootstrap 3.3.6 -->
@@ -245,93 +254,5 @@
             $("#item").val(par.index());
         });
 
-        $(document).on("click", ".del-btn", function() {
-            if (!confirm('确定删除?')) return ;
-            var typeid = $(this).attr("attr-id");
-            if (typeid == '' || typeof typeid == 'undefined') return false;
-            var that = $(this);
-
-            $.ajax({
-                url:'/admin/type/delete',
-                data: {'typeid': typeid},
-                type:"get",
-                dataType:'json',
-                success: function(data) {
-                    if (data.rs == 1)
-                        that.parent().parent().remove();
-                }
-            })
-        });
-
-        $("#type_tbody").dragsort({ dragSelector: "tr", dragSelectorExclude: "button", dragBetween: true,
-            dragEnd: function() {
-                var orders = type_ids = '';
-                $("#type_tbody").find("tr").each(function(item,value) {
-                    type_ids += $(this).attr("data-id") + ",";
-                    orders += (item+1) + ",";
-                });
-                $.ajax({
-                    url: '/admin/type/changeorder',
-                    data: {'type_ids':type_ids, 'orders':orders},
-                    datatype:'json',
-                    type:"post",
-                    success:function (data) {
-
-                    }
-                });
-            }});
-
-    });
-    $(".add_type").on("click", function() {
-        var typename = $("#typename").val();
-        if (typename == '' ) {
-            alert('类型名不能为空');
-            return false;
-        }
-        $.ajax({
-            url:'/admin/type/add',
-            type:'post',
-            data: { 'typename': typename},
-            dataType: 'json',
-            success: function(data) {
-                if (data.rs == 1) {
-                    var html = "<tr><td>"+typename+"</td>";
-                    html += "<td>";
-                    html += ' <button type="button" class="btn btn-primary modify-btn" attr-id="'+data.typeid+'">修改</button>';
-                    html += '<button type="button" class="btn btn-primary del-btn" attr-id="'+data.typeid+'">删除</button>';
-                    html += '<a href="/admin/property?typeid='+data.typeid+'"><button type="button" class="btn btn-primary" attr-id="'+data.typeid+'">属性操作</button></a>';
-                    html += "</td></tr>";
-                    $(".type_tbody").append(html);
-                    $("#add-modal").modal('hide');
-                } else {
-                    alert("修改失败");
-                    return false;
-                }
-            }
-        })
-    });
-    $(".update_btn").on("click", function() {
-        var typename = $("#edit_typename").val();
-        var typeid = $("#typeid").val();
-        if (typename == '' ) {
-            alert('类型名不能为空');
-            return false;
-        }
-        $.ajax({
-            url:'/admin/type/modify',
-            type:'post',
-            data: { 'typename': typename, 'typeid': typeid},
-            dataType: 'json',
-            success: function(data) {
-                if (data.rs == 1) {
-                    var item = parseInt($("#item").val());
-                    $("tr:eq("+item+")").find("td:eq(0)").text(typename);
-                    ("#mod-modal").modal('hide');
-                } else {
-                    alert("修改失败");
-                    return false;
-                }
-            }
-        })
     });
 </script>

@@ -17,6 +17,18 @@
                 <div class="box">
                     <div class="box-header">
                         <h3 class="box-title">商品列表</h3>
+                        <div id="select_brand">
+                            @if (!empty($brand))
+                                <select id="brand" name="brand">
+                                    <option value="0">所有品牌</option>
+                                    @foreach ($brand as $item)
+                                        <option value="{{ $item->id }}" {{ $brand_id == $item->id ? 'selected':'' }}>
+                                            {{ $item->brand_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            @endif
+                        </div>
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
@@ -38,7 +50,7 @@
                                     <td>{{ $good->price / 100 }}</td>
                                     <td>{{ empty($good->is_hot) ? '否' : '是' }}</td>
                                     <td>
-                                        {{--<a href="/admin/goods/modify?goodsid={{ $good->goodsid }}>"><button type="button" class="btn btn-primary modify-btn" attr-id="{{ $good->goodsid}}">修改</button></a>--}}
+                                        <a href="/admin/goods/edit?goods_id={{ $good->goodsid }}"><button type="button" class="btn btn-primary modify-btn" attr-id="{{ $good->goodsid}}">修改</button></a>
                                         <button type="button" class="btn btn-primary del-btn" attr-id="{{ $good->goodsid }}">删除</button>
                                         <button type="button" class="btn btn-primary mod-sale" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_sale) ? 0 : 1}}">{{ empty($good->is_sale) ? '上架' : '下架' }}</button>
                                         <button type="button" class="btn btn-primary mod-a" attr-id="{{ $good->goodsid }}" attr-value="{{ empty($good->is_ad) ? 1 : 0}}">{{ empty($good->is_ad) ? '上广告' : '下广告' }}</button>
@@ -186,5 +198,8 @@
                     that.attr('attr-value', 1 - parseInt(status)).text(status == 0 ? '上广告' : '下广告');
             }
         })
+    });
+    $("#brand").on("change", function () {
+            location.href = "/admin/goods?brand_id=" + $(this).val();
     });
 </script>

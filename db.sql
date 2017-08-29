@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS user (
   create_time TIMESTAMP DEFAULT current_timestamp comment '创建时间',
   update_time datetime comment '更新时间',
   last_login_time datetime comment '最后登陆时间',
-  primary key(userid)
+  primary key(userid),
+  UNIQUE key(openid)
 ) engine=innodb charset=utf8mb4;
 insert into user(openid, uname, avatar, sex, money) values('oBm9hvzL3JRgqrjfzlIPpktM4EgQ', 'GG',
 'http://wx.qlogo.cn/mmopen/ia0MXiakBq7O08cJPQmKzunVdjRdevbPHzYX4ZDdKkSqiclCf5AAQbCRY41rd7jqXN2Uib5k6o6a6uUQEdjA0DMSDeicpDX7OibA0J/0', 1, 0);
@@ -38,6 +39,7 @@ create table if not exists goodstype (
   typepid int not null default 0 comment '父id',
   is_delete tinyint not null default 0 comment '是否显示,0显示,1:否',
   sort int not null default 0 comment '排序',
+  brand_id int not null DEFAULT 0 COMMENT '对应品牌id',
   primary key(typeid)
 ) engine=innodb charset=utf8;
 
@@ -59,6 +61,12 @@ create table if not exists goods (
   is_discount tinyint default 0 comment '是否参与会员折扣, 0: 否， 1:是',
   discount tinyint not null default 0 comment '折扣',
   score_award tinyint default 0 comment '积分奖励倍数, 0:无, 1:一倍，2:2倍..',
+  brand_id int not null default 0 comment '品牌id',
+  common_discount int not null DEFAULT 0 COMMENT '普通用户折扣',
+  ordinary_discount int not null default 0 comment '普通会员折扣',
+  golden_discount int not null default 0 comment '黄金会员折扣',
+  platinum_discount int not null default 0 comment '铂金会员折扣',
+  diamond_discount int not null default 0 comment '钻石会员折扣',
   create_time timestamp default current_timestamp comment '创建时间',
   primary key(goodsid)
 ) engine=innodb charset=utf8;
@@ -235,6 +243,7 @@ CREATE TABLE `orderinfo` (
   `phone` varchar(20) NOT NULL DEFAULT '' COMMENT '电话',
   `location` varchar(255) NOT NULL DEFAULT '' COMMENT '地址',
   `status` tinyint(4) DEFAULT '0' COMMENT '订单状态, 0: 创建，1:待支付，2:已支付,3:待发货，4:已发货，5:已收货',
+  coupon_id int not null default 0 comment '优惠券id',
   `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `pay_time` datetime DEFAULT NULL COMMENT '支付时间',
   `send_time` datetime DEFAULT NULL COMMENT '发货时间',
@@ -396,3 +405,25 @@ CREATE TABLE IF NOT EXISTS user_coupon (
   num int not NULL DEFAULT 1 COMMENT '优惠券数量',
   PRIMARY KEY (id)
 ) ENGINE = innodb CHARSET = utf8;
+
+/*增加增值记录*/
+DROP TABLE IF EXISTS add_money_log;
+CREATE TABLE if not exists add_money_log (
+  id int not null auto_increment,
+  money int not null default 0 comment '增加金额',
+  userid int not null default 0 comment '用户id',
+  act_user int NOT null DEFAULT 0 comment '操作人员id',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP comment '操作时间',
+  primary KEY (id)
+) engine=innodb charset=utf8;
+
+
+/*会员支付记录*/
+drop table if exists wx_pay_log;
+create table if not exists wx_pay_log (
+  id int not null auto_increment,
+  money int not null default 0 comment '金额',
+  userid int not null default 0 comment '支付账户id',
+  create_time timestamp default current_timestamp comment '创建时间',
+  primary key(id)
+) engine=innodb  charset=utf8;

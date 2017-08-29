@@ -89,8 +89,16 @@
                 @foreach ($scores as $value)
                     <li>
                         <div class="name">
-                            <div class="trans_name">{{--{{ $value->type == 1 ? '微信支付' : '会员卡支付'}}--}}
-                                <?php echo $value->type==0? '购买商品' : $value->type==1? '会员卡充值' : '兑换商品'; ?>
+                            <div class="trans_name">
+                                @if ($value->type == 0)
+                                    购买商品
+                                @elseif ($value->type == 1)
+                                    充值
+                                @elseif ($value->type == 2)
+                                    消费抵扣
+                                @elseif ($value->type == 3)
+                                    后台充值
+                                @endif
                             </div>
                             <div class="trans_score">{{ $value->type == 2 ? '-':'' }}{{  $value->score }}分</div>
                         </div>

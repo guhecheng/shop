@@ -108,8 +108,8 @@
             height:100%;
             display: none;}
         .select_brands_area { padding: 5%; }
-        .select-brands { border:solid 1px #C1C1C1; width: 30%; line-height: 2rem;
-            text-align: center; float:left; margin-top: 2rem;margin-left: 5%;}
+        .select-brands { border:solid 1px #C1C1C1; width: 35%; line-height: 1.6rem;
+            text-align: center; float:left; margin-top: 1rem;margin-left: 3%;}
         .select-brands:nth-of-type(odd) {
             margin-right: 10%;
             margin-left: 10%;

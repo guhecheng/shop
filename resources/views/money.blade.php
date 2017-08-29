@@ -88,7 +88,7 @@
             @foreach ($money as $value)
             <li>
                 <div class="name">
-                    <div class="trans_name">{{ empty($value->trans_type) ? '购物' : '充值'}}</div>
+                    <div class="trans_name">@if ($value->trans_type == 0) 购物 @elseif ($value->trans_type == 1) 充值 @elseif ($value->trans_type == 2) 后台充值 @endif</div>
                     <div class="trans_money">{{ empty($value->trans_type) ? '-' : '' }}{{  $value->trans_money / 100 }}元</div>
                     <br clear="all" />
                 </div>
@@ -128,11 +128,11 @@
                     for (var i in data.money.data) {
                         money = data.money.data[i];
                         var li = '<li><div class="name"><div class="trans_name">';
-                        li += money.trans_type == 1 ? '充值' : '购物';
+                        li += money.trans_type == 1 ? '充值' : (money.trans_type==2 ? '后台充值' : '购物');
                         li += '</div><div class="trans_money">' + (money.trans_type==1 ? '':'-') + (money.trans_money / 100) + '元</div>';
                         li += '<br clear="all" /></div><div class="time">';
                         li += '<div class="trans_time">'+money.create_time+'</div>';
-                        li += '<div class="trans_no">' + (money.order_no == '' ? '' : '订单号'+ money.order_no) +  '</div>';
+                        li += '<div class="trans_no">' + (money.order_no == 0 ? '' : '订单号'+ money.order_no) +  '</div>';
                         li += '<br clear="all" /></div><br clear="all" /></li>';
                         $("ul").append(li);
                     }

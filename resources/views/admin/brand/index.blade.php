@@ -33,11 +33,11 @@
                             @foreach($brands as $brand)
                                 <tr data-id="">
                                     <td>{{ $brand->brand_name }}</td>
-                                    <td><img src="{{ $brand->brand_img }}" width="80" height="80"/></td>
+                                    <td><img src="{{ $brand->brand_img }}" width="220" height="80"/></td>
                                     <td>
                                         <button type="button" class="btn btn-primary modify-btn" attr-id="{{ $brand->id }}">修改</button>
                                         <button type="button" class="btn btn-primary del-btn" attr-id="{{ $brand->id }}">删除</button>
-                                        <a href="/admin/property?typeid={{ $brand->id }}"><button type="button" class="btn btn-primary" attr-id="{{ $brand->id }}">属性操作</button></a>
+                                        <a href="/admin/type?brand_id={{ $brand->id }}"><button type="button" class="btn btn-primary" attr-id="{{ $brand->id }}">类型操作</button></a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -146,19 +146,19 @@
                 <h4 class="modal-title">添加品牌</h4>
             </div>
             <div class="modal-body">
-                <form action="/admin/brand/add" method="post" enctype="multipart/form-data">
+                <form action="/admin/brand/mod" method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="cardname" class="col-sm-2 control-label">品牌名</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" name="brand_name" id="brand_name" placeholder="请输入品牌名">
+                            <input type="text" class="form-control" name="brand_name" id="mod_brand_name" placeholder="请输入品牌名">
                         </div>
                         <br clear="all" />
                     </div>
                     <div class="form-group">
                         <label for="cardname" class="col-sm-2 control-label">品牌图片</label>
                         <div class="col-sm-10">
-                            <input type="file" name="img" id="img" />
-                            <img src="" id="image_show" width="200px" height="100px">
+                            <input type="file" name="mod_img" id="mod_img" />
+                            <img src="" id="mod_image_show" width="200px" height="100px">
                         </div>
                         <br clear="all" />
                     </div>
@@ -172,36 +172,37 @@
                     <div class="form-group">
                         <label for="cardname" class="col-sm-2 control-label">普通会员折扣</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" name="ordinary_discount" id="ordinary_discount" placeholder="请输入折扣">
+                            <input type="text" class="form-control" name="ordinary_discount" id="mod_ordinary_discount" placeholder="请输入折扣">
                         </div>
                         <br clear="all" />
                     </div>
                     <div class="form-group">
                         <label for="cardname" class="col-sm-2 control-label">黄金会员折扣</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" name="golden_discount" id="golden_discount" placeholder="请输入折扣">
+                            <input type="text" class="form-control" name="golden_discount" id="mod_golden_discount" placeholder="请输入折扣">
                         </div>
                         <br clear="all" />
                     </div>
                     <div class="form-group">
                         <label for="cardname" class="col-sm-2 control-label">铂金会员折扣</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" name="platinum_discount" id="platinum_discount" placeholder="请输入折扣">
+                            <input type="text" class="form-control" name="platinum_discount" id="mod_platinum_discount" placeholder="请输入折扣">
                         </div>
                         <br clear="all" />
                     </div>
                     <div class="form-group">
                         <label for="cardname" class="col-sm-2 control-label">钻石会员折扣</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" name="diamond_discount" id="diamond_discount" placeholder="请输入折扣">
+                            <input type="text" class="form-control" name="diamond_discount" id="mod_diamond_discount" placeholder="请输入折扣">
                         </div>
                         <br clear="all" />
                     </div>
                 {{ csrf_field() }}
             </div>
+            <input type="hidden" id="mod_brand_id" name="brand_id" value="" />
             <div class="modal-footer">
                 <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-                <input type="submit" class="btn btn-primary add_type" value="添加" />
+                <input type="submit" class="btn btn-primary mod_btn" value="修改" />
             </div>
             </form>
         </div>
@@ -276,6 +277,9 @@
         $("#img").on("change", function () {
             preImg("img", "image_show");
         });
+        $("#mod_img").on("change", function () {
+            preImg("mod_img", "mod_image_show");
+        });
         $(".add-btn").on("click", function() {
             $("#add-modal").modal('show');
         });
@@ -284,11 +288,26 @@
         });
         $(document).on("click", ".modify-btn", function () {
             var attr_id = $(this).attr("attr-id");
-            var par = $(this).parent().parent();
-            $("#edit_typename").val($.trim(par.find("td:eq(0)").text()));
+            $.ajax({
+                url: '/admin/brand/getbrand',
+                type:'get',
+                data: {'brand_id':attr_id},
+                dataType:'json',
+                success:function (data) {
+                    console.log(data.brand);
+                    if (data.brand != '') {
+                        console.log(data.brand.brand_img);
+                        $("#mod_image_show").attr('src', ''+data.brand.brand_img+'');
+                        $("#mod_platinum_discount").val(data.brand.platinum_discount / 10);
+                        $("#mod_diamond_discount").val(data.brand.diamond_discount / 10);
+                        $("#mod_golden_discount").val(data.brand.golden_discount / 10);
+                        $("#mod_ordinary_discount").val(data.brand.ordinary_discount / 10);
+                        $("#mod_brand_name").val(data.brand.brand_name);
+                    }
+                }
+            })
             $("#mod-modal").modal('show');
-            $("#typeid").val(attr_id);
-            $("#item").val(par.index());
+            $("#mod_brand_id").val(attr_id);
         });
 
         $(document).on("click", ".del-btn", function() {
@@ -327,7 +346,7 @@
             }});
 
     });
-    $(".add_type").on("click", function() {
+    /*$(".add_type").on("click", function() {
         var typename = $("#typename").val();
         if (typename == '' ) {
             alert('类型名不能为空');
@@ -354,10 +373,9 @@
                 }
             }
         })
-    });
+    });*/
     $(".update_btn").on("click", function() {
-        var typename = $("#edit_typename").val();
-        var typeid = $("#typeid").val();
+        
         if (typename == '' ) {
             alert('类型名不能为空');
             return false;

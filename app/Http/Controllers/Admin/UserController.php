@@ -18,10 +18,15 @@ class UserController extends Controller {
 
 
     public function index(Request $request) {
-        $users = DB::table('user')->where('is_delete', $this->no_deleted)
+        $user_name = empty($request->input("user_name")) ? '' : trim($request->input('user_name'));
+        if (!empty($user_name))
+            $where[] = ['uname', 'like', "%{$user_name}%"];
+
+        $where[] = ['is_delete', '=', $this->no_deleted];
+        $users = DB::table('user')->where($where)
             ->orderBy('create_time', 'desc')
             ->paginate(20);
-        return view('admin.user.index', ['users' => $users]);
+        return view('admin.user.index', ['users' => $users, 'user_name' => empty($user_name) ?'':$user_name]);
     }
 
     /**
@@ -149,5 +154,88 @@ class UserController extends Controller {
         if (empty($remark) || empty($userid))
             return response()->json(['rs' => 0, 'errmsg' => '信息不全']);
         return DB::table("user")->where("userid", $userid)->update(['remark'=>trim($remark)]);
+    }
+
+    public function addmoney(Request $request) {
+        $userid = $request->input('userid');
+        $money = $request->input('money');
+        if (empty($userid) || empty($money)) {
+            return response()->json(['rs' => 0, 'errmsg' => '缺少信息']);
+        }
+
+        try {
+            $user = DB::table('user')->where("userid", $userid)->first();
+            if (empty($user)) {
+                throw new \Exception('用户不存在');
+            }
+
+            $trans['insert'] = DB::table('usertransmoney')->insert([
+                'uid'   => $userid,
+                'trans_type'    => 1,
+                'trans_money' => $money
+            ]);
+            if (!$trans['insert'])
+                throw new \Exception('操作失败');
+
+            if ($user->level < 4) {
+                $total_money = DB::table('usertransmoney')->where([
+                    ['uid', '=', $user->userid],
+                    ['trans_type', '=', 1],
+                    ['create_time', '>=', date("Y-m-d H:i:s", strtotime("-1 year"))]
+                ])->sum('trans_money');
+                $card = DB::table('card')->where([
+                    ['is_delete', '=', 0],
+                    ['card_id', '!=', 5],
+                    ['card_score', '<=', intval($total_money / 100)]
+                ])->orderBy('card_level', 'desc')->select('card_level')->limit(1)->first();
+                if (!empty($card->card_level)) {
+                    $level = $user->level > $card->card_level ? $user->level : $card->card_level;
+                }  else
+                    $level = $user->level;
+            } else
+                $level = $user->level;
+
+            if (empty($user->card_no)) {
+                $card_no = DB::table("user")->max("card_no");
+                if (!empty($card_no)) {
+                    $card_no = str_pad(intval($card_no) + 1, 8, "0", STR_PAD_LEFT);
+                } else
+                    $card_no = '00000001';
+            } else {
+                $card_no = $user->card_no;
+            }
+            $user_rs = DB::table('user')->where("userid", $userid)->update([
+                'money' => $user->money + $money * 100,
+                'level' => $level,
+                'score' => $user->score + intval($money),
+                'card_no' => $card_no
+            ]);
+            if (!$user_rs) {
+                throw new \Exception("修改用户金额失败");
+            }
+            DB::table('add_money_log')->insert([
+                'money' => $money * 100,
+                'act_user' => $request->session()->get('sysuid'),
+                'userid' => $userid
+            ]);
+            DB::table('usertransmoney')->insert([
+                'uid' => $userid,
+                'trans_money' => $money * 100,
+                'trans_type' => 2
+            ]);
+            if (!empty($add_score = intval($money))) {
+                DB::table('scorechange')->insert([
+                    'type' => 3,
+                    'paytype' => 3,
+                    'score' => $add_score,
+                    'uid' => $userid
+                ]);
+            }
+            DB::commit();
+            return response()->json(['rs' => 1]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return fresponse()->json(['rs' => 0]);
+        }
     }
 }

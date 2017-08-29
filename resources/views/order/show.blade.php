@@ -40,6 +40,7 @@
                 @endif
             </div>
         </div>
+        @if (!empty($order->location))
         <div class="order-address">
             <div class="order-address-info">
                 <div class="order-address-info-title"><div>{{ $order->recv_name }}</div><div>电话: {{ $order->phone }}</div></div>
@@ -47,21 +48,44 @@
             </div>
             <br clear="all" />
         </div>
+        @endif
         <div class="order-list">
             <?php $total = $count = 0; ?>
             @foreach ($goods as $item)
+                    <?php
+                    switch ($user->level) {
+                        case 1: $goods_price = empty($item->ordinary_discount) ? $item->price / 100: $item->price * $item->ordinary_discount / 10000;
+                            break;
+                        case 2: $goods_price = empty($item->golden_discount) ? $item->price / 100: $item->price * $item->golden_discount / 10000;
+                            break;
+                        case 3: $goods_price = empty($item->platinum_discount) ? $item->price / 100: $item->price * $item->platinum_discount / 10000;
+                            break;
+                        case 3: $goods_price = empty($item->diamond_discount) ? $item->price / 100: $item->price * $item->diamond_discount / 10000;
+                            break;
+                        default :
+                            $goods_price = empty($item->brands->common_discount) ? $item->price / 100: $item->price * $item->brands->common_discount / 10000;
+                            break;
+                    }
+                    ?>
                 <div class="order-item">
                     <div class="order-item-icon" style="background-image:url({{ $item->goodsicon }})"></div>
                     <div class="order-item-content">
                         <div class="order-item-name">{{ $item->goodsname }}</div>
                         <div class="order-property">
-                            <div class="order-price">￥<span class="order-money">{{ $item->price / 100 }}</span> 元</div>
+                            <div class="order-price">
+                                @if ($goods_price == $item->price / 100)
+                                    <span class="order-money">￥<?php echo $item->price / 100; ?>元</span>
+                                @else
+                                    <span class="order-money" style="text-decoration:line-through">￥<?php echo $item->price / 100; ?>元</span>
+                                    ￥<span class="order-money"><?php echo $goods_price; ?></span>元
+                                @endif
+                            </div>
                         </div>
                         <div class="order-item-num">
                             <div>{{ $item->property }}</div>
                             <div>数量: <span class="order-item-count">{{ $item->count }}</span></div>
                         </div>
-                        <?php $total += $item->price / 100 * $item->count; $count += $item->count;?>
+                        <?php $total += $goods_price * $item->count; $count += $item->count;?>
                     </div>
                     <br clear="all" />
                 </div>
@@ -69,16 +93,20 @@
         </div>
         <div class="order-express">
             <div>运费</div>
-            <div>10元(全场满1000元包邮)</div>
+            @if (empty($order->express_price))
+            <div style="color:red;">@if ($user->level < 1) 充值会员包邮  @else 免邮 @endif </div>
+            @else
+            <div style="color:red;">{{ $order->express_price }}</div>
+            @endif
         </div>
-        @if (empty($order->express_price))
+        @if (!empty($order->coupon_id))
         <div class="order-express">
-            <div>运费减免</div>
-            <div>-￥10元</div>
+            <div>优惠券折扣</div>
+            <div style="color:red;">-￥{{ $coupon->discount_price / 100  }}元</div>
         </div>
         @endif
         @if (!empty($order->discount_price))
-        <div class="order-discount">
+        {{--<div class="order-discount">
             <div>会员折扣</div>
             <div style="float:right;">
             @if ($order->discount == 90)
@@ -91,35 +119,29 @@
             @endif
                 <div style="color:red;float:right;">￥-{{ $order->discount_price }}元</div>
             </div>
-        </div>
+        </div>--}}
         @endif
-        @if (!empty($order->exchange_score))
+        @if (!empty($order->score))
             <div class="order-discount">
                 <div>积分折扣</div>
-                <div style="float:right;">
-                    {{ $order->exchange_score }}积分折扣{{ $order->exchange_score / 100 }}元
+                <div style="float:right;color: red;">
+                    {{ $order->score }}积分折扣{{ $order->score / 100 }}元
                 </div>
             </div>
         @endif
     </div>
 
+    <div class="order-show-area" style="padding:0.1rem 5%;margin-top: 0.5rem;background: #fff; line-height:1.8rem;">
+        <div class="order-show-count">
+            共计<?php echo $count; ?>件商品
+        </div>
+        <div class="order-show-total">
+            <div>合计: <span id="total_money">￥{{ empty($order->price)? $total : $order->price / 100}}</span>元</div>
+        </div>
+        <br clear="all" />
+    </div>
+
     <div class="order-show-act">
-        <div class="order-show-area" style="padding-top:0.1rem;">
-            <div class="order-show-count">
-                共计<?php echo $count; ?>件商品
-            </div>
-            <div class="order-show-total">
-                <div>合计: <span id="total_money">￥{{ $order->price / 100}}</span>元</div>
-            </div>
-            <br clear="all" />
-        </div>
-        @if (intval($order->price / 100))
-        <div class="order-get-score">
-            <div style="float: left;">获得积分</div>
-            <div style="float: right;">{{ intval($order->price / 100) }}分</div>
-            <br clear="all" />
-        </div>
-        @endif
         <div class="order-show-time">
             <div>订单号: {{ $order->order_no }}</div>
             <div>下单时间: {{ $order->create_time }}</div>
@@ -180,7 +202,7 @@
             .order-show-count { float:left; }
             .order-show-area {
                 width:100%;}
-            .order-show-act {  background: #fff; margin-top:0.5rem; width: 100%; padding:0 5%;}
+            .order-show-act {  background: #fff; border-top:solid 1px #c1c1c1; width: 100%; padding:0 5%;}
             .order-show-time { margin-top: 1rem;
                 margin-bottom:1rem;}
             .order-show-time div { line-height: 1rem; }

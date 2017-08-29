@@ -5,7 +5,7 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            种类列表
+            {{ $brand->brand_name }}-种类列表
         </h1>
         <button type="button" class="btn btn-primary add-btn">添加</button>
     </section>
@@ -218,7 +218,7 @@
         $.ajax({
             url:'/admin/type/add',
             type:'post',
-            data: { 'typename': typename},
+            data: { 'typename': typename, 'brand_id': {{$brand_id}}},
             dataType: 'json',
             success: function(data) {
                 if (data.rs == 1) {
