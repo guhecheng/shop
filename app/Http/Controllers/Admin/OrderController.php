@@ -150,6 +150,7 @@ class OrderController extends Controller
                 $order->count,
                 $order->price * $order->count / 100,
                 $order->recv_name,
+                $order->phone,
                 $order->location,
                 $order->pay_time
             ];

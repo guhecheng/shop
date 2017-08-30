@@ -30,16 +30,16 @@
                     </div>
                     @if ($goods->ordinary_discount && $goods->golden_discount && $goods->platinum_discount && $goods->diamond_discount)
                     <div class="goods-content-discount">
-                        @if ($goods->ordinary_discount)
+                        @if ($goods->ordinary_discount && $goods->ordinary_discount < 100)
                         <div>普通会员<span style="color:red;">{{ $goods->ordinary_discount / 10 }}折: {{ $goods->ordinary_discount / 100 * $goods->price / 100 }}</span></div>
                         @endif
-                        @if ($goods->golden_discount)
+                        @if ($goods->golden_discount && $goods->golden_discount < 100)
                         <div>黄金会员<span style="color:red;">{{ $goods->golden_discount / 10 }}折: {{ $goods->golden_discount / 100 * $goods->price / 100 }}</span></div>
                         @endif
-                        @if ($goods->platinum_discount)
+                        @if ($goods->platinum_discount && $goods->platinum_discount < 100)
                         <div>铂金会员<span style="color:red;">{{ $goods->platinum_discount / 10 }}折: {{ $goods->platinum_discount / 100 * $goods->price / 100 }}</span></div>
                         @endif
-                        @if ($goods->diamond_discount)
+                        @if ($goods->diamond_discount && $goods->diamond_discount < 100)
                         <div>钻石会员<span style="color:red;">{{ $goods->diamond_discount / 10 }}折: {{ $goods->diamond_discount / 100 * $goods->price / 100 }}</span></div>
                         @endif
                     </div>

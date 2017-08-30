@@ -95,7 +95,7 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">编辑种类</h4>
+                <h4 class="modal-title">编辑属性</h4>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -223,7 +223,7 @@
                             if (is_enum == 0)
                                 $(this).find("a").remove();
                             else {
-                                var html = "<a href='/admin/property/listvalue?keyid="+key_id+"&typeid="+typeid+"'><button type='button' class='btn btn-primary'>添加属性值</button></a>";
+                                var html = "<a href='/admin/property/listvalue?keyid="+key_id+"&typeid="+$("#typeid").val()+"'><button type='button' class='btn btn-primary'>添加属性值</button></a>";
                                 $(this).find("td:eq(2)").append(html);
                             }
                         }

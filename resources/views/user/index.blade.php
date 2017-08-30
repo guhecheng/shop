@@ -1,4 +1,5 @@
 @extends('layouts.comm')
+@section('title', '我的信息')
 @section('my-active', 'active')
 @section('content')
     <div class="user_index">

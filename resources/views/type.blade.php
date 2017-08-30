@@ -62,12 +62,13 @@
     </div>
     @include('layouts.footer')
     <style type="text/css">
+        @if (count($types) < 2)
         .type-wrapper { border-bottom: solid 1px #C1C1C1; }
+        @endif
         .type-slide div {
             width: 90%;
             padding:0 5%;
             text-align: center;
-            overfl
         }
         .type-slide.active div {
             background: #FF1D3D;
@@ -88,9 +89,11 @@
             float:left;
         }
         .goods-item-icon {
-            width: 80%;
-            margin: 0.5rem 10%;
+            width: 100%;
+            padding: 0 5%;
+            margin: 0.5rem 0;
             height: 8rem;
+            border: solid 1px #c0c0c0;
         }
         .type-wrapper .active {
             color: red;
@@ -106,6 +109,9 @@
             text-align: center;
             font-size: 1rem;
             background: #fff;
+            @if (count($types) >= 2)
+                border-bottom: solid 1px #C1C1C1;
+            @endif
             /* Center slide text vertically */
             display: -webkit-box;
             display: -ms-flexbox;
@@ -245,12 +251,13 @@
                             html += '<div class="goods-item-icon" style="background-image:url('+goods.goodsicon+')"></div>';
                             html += '<div class="goods-item-content">';
                             html += '<div class="goods-name">'+goods.goodsname+'</div>';
-                            if (goods.act_price == 0) {
+                            html += '<div class="goods-price">￥ '+goods.price / 100+' 元</div>';
+                            /*if (goods.act_price == 0) {
                                 html += '<div class="goods-price">￥ '+goods.price / 100+' 元</div>';
                             } else {
                                 html += '<div>原价 : '+goods.price/100+' 元</div>';
                                 html += '<div class="goods-price">￥ '+goods.act_price / 100+' 元<div class="is_act_price">特价</div></div>';
-                            }
+                            }*/
                             html += '</div><br clear="all" /></div>';
                         }
                         $(".goods-slide:eq("+index+")").attr('attr-is-add', 1).append(html);

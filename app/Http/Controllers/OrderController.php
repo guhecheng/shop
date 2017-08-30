@@ -61,7 +61,7 @@ class OrderController extends Controller {
         if ($status == 1) {
             $where = [
                 ['uid', '=', $uid],
-                ['status', '=', 1]
+                ['status', '<=', 1]
             ];
         } else if ($status == 2) {
             $where = [
@@ -155,16 +155,35 @@ class OrderController extends Controller {
                 cart.cartid in (".rtrim($car_ids,',').")";
             $goods = DB::select($sql);
         }
+        $user = DB::table("user")->where('userid', $uid)->first();
         if ($goods) {
             foreach ($goods as &$item) {
                 $true_price = !empty($item->sku_price) ? $item->sku_price : $item->price;
+                if ($user->level == 0) {
+                    $real_price = empty($item->common_discount) ? $true_price : $true_price * $item->common_discount / 100;
+                } else if ($user->level == 1) {
+                    $real_price = empty($item->ordinary_discount) ? $true_price : $true_price * $item->ordinary_discount / 100;
+                } else if ($user->level == 2) {
+                    $real_price = empty($item->ordinary_discount) ? $true_price : $true_price * $item->golden_discount / 100;
+                } else if ($user->level == 3) {
+                    $real_price = empty($item->platinum_discount) ? $true_price : $true_price * $item->platinum_discount / 100;
+                } else if ($user->level == 4) {
+                    $real_price = empty($item->diamond_discount) ? $true_price : $true_price * $item->diamond_discount / 100;
+                }
+                $count = empty($request->input('num')) ? $item->goodscount : $request->input('num');
                 DB::table('order')->insert([
                     'order_no' => $orderno,
                     'skuid' => $item->sku_id,
                     'goodsid' => $item->goodsid,
-                    'count' => empty($request->input('num')) ? $item->goodscount : $request->input('num'),
-                    'price' => $true_price
+                    'count' => $count,
+                    'price' => $true_price,
+                    'real_price' => $real_price
                 ]);
+                if (($sku = DB::table('goodssku')->where('sku_id', $item->sku_id)->first()) && $sku->num >= $count) {
+                    DB::table('goodssku')->where('sku_id', $item->sku_id)->update(['num' => $sku->num - $count]);
+                } else {
+                    return redirect('/orderpay?errmsg=1');
+                }
             }
             DB::table("orderinfo")->insert([
                 'order_no' => $orderno,
@@ -177,6 +196,9 @@ class OrderController extends Controller {
 
     }
     public function orderpay(Request $request) {
+        if ($request->input('errmsg') == 1) {
+            exit('商品已经抢购一空,下次再来');
+        }
         $address_id = $request->input('address_id');
         $orderno = $request->input('orderno');
         $uid = $request->session()->get("uid");
@@ -216,11 +238,11 @@ class OrderController extends Controller {
                     $item->goodsname = $value->goodsname;
                     $item->is_discount = $value->is_discount;
                     $item->brand_id = $value->brand_id;
-                    $item->common_discount = $value->common_discount;
+/*                    $item->common_discount = $value->common_discount;
                     $item->ordinary_discount = $value->ordinary_discount;
                     $item->golden_discount = $value->golden_discount;
                     $item->platinum_discount = $value->platinum_discount;
-                    $item->diamond_discount = $value->diamond_discount;
+                    $item->diamond_discount = $value->diamond_discount;*/
                     $item->property .= $value->value_name . " ";
                     $item->brands = DB::table('brands')->where('id', $value->brand_id)->first();
                 }
@@ -368,10 +390,9 @@ class OrderController extends Controller {
                     $user = DB::table('user')->where("userid", $order->uid)->first();
                     if (empty($user)) {
                         throw new \Exception('用户不存在');
-                    } else
-                        DB::table('user')->where('userid', $order->uid)->decrement('score', $order->score);
-
-                    if (!empty($score)) DB::table('scorechange')->insert([ 'uid'=>$order->uid, 'score'=>$score, 'type'=>2, 'paytype'=>1 ]);
+                    } /*else
+                        DB::table('user')->where('userid', $order->uid)->decrement('score', $order->score);*/
+                    if (!empty($score)) DB::table('scorechange')->insert([ 'uid'=>$order->uid, 'score'=>$info->score, 'type'=>2, 'paytype'=>1 ]);
 
                     DB::commit();
                 } catch (\Exception $e) {
@@ -453,7 +474,12 @@ class OrderController extends Controller {
             if (!empty($coupon_id)) {
                 DB::table('user_coupon')->where(['user_id' => $order->uid, 'coupon_id' => $coupon_id])->update(['status' => 1]);
             }
-            if (!empty($score)) DB::table('scorechange')->insert([ 'uid'=>$order->uid, 'score'=>$score, 'type'=>2, 'paytype'=>2 ]);
+            if (!empty($score)) {
+                if ($user->score < $score)
+                    throw new \Exception('积分不够');
+
+                DB::table('scorechange')->insert([ 'uid'=>$order->uid, 'score'=>$score, 'type'=>2, 'paytype'=>2 ]);
+            }
             DB::commit();
             return response()->json(['rs' => 1]);
         } catch (\Exception $e) {
@@ -514,7 +540,7 @@ class OrderController extends Controller {
         $score = $request->input('score');
         $price = $request->input('price');
         $coupon_id = $request->input('coupon_id');
-        if (empty($address_id) || empty($order_no)) {
+        if (empty($address_id) || empty($order_no) || empty($score)) {
             return response()->json(['rs' => 0, 'errmsg' => "订单出现异常"]);
         }
         try {
@@ -540,14 +566,17 @@ class OrderController extends Controller {
             if (!$user) {
                 throw new \Exception('用户不存在');
             }
+            if ($user->score < $score)
+                throw new \Exception('用户积分不够');
 
             $rs = DB::table('orderinfo')->where('info_id', $order->info_id)->update([
                 'pay_type' => 2,
                 'status' => $this->state['ORDER_WAIT_SEND'],
                 'pay_time' => date("Y-m-d H:i:s"),
-                'price' => 0,
+                'price' => $score,
                 'express_price' => empty($express_price) ? 0 : $express_price,
                 'recv_name' => $address->name,
+                'score' => $score,
                 'phone' => $address->phone,
                 'location' => $address->location,
                 'coupon_id' => $coupon_id
@@ -566,7 +595,7 @@ class OrderController extends Controller {
             if (!empty($score)) {
                 if ($user && $user->score >= $score) {
                     $rs = DB::table('user')->where('userid', $order->uid)->update([
-                        'score' => $user->score - $score * 100
+                        'score' => $user->score - $score
                     ]);
                     if (!$rs)
                         throw new \Exception('修改订单状态失败');
@@ -646,7 +675,7 @@ class OrderController extends Controller {
         $today = date("Y-m-d");
         $coupons = [];
         foreach ($brand_ids as $key=>$brand_id) {
-            $where = "user_coupon.user_id={$uid} and coupon_brand.brand_id = ({$brand_id}) and status=0 and end_date>='{$today}' and start_date <='{$today}' and goods_price<={$prices[$key]}*100";
+            $where = "user_coupon.user_id={$uid} and coupon_brand.brand_id = ({$brand_id}) and status=0 and end_date>='{$today}' and start_date <='{$today}' and goods_price<={$prices[$key]}";
             $brands = DB::table('brands')->where('is_del', 0)->get();
             $sql = "select `user_coupon`.*, `coupon`.*, group_concat(coupon_brand.brand_id) as brand_ids from `user_coupon` left join `coupon` on `coupon`.`id` = `user_coupon`.`coupon_id` left join `coupon_brand` on `coupon_brand`.`coupon_id` = `coupon`.`id` where ({$where}) group by `coupon_brand`.`coupon_id` order by `coupon`.`start_date` desc";
             $rs = DB::select($sql);

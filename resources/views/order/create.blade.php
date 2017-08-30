@@ -26,29 +26,29 @@
             @foreach ($goods as $item)
             <?php
             switch ($user->level) {
-                case 1: $goods_price = empty($item->ordinary_discount) ? $item->price / 100: $item->price * $item->ordinary_discount / 10000;
+                case 1: //$goods_price = empty($item->ordinary_discount) ? $item->price / 100: $item->price * $item->ordinary_discount / 10000;
                         $wx_price = empty($item->brands->ordinary_discount) ? $item->price / 100 : $item->price * $item->brands->ordinary_discount / 10000;
                         break;
-                case 2: $goods_price = empty($item->golden_discount) ? $item->price / 100: $item->price * $item->golden_discount / 10000;
+                case 2: //$goods_price = empty($item->golden_discount) ? $item->price / 100: $item->price * $item->golden_discount / 10000;
                         $wx_price = empty($item->brands->golden_discount) ? $item->price / 100 : $item->price * $item->brands->golden_discount / 10000;
                     break;
-                case 3: $goods_price = empty($item->platinum_discount) ? $item->price / 100: $item->price * $item->platinum_discount / 10000;
+                case 3: //$goods_price = empty($item->platinum_discount) ? $item->price / 100: $item->price * $item->platinum_discount / 10000;
                     $wx_price = empty($item->brands->platinum_discount ) ? $item->price / 100 : $item->price * $item->brands->platinum_discount / 10000;
                     break;
-                case 3: $goods_price = empty($item->diamond_discount) ? $item->price / 100: $item->price * $item->diamond_discount / 10000;
+                case 4: //$goods_price = empty($item->diamond_discount) ? $item->price / 100: $item->price * $item->diamond_discount / 10000;
                     $wx_price = empty($item->brands->diamond_discount) ? $item->price / 100 : $item->price * $item->brands->diamond_discount / 10000;
                     break;
                 default :
-                    $goods_price = empty($item->brands->common_discount) ? $item->price / 100: $item->price * $item->brands->common_discount / 10000;
+                    //$goods_price = empty($item->brands->common_discount) ? $item->price / 100: $item->price * $item->brands->common_discount / 10000;
                     $wx_price = empty($item->brands->common_discount) ? $item->price / 100 : $item->price * $item->brands->common_discount / 10000;
                     break;
             }
             ?>
             <?php
                 if (empty($coupons[$item->brand_id]))
-                    $coupons[$item->brand_id] = $goods_price * $item->count;
+                    $coupons[$item->brand_id] = $item->real_price * $item->count;
                 else
-                    $coupons[$item->brand_id] += $goods_price * $item->count;
+                    $coupons[$item->brand_id] += $item->real_price * $item->count;
             ?>
             <?php $brand_ids[] = $item->brand_id; ?>
             <div class="order-item" attr-id="">
@@ -57,11 +57,11 @@
                     <div class="order-item-name">{{ $item->goodsname }}</div>
                     <div class="order-property">
                         <div class="order-price">
-                            @if ($goods_price == $item->price / 100)
+                            @if ($item->real_price == $item->price)
                             <span class="order-money">￥<?php echo $item->price / 100; ?>元</span>
                             @else
                                 <span class="order-money" style="text-decoration:line-through">￥<?php echo $item->price / 100; ?>元</span>
-                                ￥<span class="order-money"><?php echo $goods_price; ?></span>元
+                                ￥<span class="order-money"><?php echo $item->real_price / 100; ?></span>元
                             @endif
                         </div>
                     </div>
@@ -70,7 +70,7 @@
                         <div>数量: <span class="order-item-count">{{ $item->count }}</span></div>
                     </div>
                     <?php
-                        $total += $goods_price * $item->count;
+                        $total += $item->real_price / 100 * $item->count;
                         $wx_total += $wx_price * $item->count;
                         $count += $item->count;
                     ?>
@@ -86,7 +86,7 @@
         </div>
         <input type="hidden" id="coupon_id" value="" />
         <input type="hidden" id="coupon_price" value="0" />
-        <input type="hidden" id="old_wx_price" value="{{ $wx_total }}" />
+        <input type="hidden" id="old_wx_price" value="{{ $total>=$wx_total ? $wx_total - 0.01 : $total }}" />
         <input type="hidden" id="score" value="0"/>
         @if ($user->level >= 1 || $wx_total >= 1000)
         <input type="hidden"  id="express_price" value="0" />
@@ -135,7 +135,7 @@
     <div class="order-select-title"><div>请选择支付方式</div><div class="order-pay-close"></div></div>
     <div class="card-pay"><div></div><span>会员卡支付</span><span id="card_price">(余额: {{ $user->money / 100 }})</span></div>
     <div class="card-no-pay" style="background: #c0c0c0;display: none;"><div></div><span>会员卡支付</span><span>(余额不足)</span></div>
-    <div class="wx-pay"><div></div><span>微信支付</span><span id="wx_pay_money" style="margin-left:2rem;"></span></div>
+    <div class="wx-pay"><div></div><span>微信支付</span><span id="wx_pay_money" style="margin-left:2rem;"></span>元</div>
     <div class="order-select-blank"></div>
     <div class="order-sure-pay">确定支付</div>
 </div>
@@ -532,7 +532,6 @@
         console.log($.trim($(".coupons-item-active").find(".coupons-price").text()));
     });
     $(".order-score-discount").on("click", function () {
-        console.log($("#coupon_price").val());
         var score = (parseFloat($("#old_wx_price").val()) - parseFloat($("#coupon_price").val())).toFixed(2);
         if (score >= {{ $user->score / 100 }} ) {
             $("#exchange_score").text({{ $user->score }});
@@ -546,11 +545,13 @@
     $(".order-score-sure-btn").on("click", function () {
         if ($(".order-score-select-type").hasClass('is_active')) {
             var score = parseFloat($("#exchange_score").text());
+            console.log($("#price").val() - score / 100);
+            var price = ($("#price").val() - score / 100).toFixed(2);
             $("#score").val(score);
-            $("#total_money").attr("data-value", $("#price").val() - score / 100).text($("#price").val() - score / 100);
-            $("#price").val($("#price").val() - score / 100);
+            $("#total_money").attr("data-value", price).text(price);
+            $("#price").val(price);
             $(".order-score-show").text(score + '积分抵扣'+ score / 100 +'元');
-            $("#wx_real_price").val($("#wx_real_price").val() - score / 100);
+            $("#wx_real_price").val(($("#wx_real_price").val() - score / 100).toFixed(2));
         } else {
             console.log($("#score"));
             var coupon_money = parseFloat($("#coupon_price").val());
@@ -673,7 +674,7 @@
             $.ajax({
                 url:'/order/pay',
                 data:{'address_id':address_id, 'score':score, 'express_price': express_price,
-                    'price':price, 'order_no':{{ $orderno }},
+                    'price':wx_price, 'order_no':{{ $orderno }},
                     'coupon_id': $("#coupon_id").val(), 'coupon_discount': $("#discount_price").val()
                     },
                 dataType:'json',
@@ -694,7 +695,7 @@
             $.ajax({
                 url:'/order/cardpay',
                 data:{'address_id':address_id, 'score':score, 'express_price': express_price,
-                    'price': wx_price, 'order_no':{{ $orderno }},
+                    'price': price, 'order_no':{{ $orderno }},
                     'coupon_id': $("#coupon_id").val(), 'coupon_discount': $("#discount_price").val()},
                 dataType:'json',
                 type:'post',

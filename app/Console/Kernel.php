@@ -31,7 +31,7 @@ class Kernel extends ConsoleKernel
             $orders = DB::table('orderinfo')->where([
                 ['status', '<=', 1],
                 ['create_time', '<=', date("Y-m-d H:i:s", time()-30*60)]
-            ])->select('order_no')->get();
+            ])->get();
             file_put_contents('cron.log', date("Y-m-d H:i:s") . var_export($orders, true) . PHP_EOL, FILE_APPEND);
             if ($orders->isEmpty()) return;
             foreach ($orders as $order) {
@@ -39,6 +39,7 @@ class Kernel extends ConsoleKernel
                 DB::table('user')->where('userid', $order->uid)->increment('score', $order->score);
                 $item = DB::table('order')->where('order_no', $order->order_no)->select('skuid', 'count')->get();
                 foreach ($item as $key=>$value) {
+                    file_put_contents('cron.log', date("Y-m-d H:i:s") . var_export($value, true) . PHP_EOL, FILE_APPEND);
                     DB::table('goodssku')->where('sku_id', $value->skuid)->increment('num', $value->count);
                 }
             }

@@ -18,11 +18,11 @@
                 <div class="swiper-slide goods-slide" attr-is-add="0">
                     @if ($i == 0 && empty($status) && !($orders->isEmpty()))
                     @foreach ($orders as $item)
-                    <div class="order-item" attr-id="{{ $item->order_no }}">
+                    <div class="order-item" attr-id="{{ $item->order_no }}" data-type="{{ $item-> status }}">
                         <div class="order-item-header">
                             <div>{{ $item->order_no }}</div>
                             <div class="order-item-status">
-                                @if ($item->status == 1)
+                                @if ($item->status == 1 || $item->status == 0)
                                 <span style="color:red;">未付款</span>
                                 @elseif ($item->status == 2)
                                 待发货
@@ -131,7 +131,10 @@
         $(function() {
             $(document).on("click", ".order-item", function () {
                 //if ($.trim($(this).find(".order-item-status").text()) == '已失效') return;
-                location.href = "/ordershow?orderno=" + $(this).attr("attr-id");
+                if ($(this).attr('data-type') == 0) {
+                    location.href = "/orderpay?orderno=" + $(this).attr("attr-id");
+                } else
+                    location.href = "/ordershow?orderno=" + $(this).attr("attr-id");
             });
         });
         $.ajaxSetup({
@@ -169,12 +172,13 @@
                         var html = '';
                         for (var i in data.orders) {
                             var order = data.orders[i];
+                            var price = 0;
                             var count = 0;
-                            html += '<div class="order-item" attr-id="' + order.order_no + '">';
+                            html += '<div class="order-item" attr-id="' + order.order_no + '" data-type="'+ order.status +'">';
                             html += '<div class="order-item-header">';
                             html += '<div>' + order.order_no + '</div>';
                             html += '<div>';
-                            if (order.status == 1)
+                            if (order.status == 1 || order.status == 0)
                                 html += '未支付';
                             else if (order.status == 2)
                                 html += '未发货';
@@ -182,6 +186,8 @@
                                 html += '待收货';
                             else if (order.status == 4)
                                 html += '已收货';
+                            else
+                                html += '已失效';
 
                             html += '</div></div>';
                             for (var j in order.data) {
@@ -196,9 +202,12 @@
                                 html += '<div>' + item.count + '</div>';
                                 count += item.count;
                                 html += '</div></div><br clear="all" /></div>';
+                                if (order.price == 0) {
+                                    price += item.count * item.real_price;
+                                }
                             }
                             html += '<div class="price"><div>共计' + count + ' 件商品</div>';
-                            html += '<div>合计<span style="color:red;">￥' + order.price / 100 + '元</span>(运费' + order.express_price + ')</div>';
+                            html += '<div>合计<span style="color:red;">￥' + (order.price == 0 ? price/100 : order.price / 100) + '元</span>(运费' + order.express_price + ')</div>';
                             html += '</div>';
                             html += '</div>';
                         }
