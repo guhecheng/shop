@@ -28,9 +28,11 @@ class QueryListener
     public function handle(QueryExecuted $event)
     {
         if (env('APP_ENV', 'production') == 'local') {
-            $sql = str_replace("?", "'%s'", $event->sql);
+            /*$sql = str_replace("?", "'%s'", $event->sql);
+            Log::info($sql);
             $log = vsprintf($sql, $event->bindings);
-            Log::info($log);
+            Log::info($log);*/
+            Log::info($event->bindings);
         }
     }
 }

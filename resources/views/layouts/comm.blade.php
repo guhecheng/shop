@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="/css/home.css">
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/layer_mobile/need/layer.css">
-    <script src="//code.jquery.com/jquery-latest.min.js"></script>
+    <script src="/js/jquery.js"></script>
     <script src="/layer_mobile/layer.js"></script>
 </head>
 <body>

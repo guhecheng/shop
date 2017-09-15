@@ -449,7 +449,7 @@
             $(".order-address").height($(".order-address-no-default").height());
             @endif--}}
     });
-    $(document).on("click", ".coupons-item", function () {
+    $(document).on("touchstart", ".coupons-item", function () {
         if ($(this).hasClass("coupons-item-active")) {
             $(this).removeClass('coupons-item-active');
         } else {
@@ -494,9 +494,13 @@
                             '                        <div>仅限'+ coupon.brand_names +'使用</div>' +
                             '                    </div>' +
                             '                    <div class="coupons-right-2">' +
-                            '                        <div>使用期限: </div>' +
-                            '                        <div class="coupons-date">'+coupon.start_date+'-'+coupon.end_date+'</div>' +
-                            '                    </div>' +
+                            '                        <div>使用期限: </div>';
+                        if (coupon.is_sub == 1)
+                            html += '                        <div class="coupons-date">无限期</div>';
+                        else
+                            html += '                        <div class="coupons-date">'+coupon.start_date+'-'+coupon.end_date+'</div>';
+
+                        html += '                    </div>' +
                             '                </div>' +
                             '</div>';
                     }

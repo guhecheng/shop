@@ -28,6 +28,7 @@ class CouponController extends Controller
             ->orderBy('id', 'desc')
             ->select('coupon.*', 'adminuser.name')
             ->paginate(10);
+        $users = DB::table('user')->get();
         if (!empty($coupons)) {
             $ids = [];
             foreach ($coupons as $coupon) {
@@ -47,21 +48,28 @@ class CouponController extends Controller
             }
         }
         $brands = DB::table('brands')->where('is_del', '0')->orderBy('sort')->get();
-        return view('admin.coupon.index', ['coupons' => $coupons, 'brands' => $brands, 'type'=>$this->type]);
+        return view('admin.coupon.index', ['coupons' => $coupons, 'brands' => $brands, 'type'=>$this->type, 'users' => $users]);
     }
 
 
     public function add(Request $request) {
-        $goods_price = $request->input('goods_price');
+        $goods_price = empty($request->input('goods_price')) ? 0 : $request->input('goods_price');
         $discount_price = $request->input('discount_price');
         $brands = $request->input('brands');
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
         $user_type = $request->input('user_type');
-        if (empty($goods_price) || empty($discount_price) || empty($brands) || empty($start_date) || empty($end_date) || empty($user_type))
+        $name = $request->input('name');
+        $type = $request->input('type');
+        $coupon_type = $request->input('coupon_type');
+        $add_num = $request->input('add_num');
+        if (empty($discount_price) || empty($start_date) || empty($end_date))
             return back()->with('coupon_info', '信息填写不完整');
 
-        if ($discount_price > $goods_price) {
+        if (empty($coupon_type) && empty($user_type) && empty($name))
+            return back()->with('coupon_info', '必须选择优惠券发送者');
+
+        if ($type!=1 && $discount_price > $goods_price) {
             return back()->with('coupon_info', '商品价小于优惠价');
         }
         if (strtotime($start_date) >= strtotime($end_date))
@@ -69,45 +77,71 @@ class CouponController extends Controller
 
         DB::beginTransaction();
         try {
-            $id = DB::table('coupon')->insertGetId([
+            $data = [
                 'goods_price' => trim($goods_price) * 100,
                 'discount_price' => trim($discount_price) * 100,
                 'start_date' => date("Y-m-d", strtotime(trim($start_date))),
                 'end_date' => date("Y-m-d", strtotime(trim($end_date))),
-                'user_type' => implode(",", $user_type),
-                'add_uid' => session("sysuid")
-            ]);
+                'user_type' => empty($user_type) ? '' : implode(",", $user_type),
+                'add_uid' => session("sysuid"),
+                'coupon_type' => $coupon_type,
+                'type' => $type,
+                'num' => $coupon_type == 2 ? $add_num : 0
+            ];
+            $id = DB::table('coupon')->insertGetId($data);
             if (empty($id))
                 throw new Exception('优惠券创建失败');
-            // 获取到对应的用户
-            $users = DB::table('user')->whereIn('level', $user_type)->get();
+
 
             $data = [];
             $insert_user_coupon = [];
-            foreach ($brands as $brand) {
-                $data[] = ['coupon_id' => $id, 'brand_id' => $brand];
+            if ($type != 1 ) {
+                foreach ($brands as $brand) {
+                    $data[] = ['coupon_id' => $id, 'brand_id' => $brand];
+                }
+                if (!DB::table('coupon_brand')->insert($data))
+                    throw new Exception('优惠券创建失败');
             }
 
-            if (!empty($users)) {
-                foreach ($users as $user) {
-                    $insert_user_coupon[] = ['user_id'=>$user->userid, 'coupon_id' => $id];
+
+            if ($coupon_type < 1){
+                if (!empty($name)) {
+                    foreach ($name as $item) {
+                        $insert_user_coupon[] = ['user_id'=>$item, 'coupon_id' => $id];
+                    }
+                } else {
+                    // 获取到对应的用户
+                    $users = DB::table('user')->whereIn('level', $user_type)->get();
+                    if (!empty($users)) {
+                        foreach ($users as $user) {
+                            $insert_user_coupon[] = ['user_id'=>$user->userid, 'coupon_id' => $id];
+                        }
+                    }
                 }
             }
 
-            if (!DB::table('coupon_brand')->insert($data))
-                throw new Exception('优惠券创建失败');
 
-            if (!DB::table('user_coupon')->insert($insert_user_coupon))
-                throw new Exception('分配优惠券失败');
+
+            if (!empty($insert_user_coupon))
+                if (!DB::table('user_coupon')->insert($insert_user_coupon))
+                    throw new Exception('分配优惠券失败');
 
             DB::commit();
         } catch (Exception $e) {
             Log::error($e->getMessage());
             DB::rollback();
-            exit($e->getMessage());
             return back()->with('coupon_info', '增加优惠券失败');
         }
         return back()->with('coupon_info', '添加成功');
+    }
+
+    public function findUser(Request $request) {
+        $user_name = $request->input('user_name');
+        if (empty($user_name))
+            return response()->json(['rs' => 0]);
+        $sql = "select * from user where uname like '%{$user_name}%'";
+        $users = DB::select($sql);
+        return response()->json(['rs' => 1, 'users' => $users]);
     }
 
 }

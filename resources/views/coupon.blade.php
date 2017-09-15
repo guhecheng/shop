@@ -7,7 +7,8 @@
 <div class="coupon-list">
     <div class="swiper-container">
         <div class="buttons-tab" id="index-tab">
-            <a href="#tab1" class="tab-link active button" attr-value="">未使用</a>
+            <a href="#tab1" class="tab-link active button" attr-value="">待领取</a>
+            <a href="#tab1" class="tab-link button" attr-value="">未使用</a>
             <a href="#tab1" class="tab-link button" attr-value="">已使用</a>
             <a href="#tab1" class="tab-link button" attr-value="">已过期</a>
         </div>
@@ -16,20 +17,29 @@
             @if (!empty($coupons))
             @foreach ($coupons as $coupon)
             @if ($coupon->end_date >= date("Y-m-d"))
-            <div class="coupons-item" style="background-image:url('/images/coupon.png')">
+            <div class="coupons-item" style="background-image:url('/images/coupon.png')" data-id="{{ $coupon->id }}">
                 <div class="coupons-left">
                     <div class="coupons-discount-price"><span>￥</span><span>{{ $coupon->discount_price/100 }}</span></div>
+                    @if ($coupon->goods_price > 0)
                     <div class="coupons-goods-price">满￥{{ $coupon->goods_price/100 }}元可用</div>
+                    @endif
                 </div>
                 <div class="coupons-right">
                     <div class="coupons-right-1">
                         <div>使用范围:</div>
+                        @if ($coupon->type == 1)
+                        <div>仅限充值使用</div>
+                        @else
                         <div>仅限{{ $coupon->brand_names }}使用</div>
+                        @endif
                     </div>
                     <div class="coupons-right-2">
                         <div>使用期限: </div>
                         <div class="coupons-date">{{ $coupon->start_date }}-{{ $coupon->end_date }}</div>
                     </div>
+                    @if ($coupon->num > 0)
+                    <div class="coupons-right-2">剩余数量: {{ $coupon->num }}张</div>
+                    @endif
                 </div>
             </div>
             @endif
@@ -89,7 +99,7 @@
         float: left;
         line-height: 2rem;
         text-align: center;
-        width: 33%;
+        width: 25%;
     }
     #index-tab a.active {
         border-bottom:solid 1px red;
@@ -123,11 +133,34 @@
         var index = $(this).index();
         mySwiper.slideTo(index);
     });
+    $(document).on('touchstart', '.coupons-item', function () {
+        var coupon_id = $(this).attr('data-id');
+        $.ajax({
+            url:'/coupon/getcoupon',
+            data:{'coupon_id': coupon_id},
+            dataType:'json',
+            type:'post',
+            success: function (data) {
+                if (data.rs == 0)
+                    layer.open({
+                        content: data.errmsg
+                        ,btn: '确定'
+                    });
+                else {
+                    
+                }
+                    layer.open({
+                        content: '领取成功'
+                        ,btn: '确定'
+                    });
+            }
+        })
+    });
     function getdata(index) {
         if ($(".swiper-slide:eq("+index+")").attr("attr-is-add") == 1) return;
         $.ajax({
             url: '/coupon',
-            data:{'status': parseInt(index) + 1},
+            data:{'status': parseInt(index)},
             dataType:'json',
             type:"get",
             success:function (data) {
@@ -147,23 +180,29 @@
                             html += ' style="background-image:url('+'/images/coupon.png'+')">';
                         }
                         html += '<div class="coupons-left">' +
-                            '                    <div class="coupons-discount-price"><span>￥</span><span>'+coupon.discount_price/100+'</span></div>' +
-                            '                    <div class="coupons-goods-price">满￥' + coupon.goods_price/100 +'元可用</div>' +
-                            '                </div>' +
+                            '                    <div class="coupons-discount-price"><span>￥</span><span>'+coupon.discount_price/100+'</span></div>';
+                        if (coupon.goods_price > 0)
+                            html += '<div class="coupons-goods-price">满￥' + coupon.goods_price/100 +'元可用</div>';
+
+                        html += '                </div>' +
                             '                <div class="coupons-right">' +
                             '                    <div class="coupons-right-1">' +
-                            '                        <div>使用范围:</div>' +
-                            '                        <div>仅限'+ coupon.brand_names +'使用</div>' +
-                            '                    </div>' +
+                            '                        <div>使用范围:</div>';
+                        if (coupon.type == 1) {
+                            html += '                        <div>仅限充值使用</div>';
+                        } else {
+                            html += '                        <div>仅限'+ coupon.brand_names +'使用</div>';
+                        }
+                        html += '                    </div>' +
                             '                    <div class="coupons-right-2">' +
                             '                        <div>使用期限: </div>' +
-                            '                        <div class="coupons-date">'+coupon.start_date+'-'+coupon.end_date+'</div>' +
+                            '                        <div class="coupons-date">'+(coupon.is_sub==1 ? '无限期' : coupon.start_date+'-'+coupon.end_date)+'</div>' +
                             '                    </div>';
-                        if (index == 1) {
+                        /*if (index == 1) {
                             html += '<div style="color:red;">已使用</div>';
                         } else if (index == 2) {
                             html += '<div style="color:">已失效</div>';
-                        }
+                        }*/
                         html += '                </div>' +
                             '</div>';
                     }

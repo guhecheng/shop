@@ -7,7 +7,6 @@
  */
 namespace App\Http\Controllers;
 
-use model\parter\emp\emp;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -675,9 +674,12 @@ class OrderController extends Controller {
         $today = date("Y-m-d");
         $coupons = [];
         foreach ($brand_ids as $key=>$brand_id) {
-            $where = "user_coupon.user_id={$uid} and coupon_brand.brand_id = ({$brand_id}) and status=0 and end_date>='{$today}' and start_date <='{$today}' and goods_price<={$prices[$key]}";
+            $where1 = "user_coupon.is_delete=0 and user_coupon.user_id={$uid} and coupon_brand.brand_id = ({$brand_id}) and status=0 and end_date>='{$today}' and start_date <='{$today}' and goods_price<={$prices[$key]} and is_sub=0";
+            $where2 = "user_coupon.is_delete=0 and user_coupon.user_id={$uid} and coupon_brand.brand_id = ({$brand_id}) and status=0 and goods_price<={$prices[$key]} and is_sub=1";
             $brands = DB::table('brands')->where('is_del', 0)->get();
-            $sql = "select `user_coupon`.*, `coupon`.*, group_concat(coupon_brand.brand_id) as brand_ids from `user_coupon` left join `coupon` on `coupon`.`id` = `user_coupon`.`coupon_id` left join `coupon_brand` on `coupon_brand`.`coupon_id` = `coupon`.`id` where ({$where}) group by `coupon_brand`.`coupon_id` order by `coupon`.`start_date` desc";
+            $sql = "(select `user_coupon`.*, `coupon`.*, group_concat(coupon_brand.brand_id) as brand_ids from `user_coupon` left join `coupon` on `coupon`.`id` = `user_coupon`.`coupon_id` left join `coupon_brand` on `coupon_brand`.`coupon_id` = `coupon`.`id` where ({$where1}) group by `coupon_brand`.`coupon_id` order by `coupon`.`start_date` desc)
+                    union 
+                    (select `user_coupon`.*, `coupon`.*, group_concat(coupon_brand.brand_id) as brand_ids from `user_coupon` left join `coupon` on `coupon`.`id` = `user_coupon`.`coupon_id` left join `coupon_brand` on `coupon_brand`.`coupon_id` = `coupon`.`id` where ({$where2}) group by `coupon_brand`.`coupon_id`)";
             $rs = DB::select($sql);
             if (!empty($rs)) {
                 $coupon = $rs[0];

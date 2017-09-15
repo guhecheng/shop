@@ -503,15 +503,16 @@ body {
     padding: 0 5%;
     width: 90%;
 }
-.card-money-area div {
+.card-money-area .select-money {
     float: left;
     width: 45%;
     line-height: 2rem;
     border: solid 1px #0c0c0c;
     text-align: center;
     margin-bottom: 0.8rem;
+    position: relative;
 }
-.card-money-area div:nth-child(even) {
+.card-money-area .select-money:nth-child(even) {
     margin-left: 10%;
 }
 .sure_recharge {

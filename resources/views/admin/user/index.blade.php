@@ -65,7 +65,7 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td rowspan="7">
+                                    <td colspan="7">
                                         {{ $users->links() }}
                                     </td>
                                 </tr>

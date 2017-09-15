@@ -14,7 +14,8 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="box">
-                    <button type="button" class="btn btn-primary add-btn" style="margin-left:10px; margin-top:10px;">添加优惠券</button>
+                    <button type="button" class="btn btn-primary add-goods-btn" style="margin-left:10px; margin-top:10px;">添加商品优惠券</button>
+                    <button type="button" class="btn btn-primary add-card-btn" style="margin-left:10px; margin-top:10px;">添加充值优惠券</button>
                     <div class="box-header">
                         @if (!empty(session('coupon_info')))
                         <h4 style="color: red;">{{ session('coupon_info') }}</h4>
@@ -29,8 +30,8 @@
                                 <th>发放时间</th>
                                 <th>类型</th>
                                 <th>使用范围</th>
-                                <th>使用时间</th>
                                 <th>使用者</th>
+                                <th>使用时间</th>
                                 <th>发放者</th>
                             </tr>
                             </thead>
@@ -72,7 +73,7 @@
                             </tbody>
                             <tfoot>
                             <tr>
-                                <td rowspan="6d">
+                                <td colspan="7">
                                     {{ $coupons->links() }}
                                 </td>
                             </tr>
@@ -101,7 +102,7 @@
             </div>
             <div class="modal-body">
                 <form action="/admin/coupon/add" method="post">
-                <div class="form-group">
+                <div class="form-group goods_coupon">
                     <label for="cardname" class="col-sm-2 control-label">类型</label>
                     <div class="col-sm-10">
                         满
@@ -111,12 +112,26 @@
                     </div>
                     <br clear="all" />
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="brand_type">
                     <label for="cardname" class="col-sm-2 control-label">使用范围</label>
                     <div class="col-sm-10">
                         @foreach ($brands as $brand)
                         <input type="checkbox" class="brands" name="brands[]" value="{{ $brand->id }}" />{{ $brand->brand_name }}
                         @endforeach
+                    </div>
+                    <br clear="all" />
+                </div>
+                <div class="form-group">
+                    <label for="cardname" class="col-sm-2 control-label">购物券类型</label>
+                    <div class="col-sm-10">
+                        <select id="coupon_type" name="coupon_type">
+                            <option value="0">普通优惠券</option>
+                            <option value="1">活动优惠券</option>
+                            <option value="2">待领优惠券</option>
+                        </select>
+                        <div id="num_area" style="display: none;float:right;margin-right:100px;">
+                            <input type="text" id="add_num" value="" name="add_num" placeholder="输入发券数目"/>
+                        </div>
                     </div>
                     <br clear="all" />
                 </div>
@@ -129,14 +144,26 @@
                     </div>
                     <br clear="all" />
                 </div>
+                <input type="hidden" id="type" value="" name="type" />
                 <div class="form-group">
                     <label for="cardname" class="col-sm-2 control-label">使用范围</label>
                     <div class="col-sm-10">
-                        <input type="checkbox" class="user_type" name="user_type[]" value="0">普通用户
-                        <input type="checkbox" class="user_type" name="user_type[]" value="1">普通会员
-                        <input type="checkbox" class="user_type" name="user_type[]" value="2">黄金会员
-                        <input type="checkbox" class="user_type" name="user_type[]" value="3">铂金会员
-                        <input type="checkbox" class="user_type" name="user_type[]" value="4">钻石会员
+                        <div>
+                            <input type="checkbox" class="user_type" name="user_type[]" value="0">普通用户
+                            <input type="checkbox" class="user_type" name="user_type[]" value="1">普通会员
+                            <input type="checkbox" class="user_type" name="user_type[]" value="2">黄金会员
+                            <input type="checkbox" class="user_type" name="user_type[]" value="3">铂金会员
+                            <input type="checkbox" class="user_type" name="user_type[]" value="4">钻石会员
+                        </div>
+                        <div>
+                            <input type="text" name="user_name" id="user_name" />
+                            <button class="btn btn-primary" id="search_btn">搜索</button>
+                            <div id="add_user_area">
+                                <table>
+                                    <tr><td style="width:100px"></td><td style="width:100px;">用户ID</td><td style="width:100px;">用户名</td></tr>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                     <br clear="all" />
                 </div>
@@ -153,36 +180,6 @@
     <!-- /.modal-dialog -->
 </div>
 
-<div class="modal fade" id="mod-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">编辑种类</h4>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="cardname" class="col-sm-2 control-label">种类名</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" name="typename" id="edit_typename" placeholder="请输入种类名">
-                    </div>
-                </div>
-                <input type="hidden" id="typeid" value="" name="typeid" />
-                <input type="hidden" id="item" value="" name="item" />
-                {{ csrf_field() }}
-                <br clear="all" />
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-                <input type="submit" class="btn btn-primary update_btn" value="修改" />
-            </div>
-        </div>
-        <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
-</div>
-<!-- /.modal -->
 <!-- /.content-wrapper -->
 <footer class="main-footer">
     <div class="pull-right hidden-xs">
@@ -201,6 +198,8 @@
         z-index: 4;
     }
     .modal { z-index: 8; }
+    #add_user_area {
+        display: none; }
 </style>
 
 <script src="/css/admin/plugins/jQuery/jquery-2.2.3.min.js"></script>
@@ -230,6 +229,7 @@
 <script src="/js/daterangepicker.js" type="text/javascript"></script>
 <script src="/js/bootstrap-datepicker.js" type="text/javascript"></script>
 <script type="text/javascript">
+    var uids = '';
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -242,7 +242,22 @@
         $('#end_date').datepicker({
             autoclose: true
         });
-        $(".add-btn").on("click", function() {
+        $(".add-goods-btn").on("click", function() {
+            $('#brand_type').show();
+            $("#type").val(0);
+            $(".goods_coupon").show();
+            $(".card_coupon").hide();
+            $("#goods_price").val('');
+            $("#discount_price").val('');
+            $("#add-modal").modal('show');
+        });
+        $(".add-card-btn").on('click', function () {
+            $('#brand_type').hide();
+            $('#type').val(1);
+            $(".goods_coupon").hide();
+            $(".card_coupon").show();
+            $("#goods_price").val('');
+            $("#discount_price").val('');
             $("#add-modal").modal('show');
         });
         $(document).on("click", ".modify-btn", function () {
@@ -254,5 +269,54 @@
             $("#item").val(par.index());
         });
 
+    });
+    $("#coupon_type").on('click', function () {
+        var type = $(this).val();
+        console.log(type);
+        if (type == 2) {
+            $("#num_area").show();
+        } else {
+            $("#num_area").hide();
+            $("#add_num").val(0);
+        }
+    });
+    $("#search_btn").on("click", function (event) {
+        event.preventDefault();
+        var user_name = $.trim($("#user_name").val());
+        if (user_name == '') return false;
+        $.ajax({
+            url:'/admin/coupon/finduser',
+            type:'post',
+            data: { 'user_name': user_name },
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                if (data.users != '') {
+                    $("#add_user_area").show();
+                    var html = '';
+                    for (var i in data.users) {
+                        var user = data.users[i];
+                        console.log(uids);
+                        if (uids != '') {
+                            var ids_arr = uids.split(',');
+                            console.log(ids_arr);
+                            console.log(user.userid);
+                            if (ids_arr.indexOf(""+user.userid+"") >= 0) {
+                                continue;
+                            }
+                        }
+
+                        uids += user.userid + ',';
+                        console.log(user);
+                        html += '<tr>';
+                        html += '<td><input type="checkbox" name="name[]" value="'+user.userid+'" style="width:20px;height:20px;"></td>';
+                        html += '<td><span>'+user.userid+'</span></td>';
+                        html += '<td><span>'+user.uname+'</span></td>';
+                        html += '</tr>';
+                    }
+                    $("#add_user_area").find("table").append(html);
+                }
+            }
+        })
     });
 </script>

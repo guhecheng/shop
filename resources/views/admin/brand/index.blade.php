@@ -25,15 +25,21 @@
                             <tr>
                                 <th>品牌名</th>
                                 <th>图片</th>
+                                <th>类目图片</th>
                                 <th>操作</th>
                             </tr>
                             </thead>
                             <tbody class="type_tbody" id="type_tbody">
                             @if (!$brands->isEmpty())
                             @foreach($brands as $brand)
-                                <tr data-id="">
+                                <tr data-id="{{ $brand->id }}">
                                     <td>{{ $brand->brand_name }}</td>
                                     <td><img src="{{ $brand->brand_img }}" width="220" height="80"/></td>
+                                    <td>
+                                        @if (!empty($brand->type_img))
+                                            <img src="{{ $brand->type_img }}" width="220" height="80"/>
+                                        @endif
+                                    </td>
                                     <td>
                                         <button type="button" class="btn btn-primary modify-btn" attr-id="{{ $brand->id }}">修改</button>
                                         <button type="button" class="btn btn-primary del-btn" attr-id="{{ $brand->id }}">删除</button>
@@ -45,7 +51,7 @@
                             </tbody>
                             <tfoot>
                             <tr>
-                                <td rowspan="3">
+                                <td colspan="4">
                                     {{ $brands->links() }}
                                 </td>
                             </tr>
@@ -86,6 +92,14 @@
                     <div class="col-sm-10">
                         <input type="file" name="img" id="img" />
                         <img src="" id="image_show" width="200px" height="100px">
+                    </div>
+                    <br clear="all" />
+                </div>
+                <div class="form-group">
+                    <label for="cardname" class="col-sm-2 control-label">类目图片</label>
+                    <div class="col-sm-10">
+                        <input type="file" name="type_img" id="type_img" />
+                        <img src="" id="type_image_show" width="200px" height="100px">
                     </div>
                     <br clear="all" />
                 </div>
@@ -163,6 +177,14 @@
                         <br clear="all" />
                     </div>
                     <div class="form-group">
+                        <label for="cardname" class="col-sm-2 control-label">类目图片</label>
+                        <div class="col-sm-10">
+                            <input type="file" name="mod_type_img" id="mod_type_img" />
+                            <img src="" id="mod_type_image_show" width="200px" height="100px">
+                        </div>
+                        <br clear="all" />
+                    </div>
+                    <div class="form-group">
                         <label for="cardname" class="col-sm-2 control-label">普通用户折扣</label>
                         <div class="col-sm-10">
                             <input type="text" class="form-control" name="common_discount" id="common_discount" placeholder="请输入折扣">
@@ -223,7 +245,10 @@
      immediately after the control sidebar -->
 <div class="control-sidebar-bg"></div>
 </div>
-
+<style type="text/css">
+    #type_image_show, #image_show { display: none; }
+    #mod_type_image_show { display: none; }
+</style>
 <script src="/css/admin/plugins/jQuery/jquery-2.2.3.min.js"></script>
 <!-- Bootstrap 3.3.6 -->
 <script src="/css/admin/bootstrap/js/bootstrap.min.js"></script>
@@ -276,9 +301,18 @@
     $(function() {
         $("#img").on("change", function () {
             preImg("img", "image_show");
+            $("#image_show").show();
         });
         $("#mod_img").on("change", function () {
             preImg("mod_img", "mod_image_show");
+        });
+        $("#mod_type_img").on("change", function () {
+            preImg("mod_type_img", "mod_type_image_show");
+            $("#mod_type_image_show").show();
+        });
+        $("#type_img").on("change", function () {
+            preImg("type_img", "type_image_show");
+            $("#type_image_show").show();
         });
         $(".add-btn").on("click", function() {
             $("#add-modal").modal('show');
@@ -298,6 +332,8 @@
                     if (data.brand != '') {
                         console.log(data.brand.brand_img);
                         $("#mod_image_show").attr('src', ''+data.brand.brand_img+'');
+                        if (data.brand.type_img != '')
+                            $("#mod_type_image_show").show().attr('src', ''+data.brand.type_img+'');
                         $("#mod_platinum_discount").val(data.brand.platinum_discount / 10);
                         $("#mod_diamond_discount").val(data.brand.diamond_discount / 10);
                         $("#mod_golden_discount").val(data.brand.golden_discount / 10);
@@ -329,14 +365,14 @@
 
         $("#type_tbody").dragsort({ dragSelector: "tr", dragSelectorExclude: "button", dragBetween: true,
             dragEnd: function() {
-                var orders = type_ids = '';
+                var orders = brand_ids = '';
                 $("#type_tbody").find("tr").each(function(item,value) {
-                    type_ids += $(this).attr("data-id") + ",";
+                    brand_ids += $(this).attr("data-id") + ",";
                     orders += (item+1) + ",";
                 });
                 $.ajax({
-                    url: '/admin/type/changeorder',
-                    data: {'type_ids':type_ids, 'orders':orders},
+                    url: '/admin/brand/changeorder',
+                    data: {'brand_ids':brand_ids, 'orders':orders},
                     datatype:'json',
                     type:"post",
                     success:function (data) {
@@ -345,56 +381,5 @@
                 });
             }});
 
-    });
-    /*$(".add_type").on("click", function() {
-        var typename = $("#typename").val();
-        if (typename == '' ) {
-            alert('类型名不能为空');
-            return false;
-        }
-        $.ajax({
-            url:'/admin/type/add',
-            type:'post',
-            data: { 'typename': typename},
-            dataType: 'json',
-            success: function(data) {
-                if (data.rs == 1) {
-                    var html = "<tr><td>"+typename+"</td>";
-                    html += "<td>";
-                    html += ' <button type="button" class="btn btn-primary modify-btn" attr-id="'+data.typeid+'">修改</button>';
-                    html += '<button type="button" class="btn btn-primary del-btn" attr-id="'+data.typeid+'">删除</button>';
-                    html += '<a href="/admin/property?typeid='+data.typeid+'"><button type="button" class="btn btn-primary" attr-id="'+data.typeid+'">属性操作</button></a>';
-                    html += "</td></tr>";
-                    $(".type_tbody").append(html);
-                    $("#add-modal").modal('hide');
-                } else {
-                    alert("修改失败");
-                    return false;
-                }
-            }
-        })
-    });*/
-    $(".update_btn").on("click", function() {
-        
-        if (typename == '' ) {
-            alert('类型名不能为空');
-            return false;
-        }
-        $.ajax({
-            url:'/admin/type/modify',
-            type:'post',
-            data: { 'typename': typename, 'typeid': typeid},
-            dataType: 'json',
-            success: function(data) {
-                if (data.rs == 1) {
-                    var item = parseInt($("#item").val());
-                    $("tr:eq("+item+")").find("td:eq(0)").text(typename);
-                    ("#mod-modal").modal('hide');
-                } else {
-                    alert("修改失败");
-                    return false;
-                }
-            }
-        })
     });
 </script>

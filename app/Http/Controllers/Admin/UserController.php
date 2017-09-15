@@ -163,6 +163,7 @@ class UserController extends Controller {
             return response()->json(['rs' => 0, 'errmsg' => '缺少信息']);
         }
 
+        DB::beginTransaction();
         try {
             $user = DB::table('user')->where("userid", $userid)->first();
             if (empty($user)) {
@@ -207,7 +208,7 @@ class UserController extends Controller {
             $user_rs = DB::table('user')->where("userid", $userid)->update([
                 'money' => $user->money + $money * 100,
                 'level' => $level,
-                'score' => $user->score + intval($money),
+                'score' => intval($money)<=0 ? $user->score : ($user->score + intval($money)),
                 'card_no' => $card_no
             ]);
             if (!$user_rs) {
@@ -223,7 +224,7 @@ class UserController extends Controller {
                 'trans_money' => $money * 100,
                 'trans_type' => 2
             ]);
-            if (!empty($add_score = intval($money))) {
+            if (!empty($add_score = intval($money)) && intval($money) > 0) {
                 DB::table('scorechange')->insert([
                     'type' => 3,
                     'paytype' => 3,
@@ -235,7 +236,63 @@ class UserController extends Controller {
             return response()->json(['rs' => 1]);
         } catch (\Exception $e) {
             DB::rollback();
-            return fresponse()->json(['rs' => 0]);
+            return response()->json(['rs' => 0]);
         }
+    }
+
+    /**
+     * 查看用户优惠券
+     * @param Request $request
+     * @return mixed
+     */
+    public function lookCoupons(Request $request) {
+        $uid = $request->input("uid");
+        if (empty($uid)) return response()->json(['rs'=>0]);
+
+        // 获取品牌
+        $brands = DB::table('brands')->where('is_del', 0)->get();
+
+        $where1 = "user_coupon.is_delete=0 and user_coupon.user_id={$uid} and coupon.is_sub=0 and status=0 and coupon.end_date >=" . date("Y-m-d");
+        $where2 = "user_coupon.is_delete=0 and user_coupon.user_id={$uid} and status=0 and coupon.is_sub=1";
+
+        $sql = "(select `coupon`.*, `user_coupon`.*,  coupon.id as coupon_id, group_concat(coupon_brand.brand_id) as brand_ids from `user_coupon` left join `coupon` on `coupon`.`id` = `user_coupon`.`coupon_id` left join `coupon_brand` on `coupon_brand`.`coupon_id` = `coupon`.`id` where ({$where1}) group by `coupon_brand`.`coupon_id` order by `coupon`.`start_date` desc)
+                    union 
+                    (select `coupon`.*, `user_coupon`.*, coupon.id as coupon_id, group_concat(coupon_brand.brand_id) as brand_ids from `user_coupon` left join `coupon` on `coupon`.`id` = `user_coupon`.`coupon_id` left join `coupon_brand` on `coupon_brand`.`coupon_id` = `coupon`.`id` where ({$where2}) group by `coupon_brand`.`coupon_id`)";
+        $coupons = DB::select($sql);
+        if (!empty($coupons)) {
+            foreach ($coupons as &$coupon) {
+                $ids = explode(',', $coupon->brand_ids);
+                $brand_names = [];
+                foreach ($brands as $brand) {
+                    if (in_array($brand->id, $ids))
+                        $brand_names[] = $brand->brand_name;
+                }
+                $coupon->brand_names = !empty($brand_names) ? implode(',', $brand_names) : '';
+                $coupon->start_date = date("Y年m月d日", strtotime($coupon->start_date));
+                $coupon->end_date = date("Y年m月d日", strtotime($coupon->end_date));
+            }
+        }
+        if ($request->ajax())
+            return response()->json(['coupons' => empty($coupons) ? '' : $coupons]);
+
+    }
+
+    /**
+     * 删除优惠券
+     * @param Request $request
+     * @return mixed
+     */
+    public function delCoupon(Request $request) {
+        $coupon_id = $request->input('coupon_id');
+        if (empty($coupon_id)) return response()->json(['rs'=>0]);
+        $rs = DB::table("user_coupon")->where('id', $coupon_id)->update(['is_delete'=>1]);
+        if ($rs == 1) {
+            DB::table("del_coupon_log")->insert([
+                'admin_id' => $request->session()->get('sysuid'),
+                'user_coupon_id' => $coupon_id
+            ]);
+            return response()->json(['rs' => 1]);
+        }
+        return response()->json(['rs' => 0]);
     }
 }

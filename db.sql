@@ -382,6 +382,9 @@ CREATE TABLE IF NOT EXISTS coupon (
   end_date DATE COMMENT '结束时间',
   user_type varchar(100) not null DEFAULT '' COMMENT '使用人类型 用,隔开',
   add_uid int NOT NULL DEFAULT 0 COMMENT '添加者id',
+  coupon_type tinyint default 0 comment '默认优惠券类型, 0:普通类型 创建及发送， 1: 活动优惠, 2:待领限量优惠券',
+  num int not null default 0 comment '购物券数量,默认0',
+  type tinyint default 0 comment '0 商品优惠券, 1 充值优惠券',
   create_time TIMESTAMP DEFAULT current_timestamp COMMENT '创建时间',
   PRIMARY KEY (id)
 ) ENGINE = innodb CHARSET = utf8;
@@ -427,3 +430,13 @@ create table if not exists wx_pay_log (
   create_time timestamp default current_timestamp comment '创建时间',
   primary key(id)
 ) engine=innodb  charset=utf8;
+
+/*删除优惠券记录*/
+drop table if exists del_coupon_log;
+create table if not exists del_coupon_log (
+  id int not null auto_increment,
+  user_coupon_id int not null DEFAULT 0 comment '用户优惠券id',
+  admin_id int not null default 0 comment '操作者id',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP comment '创建时间',
+  primary key(id)
+) engine=innodb charset=utf8;

@@ -31,17 +31,33 @@ class MemberController extends Controller {
 
     public function pay(Request $request) {
         $money = $request->input('money');
+        $coupon_id = $request->input('coupon_id');
         if (empty($money)) {
             return response()->json(['rs' => 0, 'errmsg' => '请确定支付金额']);
         }
+        $money = $money * 100;
          try {
             DB::beginTransaction();
             $charge_order = DB::table("cardrecharge")->orderBy('id', 'desc')->select('id')->limit(1)->first();
             $charge_no = date("Ymd") . mt_rand(1111, 9999) . ( empty($charge_order->id) ? 0 : $charge_order->id + 1);
+            if (!empty($coupon_id)) {
+                $coupon = DB::table('user_coupon')
+                    ->leftJoin('coupon', 'user_coupon.coupon_id', '=', 'coupon.id')
+                    ->where([
+                        ['user_coupon.status', '=', 0],
+                        ['coupon.start_date', '<=', date("Y-m-d")],
+                        ['coupon.end_date', '>=', date("Y-m-d")],
+                        ['user_coupon.is_delete', '=', 0],
+                        ['coupon.id', '=', $coupon_id]
+                    ])->first();
+                if (!empty($coupon))
+                    $money = $money - $coupon->discount_price;
+            }
             $charge_id = DB::table('cardrecharge')->insertGetId([
                 'uid' => $request->session()->get('uid'),
-                'money' => $money * 100,
-                'charge_no' => $charge_no
+                'money' => $money,
+                'charge_no' => $charge_no,
+                'coupon_id' => $coupon_id
             ]);
             if (!$charge_id)
                 throw new \Exception("订单创建失败");
@@ -59,7 +75,7 @@ class MemberController extends Controller {
             'body'          =>  '会员卡充值',
             'detail'        =>  '会员卡充值',
             'out_trade_no'  =>  $charge_no,
-            'total_fee'     => $money * 100,
+            'total_fee'     => $money,
             'notify_url'    => 'http://www.jingyuxuexiao.com/card/notify',
             'openid'    => $openid
         ];
@@ -104,7 +120,11 @@ class MemberController extends Controller {
                     ]);
                     if (!$trans['insert'])
                         throw new \Exception('操作失败');
-
+                    if (!empty($order->coupon_id))
+                        DB::table('user_coupon')->where([
+                            ['coupon_id', '=', $order->coupon_id],
+                            ['user_id', '=', $order->uid]
+                        ])->update(['status' => 1]);
                     if (!empty($add_score = intval($order->money / 100))) {
                         $score = DB::table('scorechange')->insert([
                             'type' => 1,
@@ -169,5 +189,23 @@ class MemberController extends Controller {
 
     public function forward(Request $request) {
         return redirect('/card');
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function getCoupons(Request $request) {
+        $uid = $request->session()->get('uid');
+        $money = $request->input('money');
+        if (empty($money))
+            return response()->json(['rs' => 0]);
+        $now = date("Y-m-d");
+        $price = $money * 100;
+        $sql = "(select coupon.* from user_coupon left join coupon on coupon.id=user_coupon.coupon_id where user_coupon.user_id={$uid} and type=1 and start_date<='{$now}' and end_date>='{$now}' and  status=0 and is_delete=0 and goods_price=0)
+                union
+                (select coupon.* from user_coupon left join coupon on coupon.id=user_coupon.coupon_id where user_coupon.user_id={$uid} and type=1 and start_date<='{$now}' and end_date>='{$now}' and  status=0 and is_delete=0 and goods_price>={$price})
+                ";
+        $coupons = DB::select($sql);
+        return response()->json(['rs'=>empty($coupons)?0:1, 'coupons' => $coupons]);
     }
 }

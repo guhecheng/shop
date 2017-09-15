@@ -122,6 +122,17 @@
                                 <td align="center"><textarea name="remark" id="remark" style="width:60%;height:100px;">{{ $user->remark }}</textarea></td>
                             </tr>
                         </table>
+                        <div style="text-align: center;line-height: 40px;float: left;margin-right:300px;">用户优惠券</div><button class="btn btn-primary" id="look_coupon" style="margin-left:100px;float:left;">查看</button>
+                        <table  class="table table-bordered table-hover" style="display: none;" id="user_coupon">
+                            <tr>
+                                <td align="center">购物券id</td>
+                                <td align="center">发放时间</td>
+                                <td align="center">类型</td>
+                                <td align="center">使用范围</td>
+                                <td align="center">使用时间</td>
+                            </tr>
+                        </table>
+                        <br clear="all" />
                         <div style="text-align: center;line-height: 40px;">消费记录</div>
                         @if (!$orders->isEmpty())
                         <table id="example3" class="table table-bordered table-hover">
@@ -253,6 +264,38 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+    $("#look_coupon").on("click", function () {
+        $.ajax({
+            type: 'post',
+            url: '/admin/user/lookcoupons',
+            data: {'uid':{{ $userid }}},
+            dataType: 'json',
+            success: function (data) {
+                if (data.rs == 0 || data.coupons == '') {
+                    alert('暂无可用优惠券');
+                    return false;
+                } else {
+                    var coupons = '';
+                    for (var i in data.coupons) {
+                        coupon = data.coupons[i];
+                        coupons += '<tr>';
+                        coupons += '<td>'+coupon.id+'</td>';
+                        coupons += '<td>'+coupon.create_time+'</td>';
+                        coupons += '<td>满'+coupon.goods_price/100+'减'+coupon.discount_price/100+'</td>';
+                        coupons += '<td>'+coupon.brand_names+'</td>';
+                        if (coupon['is_sub'] == 1) {
+                            coupons += '<td>永久使用</td>';
+                        } else
+                            coupons += '<td>'+coupon.start_date+'至'+coupon.end_date+'</td>';
+                        coupons += '<td><button class="del_user_coupon" data-id="'+coupon.id+'">删除</button></td>';
+                        coupons += '</tr>';
+                    }
+
+                    $("#user_coupon").show().append(coupons);
+                }
+            }
+        });
+    });
     $("#add_money").on("click", function () {
         var money = parseInt($.trim($("#money").val()));
         if (money != '') {
@@ -284,5 +327,26 @@
 
             }
         });
+    });
+    $(document).on("click", ".del_user_coupon", function () {
+        var coupon_id = $(this).attr('data-id');
+        if (coupon_id == '') {
+            alert('删除失败');
+            return false;
+        }
+        if (!confirm('确认删除?')) {
+            return false;
+        }
+        var th = $(this);
+        $.ajax({
+            type: 'post',
+            url: '/admin/user/delcoupon',
+            data: { 'coupon_id': coupon_id },
+            dataType: 'json',
+            success: function (data) {
+                if (data.rs == 1)
+                    th.parent().parent().remove();
+            }
+        })
     });
 </script>

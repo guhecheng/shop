@@ -48,9 +48,21 @@ class BrandController extends Controller
                 //return response()->json(['imgurl' => '/uploads/' . $fileName]);
                 $brand_img = '/uploads/' . $fileName;
         }
+        $file = $request->file('type_img');
+        if ($file->isValid()) {
+            $ext = $file->getClientOriginalExtension(); // 文件扩展
+            $type = $file->getClientMimeType();
+            $realPath = $file->getRealPath();
+            $fileName = 'brands/' . date('Y-m-d-H-i-s').'-'.uniqid().'.'.$ext;
+            $bool = Storage::disk('uploads')->put($fileName, file_get_contents($realPath));
+            if ($bool)
+                //return response()->json(['imgurl' => '/uploads/' . $fileName]);
+                $type_img = '/uploads/' . $fileName;
+        }
         $rs = DB::table('brands')->insert([
             'brand_name' => trim($brand_name),
             'brand_img' => trim($brand_img),
+            'type_img' => trim($type_img),
             'common_discount' => intval($common_discount * 10) ,
             'ordinary_discount' => intval($ordinary_discount * 10),
             'golden_discount' => intval($golden_discount * 10),
@@ -94,9 +106,20 @@ class BrandController extends Controller
             $fileName = 'brands/' . date('Y-m-d-H-i-s').'-'.uniqid().'.'.$ext;
             $bool = Storage::disk('uploads')->put($fileName, file_get_contents($realPath));
             if ($bool)
-                //return response()->json(['imgurl' => '/uploads/' . $fileName]);
                 $brand_img = '/uploads/' . $fileName;
         }
+
+        $file = $request->file('mod_type_img');
+        if (!empty($file) && $file->isValid()) {
+            $ext = $file->getClientOriginalExtension(); // 文件扩展
+            $type = $file->getClientMimeType();
+            $realPath = $file->getRealPath();
+            $fileName = 'brands/' . date('Y-m-d-H-i-s').'-'.uniqid().'.'.$ext;
+            $bool = Storage::disk('uploads')->put($fileName, file_get_contents($realPath));
+            if ($bool)
+                $type_img = '/uploads/' . $fileName;
+        }
+
         $data = [
             'brand_name' => trim($brand_name),
             'common_discount' => intval($common_discount * 10),
@@ -106,8 +129,19 @@ class BrandController extends Controller
             'diamond_discount' => intval($diamond_discount * 10)
         ];
         empty($brand_img) ? '' : $data['brand_img'] = trim($brand_img);
+        empty($type_img) ? '' : $data['type_img'] = trim($type_img);
         $rs = DB::table('brands')->where('id', $brand_id)->update($data);
         if ($rs)
             return redirect('/admin/brand');
+    }
+
+    public function changeorder(Request $request) {
+        $brand_ids = $request->input('brand_ids');
+        $orders = $request->input('orders');
+        $brand_arr = explode(",", $brand_ids);
+        $order_arr = explode(",", $orders);
+        foreach ($brand_arr as $key => $value) {
+            DB::table('brands')->where('id', $value)->update(['sort'=>$order_arr[$key]]);
+        }
     }
 }

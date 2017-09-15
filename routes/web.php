@@ -18,11 +18,16 @@ Route::get('/', 'IndexController@index');
 Route::get('/aboutme', function() {
     return view('aboutme');
 });
+Route::get('/customer', function () {
+    return view('customer');
+});
+
 Route::get('/test', 'IndexController@test');
 Route::get('/addmenu', 'IndexController@addmenu');
 Route::any('/wx', 'IndexController@wx');
 Route::any('/card/notify', 'MemberController@notify');
 Route::any('/order/wxnotify', 'OrderController@wxnotify');
+Route::post('/index/search', 'IndexController@search');
 
 Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/type', 'IndexController@type');
@@ -32,6 +37,7 @@ Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/card', 'MemberController@card');
     Route::post('/card/pay', 'MemberController@pay');
     Route::get('/card/forward', 'MemberController@forward');
+    Route::post('/card/getcoupons', 'MemberController@getCoupons');
 
 
     Route::post('/address/setdefault', 'AddressController@setdefault');
@@ -149,8 +155,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::any('/brand/mod', 'BrandController@mod');
     Route::get('/brand/getbrand', 'BrandController@getBrand');
     Route::get('/brand/del', 'BrandController@del');
+    Route::post('/brand/changeorder', 'BrandController@changeorder');
     Route::get('/coupon', 'CouponController@index');
     Route::any('/coupon/add', 'CouponController@add');
+    Route::any('/coupon/finduser', 'CouponController@findUser');
+
+    Route::post('/user/lookcoupons', 'UserController@lookCoupons');
+    Route::post('/user/delcoupon', 'UserController@delCoupon');
 
     Route::post('/goods/gettypesbybrand', 'GoodsController@getTypesByBrand');
 });
