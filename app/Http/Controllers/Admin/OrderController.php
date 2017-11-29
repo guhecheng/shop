@@ -40,6 +40,7 @@ class OrderController extends Controller
         if (!empty($end_date)) {
             $where[] = ['orderinfo.pay_time', '<=', $end_date];
         }
+        $where[] = ['orderinfo.is_comm', '=', 0];
         $orders = DB::table('orderinfo')->leftJoin('order', 'order.order_no', '=', 'orderinfo.order_no')
             ->select('orderinfo.*', 'order.count', 'order.price as per_price', 'order.skuid')
             ->where($where)->orderBy('order.order_no', 'asc')->get();

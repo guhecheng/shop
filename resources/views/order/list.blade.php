@@ -36,11 +36,13 @@
                             </div>
                         </div>
                         <?php $count = 0; ?>
+                        @if (!empty($item->data))
                         @foreach($item->data as $value)
+                        <?php if (empty($value->goodsname)) continue; ?>
                         <div class="goods-item" attr-id="{{ $value->goodsid }}">
                             <div class="goods-item-icon" style="background-image:url({{ $value->goodsicon }})"></div>
                             <div class="goods-item-content">
-                                <div class="goods-name" style="height:1.6rem; line-height:1.6rem; font-size:1rem;">{{ $value->goodsname }}</div>
+                                <div class="goods-name" style="height:1.6rem; line-height:1.6rem; font-size:1rem;overflow: hidden;">{{ $value->goodsname }}</div>
                                 <div class="goods-price" style="height:1rem;font-size:0.8rem;">￥{{ $value->price / 100 }} 元</div>
                                 <div class="order-goods-property" style="height: 0.8rem;font-size:0.8rem;padding-top:0.2rem;">
                                     <div style="color:#888888;">{{ $value->property }}</div>
@@ -51,6 +53,7 @@
                             <br clear="all" />
                         </div>
                         @endforeach
+                        @endif
                         <div class="price">
                             <div>共计<?php echo $count; ?> 件商品</div>
                             <div>合计<span style="color:red;">￥{{ $item->price / 100 }}元</span>(运费{{ $item->express_price }})</div>
@@ -159,6 +162,19 @@
             $(this).addClass("active");
             var index = $(this).index()
             mySwiper.slideTo(index);
+        });
+        mySwiper.on("click", function (swiper) {
+            /*//下拉加载
+            if (swiper.isEnd) {
+                $("#NextPage").click();
+            }*/
+            //上拉刷新
+            if (swiper.translate > 0) {
+                //document.getElementById('show').innerHTML = '刷新中';
+                alert('jfkadlsfasfas');
+                //reloadData();
+            }
+
         });
         function getdata(index) {
             if ($(".goods-slide:eq("+index+")").attr("attr-is-add") == 1) return;

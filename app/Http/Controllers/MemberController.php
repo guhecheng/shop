@@ -30,12 +30,12 @@ class MemberController extends Controller {
     }
 
     public function pay(Request $request) {
-        $money = $request->input('money');
+        $post_money = $request->input('money');
         $coupon_id = $request->input('coupon_id');
-        if (empty($money)) {
+        if (empty($post_money)) {
             return response()->json(['rs' => 0, 'errmsg' => '请确定支付金额']);
         }
-        $money = $money * 100;
+        $money = $post_money * 100;
          try {
             DB::beginTransaction();
             $charge_order = DB::table("cardrecharge")->orderBy('id', 'desc')->select('id')->limit(1)->first();
@@ -55,9 +55,9 @@ class MemberController extends Controller {
             }
             $charge_id = DB::table('cardrecharge')->insertGetId([
                 'uid' => $request->session()->get('uid'),
-                'money' => $money,
+                'money' => $post_money * 100,
                 'charge_no' => $charge_no,
-                'coupon_id' => $coupon_id
+                'coupon_id' => empty($coupon_id) ? 0 : $coupon_id
             ]);
             if (!$charge_id)
                 throw new \Exception("订单创建失败");
@@ -108,7 +108,7 @@ class MemberController extends Controller {
                 // 不是已经支付状态则修改为已经支付状态
                 try {
                     $order_rs = DB::table('cardrecharge')->where('id', $order->id)
-                                ->update(['status' => 1, 'pay_time' => date("Y-m-d H:i:s")]);
+                                ->update(['status' => 1, 'pay_time' => date("Y-m-d H:i:s"), 'transaction_id'=>$notify->transaction_id]);
                     if (!$order_rs) {
                         throw new \Exception('订单状态修改失败');
                     }
@@ -139,15 +139,15 @@ class MemberController extends Controller {
                     }
 
                     if ($user->level < 4) {
-                        $money = DB::table('usertransmoney')->where([
+                       /* $money = DB::table('usertransmoney')->where([
                             ['uid', '=', $user->userid],
                             ['trans_type', '=', 1],
                             ['create_time', '>=', date("Y-m-d H:i:s", strtotime("-1 year"))]
-                        ])->sum('trans_money');
+                        ])->sum('trans_money');*/
                         $card = DB::table('card')->where([
                             ['is_delete', '=', 0],
                             ['card_id', '!=', 5],
-                            ['card_score', '<=', intval($money / 100)]
+                            ['card_score', '<=', intval($user->total_score + intval($order->money / 100))]
                         ])->orderBy('card_level', 'desc')->select('card_level')->limit(1)->first();
                         if (!empty($card->card_level)) {
                             $level = $user->level > $card->card_level ? $user->level : $card->card_level;
@@ -155,6 +155,15 @@ class MemberController extends Controller {
                             $level = $user->level;
                     } else
                         $level = $user->level;
+                    if ($level > $user->level && $level >= 1) {
+                        $count = DB::table('user_levelup_coupon')->where([['uid', '=', $order->uid], ['type', '=', $level-1]])->count();
+                        if ($count < $level)
+                            for ($i = 0; $i < $level - $count; $i++)
+                                DB::table("user_levelup_coupon")->insert(['uid'=>$order->uid,
+                                    'type'=>$level-1,
+                                    'start_at' => date("Y-m-d"),
+                                    'end_at' => date("Y-m-d", time() + 30 * 24 * 3600)]);
+                    }
 
                     if (empty($user->card_no)) {
                         $card_no = DB::table("user")->max("card_no");
@@ -169,6 +178,7 @@ class MemberController extends Controller {
                         'money' => $user->money + $order->money,
                         'level' => $level,
                         'score' => $user->score + intval($order->money / 100),
+                        'total_score' => $user->total_score + intval($order->money / 100),
                         'card_no' => $card_no
                     ]);
                     if (!$user_rs) {
@@ -193,6 +203,7 @@ class MemberController extends Controller {
 
     /**
      * @param Request $request
+     * @return bool
      */
     public function getCoupons(Request $request) {
         $uid = $request->session()->get('uid');
@@ -207,5 +218,35 @@ class MemberController extends Controller {
                 ";
         $coupons = DB::select($sql);
         return response()->json(['rs'=>empty($coupons)?0:1, 'coupons' => $coupons]);
+    }
+
+    /**
+     * 退款测试
+     */
+    public function rebackPay(Request $request) {
+        $app = new Application(config('wx'));
+        $payment = $app->payment;
+        $order_id = 172;
+        $record = DB::table('cardrecharge')->where(['id'=>$order_id, 'status'=>1, 'pay_type'=>0])->first();
+        if (empty($record) || empty($record->transaction_id))
+            return false;
+
+        $result = $payment->refundByTransactionId($record->transaction_id, $record->charge_no, $record->money);
+        var_dump($result);
+    }
+
+    /**
+     * 定时脚本查询退款记录
+     */
+    public function cronCheckReback(Request $request) {
+        $app = new Application(config('wx'));
+        $payment = $app->payment;
+        $order_id = 172;
+        $record = DB::table('cardrecharge')->where(['id'=>$order_id, 'status'=>1, 'pay_type'=>0])->first();
+        if (empty($record) || empty($record->transaction_id))
+            return false;
+
+        $result = $payment->queryRefundByTransactionId($record->transaction_id);
+        var_dump($result);
     }
 }

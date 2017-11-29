@@ -37,7 +37,7 @@
                 <div class="address-location">
                     <div style="padding-top: 0.2rem;">详细地址</div>
                     <div>
-                        <textarea id="location"></textarea>
+                        <textarea id="location" placeholder="点击输入相关描述"></textarea>
                     </div>
                 </div>
             </li>

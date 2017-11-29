@@ -53,11 +53,16 @@
                                     <span id="balance" data-value="{{ $user->money / 100 }}">{{ $user->money / 100 }}</span>
                                     <input type="text" name="money" id="money" placeholder="填写增加金额" />
                                     <button class="btn btn-primary" id="add_money">添加</button>
+                                    <button class="add_money">添加金额</button>
                                 </td>
                             </tr>
                             <tr>
                                 <td>积分</td>
-                                <td>{{ $user->score }}</td>
+                                <td>
+                                    <span id="user_score" data-value="{{ $user->score }}">{{ $user->score }}</span>
+                                    <input type="text" name="score" id="score" placeholder="填写增加积分" />
+                                    <button class="btn btn-primary" id="add_score">添加</button>
+                                </td>
                             </tr>
                             <tr><td colspan="2" align="center">孩子信息</td></tr>
                             @if (!empty($user->child_id))
@@ -133,6 +138,29 @@
                             </tr>
                         </table>
                         <br clear="all" />
+                        @if (!empty($level_coupons))
+                            <div style="text-align: center;line-height: 40px;">升级优惠券</div>
+                            <table id="example3" class="table table-bordered table-hover">
+                                <thead>
+                                <tr>
+                                    <th>优惠券类型</th>
+                                    <th>领取者</th>
+                                    <th>领取时间</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($level_coupons as $coupon)
+                                    <tr>
+                                        <td>{{ $coupon->type == 0 ? '黄金福利券' : ($coupon->type == 1 ? '铂金福利券' : '钻石福利券') }}</td>
+                                        <td>{{ $coupon->recv_uname }}</td>
+                                        <td>{{ $coupon->recv_time }}</td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                                <tfoot>
+                                </tfoot>
+                            </table>
+                        @endif
                         <div style="text-align: center;line-height: 40px;">消费记录</div>
                         @if (!$orders->isEmpty())
                         <table id="example3" class="table table-bordered table-hover">
@@ -153,6 +181,9 @@
                             <tbody>
                             <?php $order_no = ''; ?>
                             @foreach($orders as $order)
+                                <?php if (!isset($order->times))
+                                        continue;
+                                ?>
                             <tr>
                                 @if ($order_no != $order->order_no)
                                 <td rowspan="{{ $order->times }}">
@@ -264,7 +295,9 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+    var time = 0;
     $("#look_coupon").on("click", function () {
+        if (time >= 1) return;
         $.ajax({
             type: 'post',
             url: '/admin/user/lookcoupons',
@@ -275,6 +308,7 @@
                     alert('暂无可用优惠券');
                     return false;
                 } else {
+                    time += 1;
                     var coupons = '';
                     for (var i in data.coupons) {
                         coupon = data.coupons[i];
@@ -316,6 +350,26 @@
             })
         }
     });
+    $("#add_score").on("click", function () {
+        var score = parseInt($.trim($("#score").val()));
+        if (score != '') {
+            if (!confirm('确认给用户增加' + score +'积分?'))
+                return false;
+            $.ajax({
+                url:'/admin/user/addscore',
+                type:'post',
+                dataType:'json',
+                data:{'score': score, 'userid':{{ $userid }} },
+                success: function (data) {
+                    if (data.rs == 1) {
+                        var add_score = parseInt($("#user_score").attr('data-value')) + score;
+                        $("#user_score").text(add_score).attr('data-value', add_score);
+                    } else
+                        alert('添加失败');
+                }
+            })
+        }
+    });
     $("#remark").on("blur", function () {
         if ($.trim($(this).val()) == '') return false;
         $.ajax({
@@ -348,5 +402,21 @@
                     th.parent().parent().remove();
             }
         })
+    });
+    $(".add_money").on("click", function () {
+        if (price = prompt("请输入金额?")) {
+            $.ajax({
+                url:'/admin/user/addsinglemoney',
+                type:'post',
+                dataType:'json',
+                data:{'money': price, 'userid':{{ $userid }} },
+                success: function (data) {
+                    if (data.rs == 1) {
+                        location.reload();
+                    } else
+                        alert('添加失败');
+                }
+            })
+        }
     });
 </script>

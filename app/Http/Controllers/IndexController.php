@@ -7,13 +7,11 @@
  */
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
+use Log, DB;
 use Illuminate\Http\Request;
 use EasyWeChat\Foundation\Application;
 use Illuminate\Support\Facades\Redis;
 use EasyWeChat\Message\News;
-
 
 class IndexController extends Controller {
     private $app;
@@ -83,7 +81,7 @@ class IndexController extends Controller {
                             ]);
                             $request->session()->put('openid', $message->FromUserName);
                             $request->session()->put('uid', empty($id) ? $user->userid : $id);
-                            return '欢迎来到童马儿童生活';
+                            return '欢迎加入童马家族，童马已送您一张关注券，请进入商城查看。';
                             break;
                         case 'unsubscribe':
                             DB::table('user')->where('openid', $message->FromUserName)->update([
@@ -102,7 +100,30 @@ class IndexController extends Controller {
                         'openid' => $message->FromUserName,
                         'content' => $message->Content,
                     ]);
-                    if (strpos($message->Content, '萌宝') !== false ||
+                    /*$day = date("Y-m-d");
+                    $data = DB::select("SELECT * FROM coupon WHERE send_content LIKE '%{$message->Content}%' and start_date<='{$day}' and end_date>='{$day}' limit 1");
+                    if (!empty($data)) {
+                        $coupon = $data[0];
+                        if (in_array($user->level, explode(',', $coupon->user_type))) {
+                            DB::table('user_coupon')->insert([
+                                'user_id' => $user->userid,
+                                'coupon_id' => $coupon->id,
+                                'num' => 1
+                            ]);
+                            return '满' . ($coupon->goods_price/100) . '减'. ($coupon->discount_price) . '优惠券已领取，请点击【童马会员】-【我的信息】查看。';
+                        }
+                    }
+                    Log::info($coupon);*/
+                    /*$coupon = DB::table('user_coupon')->where(['coupon_id'=>23, 'user_id'=>$user->userid])->first();
+                    if (empty($coupon)) {
+                        DB::table('user_coupon')->insert([
+                            'user_id' => $user->userid,
+                            'coupon_id' => 23,
+                            'num' => 1
+                        ]);
+                        return '200元现金券已到账，请点击【童马会员】-【我的信息】查看。';
+                    }*/
+                    /*if (strpos($message->Content, '萌宝') !== false ||
                         strpos($message->Content, '投票') !== false ||
                         strpos($message->Content, '萌宝投票') !== false ||
                         strpos($message->Content, '最美小萌宝') !== false
@@ -112,8 +133,8 @@ class IndexController extends Controller {
                             'description' => '汇集了无数萌宝，萌翻观众一片，这里是《最美小萌宝》第三季的投票现场!',
                             'url'         => 'http://mp.weixin.qq.com/s?__biz=MzIxMDgzMzY3MA==&mid=100000136&idx=1&sn=16a35a4bf898cdf05a1b767324f0c572&chksm=175fd9e1202850f7f2d05c8242e6448652eb68c263475a16807949b8f04e783bfddb6f9ecffa#rd',
                             // ...
-                        ]);
-                    if (strpos($message->Content, '双节提前享') !== false) {
+                        ]);*/
+                    /*if (strpos($message->Content, '双节提前享') !== false) {
                         if (date("Y-m-d") <= "2017-10-08") {
                             $coupon = DB::table('user_coupon')->where(['coupon_id'=>23, 'user_id'=>$user->userid])->first();
                             if (empty($coupon)) {
@@ -126,7 +147,7 @@ class IndexController extends Controller {
                             }
                             return '200元现金券已经到账';
                         }
-                    }
+                    }*/
                     break;
                 case 'image':
                     DB::table('usersendmsg')->insert([
@@ -161,7 +182,9 @@ class IndexController extends Controller {
         		}
         	}
     	}
+        $redis = app('redis.connection');
         $brands = DB::table("brands")->orderBy('sort', 'asc')->where('is_del', 0)->get();
+
         return view('index', ['brands' => $brands]);
     }
 
@@ -207,7 +230,7 @@ class IndexController extends Controller {
                   [
                       'type' => 'view',
                       'name' => '关于我们',
-                      'url' => 'http://mp.weixin.qq.com/s?__biz=MzIxMDgzMzY3MA==&mid=100000222&idx=1&sn=0e1a2c28e3bf7c68f137ca08bca2049a&chksm=175fd9b7202850a170c065204f0f0033593641a89cbd68cef53f345032d91c551bb51a9cb98a#rd'
+                      'url' => $this->url . '/aboutme'
                   ]
               ]
             ],

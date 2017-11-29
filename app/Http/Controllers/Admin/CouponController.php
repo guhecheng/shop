@@ -62,6 +62,7 @@ class CouponController extends Controller
         $name = $request->input('name');
         $type = $request->input('type');
         $coupon_type = $request->input('coupon_type');
+        $send_content = $request->input('send_content');
         $add_num = $request->input('add_num');
         if (empty($discount_price) || empty($start_date) || empty($end_date))
             return back()->with('coupon_info', '信息填写不完整');
@@ -74,7 +75,8 @@ class CouponController extends Controller
         }
         if (strtotime($start_date) >= strtotime($end_date))
             return back()->with('coupon_info', '日期选择错误');
-
+        if ($coupon_type == 3 && empty($send_content))
+            return back()->with('coupon_info', '回复优惠券缺少必须添加回复信息');
         DB::beginTransaction();
         try {
             $data = [
@@ -86,7 +88,8 @@ class CouponController extends Controller
                 'add_uid' => session("sysuid"),
                 'coupon_type' => $coupon_type,
                 'type' => $type,
-                'num' => $coupon_type == 2 ? $add_num : 0
+                'num' => $coupon_type == 2 ? $add_num : 0,
+                'send_content' => $coupon_type == 3 ? $send_content : ''
             ];
             $id = DB::table('coupon')->insertGetId($data);
             if (empty($id))

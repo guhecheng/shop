@@ -17,7 +17,7 @@
             @if (!empty($coupons))
             @foreach ($coupons as $coupon)
             @if ($coupon->end_date >= date("Y-m-d"))
-            <div class="coupons-item" style="background-image:url('/images/coupon.png')" data-id="{{ $coupon->id }}">
+            <div class="coupons-item" style="background-image:url('/images/coupon.png')" data-id="{{ $coupon->id }}" data-type="{{ $coupon->coupon_type }}">
                 <div class="coupons-left">
                     <div class="coupons-discount-price"><span>￥</span><span>{{ $coupon->discount_price/100 }}</span></div>
                     @if ($coupon->goods_price > 0)
@@ -46,6 +46,7 @@
             @endforeach
             @endif
             </div>
+            <div class="swiper-slide" attr-is-add="0"></div>
             <div class="swiper-slide" attr-is-add="0"></div>
             <div class="swiper-slide" attr-is-add="0"></div>
         </div>
@@ -133,8 +134,10 @@
         var index = $(this).index();
         mySwiper.slideTo(index);
     });
-    $(document).on('touchstart', '.coupons-item', function () {
+    $(document).on('click', '.coupons-item', function () {
         var coupon_id = $(this).attr('data-id');
+        if ($(this).attr('data-type') != 2) return false;
+        var th = $(this);
         $.ajax({
             url:'/coupon/getcoupon',
             data:{'coupon_id': coupon_id},
@@ -147,12 +150,12 @@
                         ,btn: '确定'
                     });
                 else {
-                    
-                }
                     layer.open({
                         content: '领取成功'
                         ,btn: '确定'
                     });
+                    th.remove();
+                }
             }
         })
     });
@@ -170,41 +173,68 @@
                     var html = '';
                     for (var i in data.coupons) {
                         var coupon = data.coupons[i];
-                        console.log(coupon);
-                        html += '<div class="coupons-item"';
-                        if (index == 1) {
-                            html += ' style="background-image:url('+'/images/coupon_has_userd.png'+')">';
-                        } else if (index == 2) {
-                            html += ' style="background-image:url('+'/images/coupon_invalid.png'+')">';
-                        } else {
-                            html += ' style="background-image:url('+'/images/coupon.png'+')">';
-                        }
-                        html += '<div class="coupons-left">' +
-                            '                    <div class="coupons-discount-price"><span>￥</span><span>'+coupon.discount_price/100+'</span></div>';
-                        if (coupon.goods_price > 0)
-                            html += '<div class="coupons-goods-price">满￥' + coupon.goods_price/100 +'元可用</div>';
+                        console.log(typeof(coupon.cname));
+                        if (typeof(coupon.cname) === 'undefined') {
 
-                        html += '                </div>' +
-                            '                <div class="coupons-right">' +
-                            '                    <div class="coupons-right-1">' +
-                            '                        <div>使用范围:</div>';
-                        if (coupon.type == 1) {
-                            html += '                        <div>仅限充值使用</div>';
+                            html += '<div class="coupons-item" data-type="'+coupon.coupon_type+'" data-id="'+coupon.id+'"';
+                            if (index == 2) {
+                                html += ' style="background-image:url('+'/images/coupon_has_userd.png'+')">';
+                            } else if (index == 3) {
+                                html += ' style="background-image:url('+'/images/coupon_invalid.png'+')">';
+                            } else {
+                                html += ' style="background-image:url('+'/images/coupon.png'+')">';
+                            }
+                            html += '<div class="coupons-left">' +
+                                '                    <div class="coupons-discount-price"><span>￥</span><span>'+coupon.discount_price/100+'</span></div>';
+                            if (coupon.goods_price > 0)
+                                html += '<div class="coupons-goods-price">满￥' + coupon.goods_price/100 +'元可用</div>';
+
+                            html += '                </div>' +
+                                '                <div class="coupons-right">' +
+                                '                    <div class="coupons-right-1">' +
+                                '                        <div>使用范围:</div>';
+                            if (coupon.type == 1) {
+                                html += '                        <div>仅限充值使用</div>';
+                            } else {
+                                html += '                        <div>仅限'+ coupon.brand_names +'使用</div>';
+                            }
+                            html += '                    </div>' +
+                                '                    <div class="coupons-right-2">' +
+                                '                        <div>使用期限: </div>' +
+                                '                        <div class="coupons-date">'+(coupon.is_sub==1 ? '无限期' : coupon.start_date+'-'+coupon.end_date)+'</div>' +
+                                '                    </div>';
+                            html += '                </div>' +
+                                '</div>';
                         } else {
-                            html += '                        <div>仅限'+ coupon.brand_names +'使用</div>';
+                            html += '<div class="coupons-item" ';
+                            if (index == 2) {
+                                html += ' style="background-image:url(' + '/images/coupon_has_userd.png' + ')">';
+                            } else if (index == 3) {
+                                html += ' style="background-image:url(' + '/images/coupon_invalid.png' + ')">';
+                            } else {
+                                html += ' style="background-image:url(' + '/images/coupon.png' + ')">';
+                            }
+                            var name = coupon.type == 0 ? '普通福利券' : (coupon.type == 1 ? '黄金福利券' : (coupon.type==2 ? '铂金福利券': '钻石福利券'));
+                            html += '<div class="coupons-left"><div class="coupons-discount-price">' + name + '</div></div>';
+                            html += '                <div class="coupons-right">' +
+                                '                    <div class="coupons-right-1">' +
+                                '                        <div>使用范围:</div>';
+                            if (coupon.type == 0)
+                                html += '                        <div>使用该券可享受普通会员同等折扣1次</div>';
+                            } else if (coupon.type == 1) {
+                                html += '                        <div>使用该券可享受黄金会员同等折扣1次</div>';
+                            } else if (coupon.type == 2) {
+                                html += '                        <div>使用该券可享受铂金会员同等折扣1次</div>';
+                            } else if (coupon.type == 3)
+                                html += '                        <div>使用该券可享受钻石会员同等折扣1次</div>';
+                            html += '                    </div>' +
+                                '                    <div class="coupons-right-2">' +
+                                '                        <div>使用期限: </div>' +
+                                '                        <div class="coupons-date">'+ coupon.start_at+'-'+coupon.end_at+'</div>' +
+                                '                    </div>';
+                            html += '                </div>' +
+                                '</div>';
                         }
-                        html += '                    </div>' +
-                            '                    <div class="coupons-right-2">' +
-                            '                        <div>使用期限: </div>' +
-                            '                        <div class="coupons-date">'+(coupon.is_sub==1 ? '无限期' : coupon.start_date+'-'+coupon.end_date)+'</div>' +
-                            '                    </div>';
-                        /*if (index == 1) {
-                            html += '<div style="color:red;">已使用</div>';
-                        } else if (index == 2) {
-                            html += '<div style="color:">已失效</div>';
-                        }*/
-                        html += '                </div>' +
-                            '</div>';
                     }
                     $(".swiper-slide:eq("+index+")").attr('attr-is-add', 1).append(html);
                 }

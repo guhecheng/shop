@@ -1,5 +1,4 @@
 @include('/admin/header')
-@yield('title', '卡券列表页')
 @include('/admin/menu')
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -7,7 +6,7 @@
         <h1>
             商品列表
         </h1>
-        <a href="/admin/goods/add"><button type="button" class="btn btn-primary add-btn">添加</button></a>
+        <a href="/admin/goods"><button type="button" class="btn btn-primary add-btn">返回</button></a>
     </section>
 
     <!-- Main content -->
@@ -302,7 +301,6 @@
                     data: {'brand_id' : brand_id},
                     dataType:'json',
                     success: function (data) {
-                        console.log(data);
                         $("#common_discount").val(data.brand.common_discount / 10);
                         $("#ordinary_discount").val(data.brand.ordinary_discount / 10);
                         $("#golden_discount").val(data.brand.golden_discount / 10);
@@ -358,11 +356,12 @@
         });
 
         $("div").delegate("div[class='del_img']", 'click', function () {
+            $(this).parent().remove();
             var val = '';
             $(".images_url").each(function() {
                 val += $(this).val() + ",";
             });
-            $("#imglist").val(v);
+            $("#imglist").val(val);
         });
 
         $("div").delegate("div[class='del_logo']", 'click', function () {

@@ -30,7 +30,8 @@ class Kernel extends ConsoleKernel
         $schedule->call(function() {
             $orders = DB::table('orderinfo')->where([
                 ['status', '<=', 1],
-                ['create_time', '<=', date("Y-m-d H:i:s", time()-30*60)]
+                ['create_time', '<=', date("Y-m-d H:i:s", time()-30*60)],
+                ['is_comm', '=', 0]
             ])->get();
             file_put_contents('cron.log', date("Y-m-d H:i:s") . var_export($orders, true) . PHP_EOL, FILE_APPEND);
             if ($orders->isEmpty()) return;

@@ -28,6 +28,14 @@ Route::any('/wx', 'IndexController@wx');
 Route::any('/card/notify', 'MemberController@notify');
 Route::any('/order/wxnotify', 'OrderController@wxnotify');
 Route::post('/index/search', 'IndexController@search');
+Route::get('/customer/qrcode', 'CustomerController@qrcode');
+Route::get('/card/reback', 'MemberController@rebackPay');
+Route::get('/card/cronCheckReback', 'MemberController@cronCheckReback');
+Route::get('/purchase/select', 'PurchaseController@select');
+Route::any('/purchase/notify', 'PurchaseController@notify');
+Route::any('/purchase/wxnotify', 'PurchaseController@wxnotify');
+Route::any('/user/levelcoupon', 'UserController@levelCoupon');
+Route::any('/user/recvcoupon', 'UserController@recvCoupon');
 
 Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/type', 'IndexController@type');
@@ -39,6 +47,10 @@ Route::group(['middleware' => 'userlogin'], function (){
     Route::get('/card/forward', 'MemberController@forward');
     Route::post('/card/getcoupons', 'MemberController@getCoupons');
 
+    Route::get('/purchase/create', 'PurchaseController@index');
+    Route::get('/purchase/add', 'PurchaseController@add');
+    Route::post('/purchase/upload', 'PurchaseController@upload');
+    Route::post('/purchase/goods', 'PurchaseController@goods');
 
     Route::post('/address/setdefault', 'AddressController@setdefault');
     Route::get('/address/del', 'AddressController@delete');
@@ -68,6 +80,23 @@ Route::group(['middleware' => 'userlogin'], function (){
 
     Route::post('/modcar', 'CarController@modcar');
     Route::get('/coupon', 'CouponController@index');
+    Route::any('/coupon/getcoupon', 'CouponController@getCoupon');
+
+    Route::get('/purchase/goods', 'PurchaseController@goods');
+    Route::get('/purchase/detail', 'PurchaseController@detail');
+    Route::get('/purchase/pay', 'PurchaseController@pay');
+    Route::any('/purchase/wxpay', 'PurchaseController@wxpay');
+    Route::any('/purchase/cardpay', 'PurchaseController@cardpay');
+    Route::any('/purchase/add', 'PurchaseController@add');
+    Route::get('/purchase/returnpay', 'PurchaseController@returnpay');
+
+    Route::any('/user/fit', 'UserController@fit');
+    Route::any('/user/overstudy', 'UserController@overStudy');
+    Route::any('/user/luxurysale', 'UserController@luxurySale');
+    Route::any('/user/uploadImage', 'UserController@uploadImage');
+    Route::any('/user/sharecoupon', 'UserController@shareCoupon');
+
+    Route::any('/share', 'UserController@share');
 });
 Route::get('/goods', 'GoodsController@index');
 Route::get('/goods/property', 'GoodsController@property');
@@ -91,6 +120,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::get('/user/usercard', 'UserController@usercard');
     Route::post('/user/addremark', 'UserController@addremark');
     Route::post('/user/addmoney', 'UserController@addmoney');
+    Route::post('/user/addscore', 'UserController@addscore');
+    Route::get('/user/fit', 'UserController@fit');
+    Route::get('/user/consulation', 'UserController@consulation');
 
     Route::get('/type', 'TypeController@index');
     Route::post('/type/add', 'TypeController@add');
@@ -117,6 +149,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
     Route::post("/goods/upload", 'GoodsController@upload');
     Route::post("/goods/create", 'GoodsController@create');
     Route::any('/goods/edit', 'GoodsController@edit');
+    Route::any('/goods/update', 'GoodsController@update');
+    Route::any('/goods/batchAct', 'GoodsController@batchAct');
+    Route::any('/user/test', 'UserController@test');
 
     Route::get("/card/recharge", 'CardController@recharge');
     Route::resource("card", 'CardController');
@@ -162,6 +197,16 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'middleware' => ['che
 
     Route::post('/user/lookcoupons', 'UserController@lookCoupons');
     Route::post('/user/delcoupon', 'UserController@delCoupon');
+    Route::post('/user/addsinglemoney', 'UserController@addsinglemoney');
+    Route::get('/user/secondsale', 'UserController@secondSale');
+    Route::get('/user/addcoupon', 'UserController@addCoupon');
+
+    Route::get('/purchase', 'PurchaseController@index');
+    Route::get('/purchase/add', 'PurchaseController@add');
+    Route::post('/purchase/create', 'PurchaseController@create');
+    Route::get('/purchase/sureback', 'PurchaseController@sureback');
+    Route::get('/purchase/modify', 'PurchaseController@modify');
+    Route::post('/purchase/mod', 'PurchaseController@mod');
 
     Route::post('/goods/gettypesbybrand', 'GoodsController@getTypesByBrand');
 });

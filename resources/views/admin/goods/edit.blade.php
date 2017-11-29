@@ -19,7 +19,7 @@
                         <h3 class="box-title">商品列表</h3>
                     </div>
                     <!-- /.box-header -->
-                    <form enctype="multipart/form-data" method="post" role="form" action="/admin/goods/create" onsubmit="return checkform()">
+                    <form enctype="multipart/form-data" method="post" role="form" action="/admin/goods/update" onsubmit="return checkform()">
                         <div class="box-body">
                             <div class="form-group">
                                 <label for="goodsname" class="col-sm-2 control-label">商品名 <span class="is_must">*</span></label>
@@ -58,8 +58,8 @@
                             <div class="form-group">
                                 <label for="lastname" class="col-sm-2 control-label">是否推荐</label>
                                 <div class="col-sm-10">
-                                    <input type="radio" name="is_hot" value="0" />否
-                                    <input type="radio" name="is_hot" value="1" />是
+                                    <input type="radio" name="is_hot" value="0" {{ $goods->is_hot ? '' : 'selected' }} />否
+                                    <input type="radio" name="is_hot" value="1" {{ $goods->is_hot ? 'selected' : '' }} />是
                                 </div>
                                 <br clear="all" />
                             </div>
@@ -142,7 +142,7 @@
                             </div>--}}
                             <div class="form-group">
                                 <div class="col-sm-offset-2 col-sm-10">
-                                    <input type="submit" class="btn btn-default" value="添加商品">
+                                    <input type="submit" class="btn btn-default" value="修改商品">
                                 </div>
                             </div>
                         </div>
@@ -151,6 +151,7 @@
                         <input type="hidden" id="logo" name="logo" value="" />
                         <input type="hidden" id="imglist" name="imglist" value="" />
                         <input type="hidden" id="len" name="len" value="" />
+                        <input type="hidden" id="goods_id" name="goods_id" value="{{ $goods->goodsid }}" />
                 </div>
                 </form>
                 <!-- /.box -->
@@ -232,14 +233,14 @@
             alert('基本价不能为空');
             return false;
         }
-        if ($("#logo").val()=='') {
+        /*if ($("#logo").val()=='') {
             alert('封面需要图片');
             return false;
         }
         if ($("#imglist").val() == '') {
             alert('介绍图片不能为空');
             return false;
-        }
+        }*/
     }
     $.ajaxSetup({
         headers: {
@@ -299,11 +300,11 @@
                     dataType:'json',
                     success: function (data) {
                         console.log(data);
-                        $("#common_discount").val(data.brand.common_discount);
-                        $("#ordinary_discount").val(data.brand.ordinary_discount);
-                        $("#golden_discount").val(data.brand.golden_discount);
-                        $("#platinum_discount").val(data.brand.platinum_discount);
-                        $("#diamond_discount").val(data.brand.diamond_discount);
+                        $("#common_discount").val(data.brand.common_discount / 10);
+                        $("#ordinary_discount").val(data.brand.ordinary_discount / 10);
+                        $("#golden_discount").val(data.brand.golden_discount / 10);
+                        $("#platinum_discount").val(data.brand.platinum_discount / 10);
+                        $("#diamond_discount").val(data.brand.diamond_discount / 10);
                         $("#goodstype").empty();
                         var html = "<option value='0'>请选择类目</option>";
                         if (data.types != '') {
@@ -354,11 +355,12 @@
         });
 
         $("div").delegate("div[class='del_img']", 'click', function () {
+            $(this).parent().remove();
             var val = '';
             $(".images_url").each(function() {
                 val += $(this).val() + ",";
             });
-            $("#imglist").val(v);
+            $("#imglist").val(val);
         });
 
         $("div").delegate("div[class='del_logo']", 'click', function () {

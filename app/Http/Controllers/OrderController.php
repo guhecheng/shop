@@ -38,7 +38,7 @@ class OrderController extends Controller {
         $uid = $request->session()->get('uid');
         $status = $request->input('status');   // 订单状态
 
-        $orders = $this->getGoods($status, $uid, $pagesize = 10);
+        $orders = $this->getGoods($status, $uid, $pagesize = 30);
 
         if ($request->ajax()) {
             return response()->json(['orders' => $orders]);
@@ -50,7 +50,7 @@ class OrderController extends Controller {
         $uid = $request->session()->get('uid');
         $status = $request->input('status');   // 订单状态
 
-        $orders = $this->getGoods($status, $uid, $pagesize = 10);
+        $orders = $this->getGoods($status, $uid, $pagesize = 30);
         if ($request->ajax()) {
             return response()->json(['orders' => $orders]);
         }
@@ -60,23 +60,27 @@ class OrderController extends Controller {
         if ($status == 1) {
             $where = [
                 ['uid', '=', $uid],
-                ['status', '<=', 1]
+                ['status', '<=', 1],
+                ['is_comm', '=', 0]
             ];
         } else if ($status == 2) {
             $where = [
                 ['uid', '=', $uid],
-                ['status', '=', 2]
+                ['status', '=', 2],
+                ['is_comm', '=', 0]
             ];
         } else if ($status == 3) {
             $where = [
                 ['uid', '=', $uid],
-                ['status', '>=', 4]
+                ['status', '>=', 4],
+                ['is_comm', '=', 0]
             ];
         } else if (empty($status) || $status == -1) {
 
             $where = [
                 ['uid', '=', $uid],
-                ['status', '>', 0]
+                ['status', '>', 0],
+                ['is_comm', '=', 0]
             ];
         } else {
 
@@ -109,7 +113,7 @@ class OrderController extends Controller {
             ->get();
         foreach ($data as &$item) {
             foreach ($goods as $value) {
-                if ($item->goodsid = $value->goodsid) {
+                if ($item->goodsid == $value->goodsid) {
                     $item->goodsname = $value->goodsname;
                     $item->goodsicon = $value->goodsicon;
                     $item->goodsdelete = $value->is_delete;
@@ -192,7 +196,6 @@ class OrderController extends Controller {
         }
         //DB::table("cart")->whereIn('cartid', $car_ids)->update(['is_delete', 0]);
         return redirect('/orderpay?orderno=' . $orderno);
-
     }
     public function orderpay(Request $request) {
         if ($request->input('errmsg') == 1) {
@@ -237,11 +240,11 @@ class OrderController extends Controller {
                     $item->goodsname = $value->goodsname;
                     $item->is_discount = $value->is_discount;
                     $item->brand_id = $value->brand_id;
-/*                    $item->common_discount = $value->common_discount;
+                    $item->common_discount = $value->common_discount;
                     $item->ordinary_discount = $value->ordinary_discount;
                     $item->golden_discount = $value->golden_discount;
                     $item->platinum_discount = $value->platinum_discount;
-                    $item->diamond_discount = $value->diamond_discount;*/
+                    $item->diamond_discount = $value->diamond_discount;
                     $item->property .= $value->value_name . " ";
                     $item->brands = DB::table('brands')->where('id', $value->brand_id)->first();
                 }
@@ -272,6 +275,7 @@ class OrderController extends Controller {
         $score = $request->input('score');
         $price = $request->input('price');
         $coupon_id = $request->input('coupon_id');
+        $coupon_type = $request->input('coupon_type');
         $coupon_discount = $request->input('coupon_discount');
         if (empty($address_id)) {
             return response()->json(['rs' => 0, 'errmsg' => "请先选择地址"]);
@@ -304,13 +308,18 @@ class OrderController extends Controller {
                 'recv_name' => $address->name,
                 'phone' => $address->phone,
                 'location' => $address->location,
-                'coupon_id' => empty($coupon_id) ? 0 : $coupon_id
+                'coupon_id' => empty($coupon_id) ? 0 : $coupon_id,
+                'coupon_type' => empty($coupon_type) ? 0 : $coupon_type
             ]);
             if (!$rs)
                 throw new \Exception('修改订单状态失败');
 
             if (!empty($coupon_id)) {
-                DB::table('user_coupon')->where(['user_id'=>$request->session()->get("uid"), "coupon_id" => $coupon_id])->update(['status'=>1]);
+                if (empty($coupon_type))
+                    DB::table('user_coupon')->where(['user_id'=>$request->session()->get("uid"), "coupon_id" => $coupon_id])->update(['status'=>1]);
+                else
+                    DB::table('user_levelup_coupon')->where(['openid'=>$request->session()->get("openid"), "id" => $coupon_id])->update(['is_use'=>1]);
+
             }
             if (!empty($score)) {
                 if ($user->score < $score)
@@ -366,6 +375,7 @@ class OrderController extends Controller {
                     $info = DB::table('orderinfo')->where('info_id', $order->info_id)->update([
                         'status' => $this->state['ORDER_WAIT_SEND'],
                         'pay_time' => date("Y-m-d H:i:s"),
+                        'transaction_id'=>$notify->transaction_id
                     ]);
                     if (!$info) {
                         throw new \Exception("修改订单状态失败");
@@ -413,7 +423,7 @@ class OrderController extends Controller {
         $score = $request->input('score');
         $price = $request->input('price');              // 金额
         $coupon_id = $request->input('coupon_id');      // 优惠券id
-
+        $coupon_type = $request->input('coupon_type');
         if (empty($address_id) || empty($order_no) || empty($price)) {
             return response()->json(['rs' => 0, 'errmsg' => "订单出现异常"]);
         }
@@ -447,7 +457,8 @@ class OrderController extends Controller {
                 'recv_name' => $address->name,
                 'phone' => $address->phone,
                 'location' => $address->location,
-                'coupon_id' => empty($coupon_id) ? 0 : $coupon_id
+                'coupon_id' => empty($coupon_id) ? 0 : $coupon_id,
+                'coupon_type' => empty($coupon_type) ? 0 : $coupon_type
             ]);
 
             if (!$rs)
@@ -471,7 +482,10 @@ class OrderController extends Controller {
             }
 
             if (!empty($coupon_id)) {
-                DB::table('user_coupon')->where(['user_id' => $order->uid, 'coupon_id' => $coupon_id])->update(['status' => 1]);
+                if (empty($coupon_type))
+                    DB::table('user_coupon')->where(['user_id' => $order->uid, 'coupon_id' => $coupon_id])->update(['status' => 1]);
+                else
+                    DB::table('user_levelup_coupon')->where(['openid'=>$request->session()->get("openid"), "id" => $coupon_id])->update(['is_use'=>1]);
             }
             if (!empty($score)) {
                 if ($user->score < $score)
@@ -539,6 +553,7 @@ class OrderController extends Controller {
         $score = $request->input('score');
         $price = $request->input('price');
         $coupon_id = $request->input('coupon_id');
+        $coupon_type = $request->input('coupon_type');
         if (empty($address_id) || empty($order_no) || empty($score)) {
             return response()->json(['rs' => 0, 'errmsg' => "订单出现异常"]);
         }
@@ -599,6 +614,13 @@ class OrderController extends Controller {
                     if (!$rs)
                         throw new \Exception('修改订单状态失败');
                 }
+            }
+
+            if (!empty($coupon_id)) {
+                if (empty($coupon_type))
+                    DB::table('user_coupon')->where(['user_id' => $order->uid, 'coupon_id' => $coupon_id])->update(['status' => 1]);
+                else
+                    DB::table('user_levelup_coupon')->where(['openid'=>$request->session()->get("openid"), "id" => $coupon_id])->update(['is_use'=>1]);
             }
             DB::commit();
             return response()->json(['rs' => 1]);
@@ -694,6 +716,11 @@ class OrderController extends Controller {
                 $coupon->end_date = date("Y年m月d日", strtotime($coupon->end_date));
                 $coupons[] = $coupon;
             }
+            $user = DB::table("user")->where('userid', $request->session()->get('uid'))->first();
+            $day = date("Y-m-d");
+            $openid = $request->session()->get('openid');
+            $special_coupon = DB::select("select * from user_levelup_coupon where openid='{$openid}' and is_use=0 AND start_at<='{$day}' and end_at>='{$day}' and type>" . ($user->level - 1));
+            $coupons = array_merge_recursive($coupons, $special_coupon);
         }
         return response()->json(['coupons'=>!empty($coupons) ? $coupons : '']);
     }

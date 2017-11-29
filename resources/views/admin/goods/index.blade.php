@@ -8,6 +8,9 @@
             商品列表
         </h1>
         <a href="/admin/goods/add"><button type="button" class="btn btn-primary add-btn">添加</button></a>
+        <input type="text" name="goods_name" id="goods_name" placeholder="输入商品名称" value="{{ $goods_name }}"/>
+        <button id="search_btn">搜索</button>
+        <button id="search_all">查看所有</button>
     </section>
 
     <!-- Main content -->
@@ -35,6 +38,7 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>
+                                <th><input type="checkbox" name="select_goods" id="batch_select_goods" data-type="0" /></th>
                                 <th>商品名</th>
                                 <th>图标</th>
                                 <th>基本价</th>
@@ -45,6 +49,7 @@
                             <tbody>
                             @foreach($goods as $good)
                                 <tr>
+                                    <td><input type="checkbox" name="select_goods" class="select_goods" value="{{ $good->goodsid }}"/></td>
                                     <td>{{ $good->goodsname }}</td>
                                     <td><img src="{{ $good->goodsicon }}" width="100" height="100"/></td>
                                     <td>{{ $good->price / 100 }}</td>
@@ -61,7 +66,14 @@
                             </tbody>
                             <tfoot>
                             <tr>
-                                <td colspan="5">
+                                <td colspan="6">
+                                    <div>
+                                    <button id="batch_on">批量上架</button>
+                                    <button id="batch_off">批量下架</button>
+                                    </div>
+                                    <div>
+                                    {{ $goods->appends(['brand_id' => $brand_id])->links() }}
+                                    </div>
                                 </td>
                             </tr>
                             </tfoot>
@@ -89,7 +101,9 @@
 
 <div class="control-sidebar-bg"></div>
 </div>
-
+<style type="text/css">
+    .select_goods, #batch_select_goods { width:18px; height:18px; }
+</style>
 <script src="/css/admin/plugins/jQuery/jquery-2.2.3.min.js"></script>
 <!-- Bootstrap 3.3.6 -->
 <script src="/css/admin/bootstrap/js/bootstrap.min.js"></script>
@@ -118,6 +132,53 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+    $("#search_btn").on("click", function () {
+        var goods_name = $("#goods_name").val();
+        if (goods_name == '') return ;
+        location.href = '/admin/goods?goods_name=' + goods_name;
+    });
+    $("#search_all").on("click", function () {
+        location.href = '/admin/goods';
+    });
+    $("#batch_select_goods").on("click", function () {
+        var data_type = $(this).attr('data-type');
+        $(".select_goods").prop("checked", data_type == 0 ? true : false);
+        $(this).attr('data-type', 1 - parseInt(data_type));
+    });
+    $("#batch_on").on('click', function () {
+        var goods_ids = '';
+        $(".select_goods").each(function () {
+            console.log($(this).prop('checked'));
+            if ($(this).prop('checked')) goods_ids += $(this).val() + ',';
+        });
+        if (goods_ids == '') return false;
+        batch_act_goods(goods_ids, 1);
+    });
+    $("#batch_off").on('click', function () {
+        var goods_ids = '';
+        $(".select_goods").each(function () {
+            console.log($(this).prop('checked'));
+            if ($(this).prop('checked')) goods_ids += $(this).val() + ',';
+        });
+        if (goods_ids == '') return false;
+        batch_act_goods(goods_ids, 0);
+    });
+    function batch_act_goods(goods_ids, act_type) {
+        $.ajax({
+            url:'/admin/goods/batchAct',
+            data: { 'goods_ids' : goods_ids, 'act_type' : act_type },
+            dataType: 'json',
+            type:'post',
+            success: function (data) {
+                if (data.rs == 1) {
+                    alert(data.errmsg);
+                    return false;
+                }
+                alert('操作成功');
+                location.reload();
+            }
+        });
+    }
     $(function() {
         $(".add-btn").on("click", function() {
             $("#add-modal").modal('show');

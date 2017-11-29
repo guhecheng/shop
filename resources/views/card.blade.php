@@ -29,9 +29,22 @@
                 <div class="line"></div><div>会员卡说明</div><div class="line"></div>
             </div>
             <div class="card_desc_content">
-                <p>1, 请在结账前出示此卡;</p>
+                <div class="card_desc_img"></div>
+                <div class="card_desc_text">
+                    <p>1.童马会员卡共分为普通会员、黄金会员、铂金会员、钻石会员四个等级</p>
+                    <p>2.一年内消费满￥1000元成为普通会员，享受基本折扣和优惠</p>
+                    <p>3.一年内充值金额大于等于2000元，可成为黄金会员，满5000元成为铂金会员，满10000元成为钻石会员</p>
+                    <p>4.除普通会员外，其他会员均只有充值能够累计成长值</p>
+                    <p>5.充值后可用余额分别享受各品牌对应的折扣，等级越高，折扣越大，优惠越多，福利越多</p>
+                    <p>6.部分特殊商品不享受折扣，具体折扣信息请以实际时间、实际商品为准</p>
+                    <p>7.线下已是普通会员的朋友，可以点击我的信息-点击头像-我是老会员-输入手机号关联</p>
+                    <p>8.会员卡线上线下可同步使用，线下结账时请出示此卡</p>
+                    <p>9.若您有任何疑问，可咨询童马旗下门店</p>
+                    <p>10.最终解释权归童马所有</p>
+                </div>
+                {{--<p>1, 请在结账前出示此卡;</p>
                 <p>2, 此卡可享受会员优惠待遇;</p>
-                <p>3, 此卡不得够买产品，不得与其他优惠同时使用;</p>
+                <p>3, 此卡不得够买产品，不得与其他优惠同时使用;</p>--}}
             </div>
         </div>
     </div>
@@ -63,6 +76,7 @@
     <input type="hidden" id="pay_chance" value="0" />
     <input type="hidden" id="coupon_id" value="0" />
     <input type="hidden" id="money" value="0" />
+    <input type="hidden" id="select_price" value="0" />
 
     @include('layouts.footer')
     <div class="order-coupons-area">
@@ -70,6 +84,19 @@
         <div class="order-coupons-sure-btn">确 认</div>
     </div>
     <style type="text/css">
+        .card_desc_content {
+            overflow: scroll; }
+        .card_desc_text {
+            width: 100%;
+            height: 6rem;
+        }
+        .card_desc_img {
+            width: 100%;
+            height: 8rem;
+            background-image:url('/images/webwxgetmsgimg.jpg');
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
         .coupons-item-active{
             border-top:solid 2px yellow;
             border-bottom:solid 2px yellow;
@@ -290,8 +317,15 @@
         $(".select-money").on("click", function() {
             $(".select-money").removeClass("active");
             $(this).addClass("active");
-            $("#coupon_id").val(0);
-            $("#money").val(0);
+            var price = parseFloat($(this).attr('data-value'));
+            if ($("#select_price").val() == price) {
+                alert('jlfaksdfasf');
+            } else {
+                $("#select_coupon").text("使用充值券");
+                $("#select_price").val(price);
+                $("#coupon_id").val(0);
+                $("#money").val(0);
+            }
         })
         $(".sure_recharge").on("click", function() {
             if ($("#pay_chance").val() >= 1) return;
@@ -409,6 +443,10 @@
             }
             $(".order-coupons-area").hide();
             $("#coupon_id").val($(".coupons-item-active").attr('data-id'));
+            var money = parseFloat($(".card-money-area").find(".active").attr("data-value"));
+            console.log(money);
+            console.log(price);
+            $("#select_coupon").text("已经使用优惠券，仅需支付￥" + (money - parseFloat(price)) );
             $("#money").val(price);
         });
     </script>

@@ -21,20 +21,7 @@ body {
 }
 .goods-item-content {
     float: left;
-    width: 80%;
-}
-.goods-item-content div {
-	height: 1rem;
-}
-.goods-item-content div:first-child {
-	height: 1.2rem;
-	line-height: 1.2rem;
-}
-.goods-name {
-    font-size: 1rem;
-    font-weight:bold;
-    overflow: hidden;
-    word-break: break-all;
+    width: 100%;
 }
 
 /*goods.blade.php*/
@@ -853,11 +840,11 @@ body {
     line-height: 2rem;
 }
 .order-count {
-    width: 50%;
+    width: 40%;
     padding-left:4%;
 }
 .order-total {
-    width:30%;
+    width:40%;
 }
 .order-buy {
     width: 20%;
@@ -899,11 +886,11 @@ body {
     font-weight:bold;
 }
 .order-item-name {
-    height:1.8rem;
+    height:1rem;
     font-weight:bold;
     overflow: hidden;
     word-break: break-all;
-    font-size: 0.8rem;
+    font-size: 0.6rem;
 }
 .order-item-num div:first-child {
     width: 70%;

@@ -6,7 +6,11 @@
     <div class="index">
         @if (!$brands->isEmpty())
             @foreach ($brands as $brand)
-                <a href="/type?brand_id={{ $brand->id }}">
+                @if ($brand->brand_name == '国际代购')
+                    <a href="/purchase/select?brand_id={{ $brand->id }}">
+                @else
+                    <a href="/type?brand_id={{ $brand->id }}">
+                @endif
                 <div class="brand-item" style="background-image:url('{{ $brand->brand_img }}')"></div>
                 </a>
             @endforeach

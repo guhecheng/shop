@@ -28,21 +28,23 @@
                         </div>
                         <div>库存 {{ $count }}</div>
                     </div>
+                    @if (0)
                     @if ($goods->ordinary_discount && $goods->golden_discount && $goods->platinum_discount && $goods->diamond_discount)
                     <div class="goods-content-discount">
                         @if ($goods->ordinary_discount && $goods->ordinary_discount < 100)
-                        <div>普通会员<span style="color:red;">{{ $goods->ordinary_discount / 10 }}折: {{ $goods->ordinary_discount / 100 * $goods->price / 100 }}</span></div>
+                        <div>普通会员<span style="color:red;"> {{ $goods->ordinary_discount / 10 }}折</span></div>
                         @endif
                         @if ($goods->golden_discount && $goods->golden_discount < 100)
-                        <div>黄金会员<span style="color:red;">{{ $goods->golden_discount / 10 }}折: {{ $goods->golden_discount / 100 * $goods->price / 100 }}</span></div>
+                        <div>黄金会员<span style="color:red;"> {{ $goods->golden_discount / 10 }}折</span></div>
                         @endif
                         @if ($goods->platinum_discount && $goods->platinum_discount < 100)
-                        <div>铂金会员<span style="color:red;">{{ $goods->platinum_discount / 10 }}折: {{ $goods->platinum_discount / 100 * $goods->price / 100 }}</span></div>
+                        <div>铂金会员<span style="color:red;"> {{ $goods->platinum_discount / 10 }}折</span></div>
                         @endif
                         @if ($goods->diamond_discount && $goods->diamond_discount < 100)
-                        <div>钻石会员<span style="color:red;">{{ $goods->diamond_discount / 10 }}折: {{ $goods->diamond_discount / 100 * $goods->price / 100 }}</span></div>
+                        <div>钻石会员<span style="color:red;"> {{ $goods->diamond_discount / 10 }}折</span></div>
                         @endif
                     </div>
+                        @endif
                     @endif
                     <div class="goods-content-detail">
                         <div>满1000包邮|<span style="color:red;">充值会员全场包邮</span></div>
@@ -189,7 +191,7 @@
             right: 1rem;
         }
         .swiper-slide {
-            height: 9rem;
+            height: 12rem;
             width: 100%;
             background-size: 100% 100%;
             background-repeat:no-repeat;

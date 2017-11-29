@@ -15,7 +15,14 @@
             <div class="col-xs-12">
                 <div class="box">
                     <div style="margin-top:10px; margin-left:10px;">
-                        <input type="text" id="user_name" class="form-control" placeholder="用户名" style="width:200px;float:left;" value="{{ $user_name }}"/>
+                        <input type="text" id="user_name" class="form-control" placeholder="用户名或者ID" style="width:200px;float:left;" value="{{ $user_name }}"/>&nbsp;
+                        <?php $levels = empty($level_ids) ? [] : explode(',', $level_ids); ?>
+                        <button type="button" class="btn {{ in_array(0, $levels) ? 'btn-primary' : 'btn-default' }} btn-level">普通用户 <span>@foreach ($count as $cnt) @if ($cnt->level==0) {{ $cnt->cnt }} @endif @endforeach</span></button>
+                        <button type="button" class="btn {{ in_array(1, $levels) ? 'btn-primary' : 'btn-default' }} btn-level">普通会员 <span>@foreach ($count as $cnt) @if ($cnt->level==1) {{ $cnt->cnt }} @endif @endforeach</span></button>
+                        <button type="button" class="btn {{ in_array(2, $levels) ? 'btn-primary' : 'btn-default' }} btn-level">黄金会员 <span>@foreach ($count as $cnt) @if ($cnt->level==2) {{ $cnt->cnt }} @endif @endforeach</span></button>
+                        <button type="button" class="btn {{ in_array(3, $levels) ? 'btn-primary' : 'btn-default' }} btn-level">铂金会员 <span>@foreach ($count as $cnt) @if ($cnt->level==3) {{ $cnt->cnt }} @endif @endforeach</span></button>
+                        <button type="button" class="btn {{ in_array(4, $levels) ? 'btn-primary' : 'btn-default' }} btn-level">钻石会员 <span>@foreach ($count as $cnt) @if ($cnt->level==4) {{ $cnt->cnt }} @endif @endforeach</span></button>
+
                         <button id="search_btn" class="btn btn-primary">查找</button>
                     </div>
                     <!-- /.box-header -->
@@ -66,7 +73,7 @@
                             <tfoot>
                                 <tr>
                                     <td colspan="7">
-                                        {{ $users->links() }}
+                                        {{ $users->appends(['level_ids' => $level_ids])->links() }}
                                     </td>
                                 </tr>
                             </tfoot>
@@ -174,7 +181,9 @@
     <strong>Copyright &copy; 2014-2017</strong> All rights
     reserved.
 </footer>
-
+<style type="text/css">
+    .btn-level span { color: red; }
+</style>
 <script src="/css/admin/plugins/jQuery/jquery-2.2.3.min.js"></script>
 <!-- Bootstrap 3.3.6 -->
 <script src="/css/admin/bootstrap/js/bootstrap.min.js"></script>
@@ -203,15 +212,30 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+    $("#level").on("change", function () {
+        location.href = '/admin/user?level=' + $(this).val();
+    });
+    $(".btn-level").on('click', function () {
+        if ($(this).hasClass('btn-primary')) {
+            $(this).removeClass('btn-primary');
+        } else
+            $(this).addClass('btn-primary');
+    });
     $(function() {
         $(".add-btn").on("click", function() {
             $("#add-modal").modal('show');
         });
         $("#search_btn").on("click",function () {
             var user_name = $.trim($("#user_name").val());
+            var level_ids = '';
+            $(".btn-level").each(function () {
+                if ($(this).hasClass("btn-primary")) {
+                    level_ids += ($(this).index() - 1) + ',';
+                }
+            });
             if (user_name == '')
-                location.href = '/admin/user';
-            location.href = '/admin/user?user_name=' + user_name;
+                location.href = '/admin/user?level_ids=' + level_ids;
+            location.href = '/admin/user?user_name=' + user_name + '&level_ids=' + level_ids;
         });
         //initFileInput("add_img", "/admin/card/upload");
         $("#add_img").fileinput({

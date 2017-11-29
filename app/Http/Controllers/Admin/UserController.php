@@ -11,22 +11,40 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Excel;
+use model\parter\emp\emp;
 
 class UserController extends Controller {
     private $is_deleted = 1;        //已删除
     private $no_deleted = 0;        // 未删除
 
-
+    /**
+     * 用户展示信息页 (存在查询条件bug)
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View|string
+     */
     public function index(Request $request) {
         $user_name = empty($request->input("user_name")) ? '' : trim($request->input('user_name'));
+        $level_ids = $request->input('level_ids') ?? '';
         if (!empty($user_name))
-            $where[] = ['uname', 'like', "%{$user_name}%"];
-
+            if (is_numeric($user_name)) {
+                if (strlen($user_name) >= 10)
+                    $where[] = ['phone', '=', $user_name];
+                else
+                $where[] = ['userid', '=', $user_name];
+            }
+            else
+                $where[] = ['uname', 'like', "%{$user_name}%"];
         $where[] = ['is_delete', '=', $this->no_deleted];
-        $users = DB::table('user')->where($where)
-            ->orderBy('create_time', 'desc')
-            ->paginate(20);
-        return view('admin.user.index', ['users' => $users, 'user_name' => empty($user_name) ?'':$user_name]);
+
+        $db = DB::table('user')->where($where);
+        if (!empty($level_ids))
+            $db = $db->whereIn('level', explode(',', rtrim($level_ids, ',')));
+
+        // 获取对应等级会员人数
+        $count = DB::select("select count(*) cnt,level from user group by level order by level asc");
+        // 获取会员列表
+        $users = $db->orderBy('create_time', 'desc')->paginate(20);
+        return view('admin.user.index', ['users' => $users, 'count' => $count, 'user_name' => empty($user_name) ?'':$user_name, 'level_ids' => rtrim($level_ids, ',')]);
     }
 
     /**
@@ -57,17 +75,18 @@ class UserController extends Controller {
                 $realPath = $file->getRealPath();
                 if ($ext != 'xls' && $ext != 'xlsx')
                     return view('/admin/user/userexport', ['error' => '文件类型不对']);
-
-                Excel::load($realPath, function ($reader) {
+                $insert_num = $repeat_phone = 0;
+                Excel::load($realPath, function ($reader) use (&$insert_num, &$repeat_phone) {
                     // 将第一张表数据导入转成数据
                     $data = $reader->getSheet(0)->toArray();
-                    foreach ($data as $key => $item) {
+                   /* foreach ($data as $key => $item) {
                         if ($key == 0) continue;
+                        if (($key== 0) || empty($item[0]) || empty($item[1]) || empty($item[3])) continue;
                         $count = DB::table('olduser')->where('phone', $item[1])->count();
                         if ($count) {
+                            $repeat_phone++;
                             continue;
                         }
-
                         $id = DB::table('olduser')->insertGetId(
                             ['name'=>$item[0], 'phone'=>$item[1], 'password'=>'1234']
                         );
@@ -75,9 +94,42 @@ class UserController extends Controller {
                         DB::table('children')->insert([
                             ['name'=>$item[2], 'sex'=>$sex, 'birth_date'=>$item[4], 'parent_id' => $id]
                         ]);
+                        $insert_num++;
+                    }*/
+                    foreach ($data as $key => $item) {
+                        if ($key == 0) continue;
+                        if (($key== 0) || empty($item[1])) continue;
+                        $user = DB::table('olduser')->where('phone', $item[1])->first();
+                        $parent_data = [
+                            'name' => empty(trim($item[0])) ? '' : trim($item[0]),
+                            'phone' => trim($item[1]),
+                            'password' => '1234'
+                        ];
+                        if (isset($item[5]) && !empty(trim($item[5])))
+                            $parent_data['score'] = intval(trim($item[5]));
+
+                        $sex = trim($item[3]) == '男' ? '1' : ($item[3] == '女' ? 2 : 0);
+                        $name = trim($item[2]) == '未填写' ? '' : trim($item[2]);
+                        $birth_date = trim($item[4]);
+                        if (!empty($sex) || !empty($name) || !empty($birth_date))
+                            $children_data = [
+                                'sex' => $sex,
+                                'name' => $name,
+                                'birth_date' => $birth_date
+                            ];
+                        if (empty($user)) {
+                            $id = DB::table('olduser')->insertGetId($parent_data);
+                            if (!empty($children_data))
+                                DB::table('children')->insert(array_merge($children_data, ['parent_id' => $id]));
+                        } else {
+                            DB::table('olduser')->where('id', $user->id)->update($parent_data);
+                            if (!empty($children_data))
+                                DB::table('children')->where('parent_id', $user->id)->update($children_data);
+                        }
+
                     }
                 });
-                return view('/admin/user/userexport', ['error' => '加入成功']);
+                return view('/admin/user/userexport', ['error' => '成功添加' . $insert_num .'人， 重复增加' . $repeat_phone.'手机号码']);
             }
         }
         return view('admin.user.userexport');
@@ -93,6 +145,11 @@ class UserController extends Controller {
         return view('admin.user.card', ['cards' => $cards]);
     }
 
+    /**
+     * 展示个人信息
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View|string
+     */
     public function info(Request $request) {
         $userid = $request->input('userid');
         if (empty($userid)) exit;
@@ -101,14 +158,15 @@ class UserController extends Controller {
 
         $orders = DB::table('orderinfo')->leftJoin('order', 'order.order_no', '=', 'orderinfo.order_no')
             ->select('orderinfo.*', 'order.count', 'order.price as per_price', 'order.skuid')
-            ->where(['uid' => $userid, 'orderinfo.status'=>2] )->orderBy('order.order_no', 'asc')->get();
+            ->where(['uid' => $userid, 'orderinfo.status'=>2, 'is_comm'=> 0] )->orderBy('order.order_no', 'asc')->get();
 
         if (empty($orders))
             return view('admin.order.index', ['orders' => null]);
         // 没有获取到数据
         $skuids = $order_no_items = [];
         foreach ($orders as $item) {
-            $skuids[] = $item->skuid;
+            if (!empty($item->skudi))
+                $skuids[] = $item->skuid;
             if (key_exists($item->order_no, $order_no_items)) {
                 $order_no_items[$item->order_no] += 1;
             } else
@@ -141,13 +199,21 @@ class UserController extends Controller {
 
         $scores = DB::table("scorechange")->where("uid", $userid)->get();
 
+        $level_coupons = DB::table('user_levelup_coupon')->where([['uid', '=', $userid], ['openid', '!=', '']])->get();
+
         return view('admin.user.info', ['userid'=> $userid,'user'=>$user,
                                         'child' => $child,
                                         'orders'=>$orders,
-                                        'scores' => $scores]);
+                                        'scores' => $scores,
+                                        'level_coupons' => $level_coupons]);
     }
 
 
+    /**
+     * 增加备注
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function addremark(Request $request) {
         $userid = $request->input("userid");
         $remark = $request->input('remark');
@@ -170,31 +236,30 @@ class UserController extends Controller {
                 throw new \Exception('用户不存在');
             }
 
-            $trans['insert'] = DB::table('usertransmoney')->insert([
-                'uid'   => $userid,
-                'trans_type'    => 1,
-                'trans_money' => $money
-            ]);
-            if (!$trans['insert'])
-                throw new \Exception('操作失败');
-
-            if ($user->level < 4) {
-                $total_money = DB::table('usertransmoney')->where([
-                    ['uid', '=', $user->userid],
-                    ['trans_type', '=', 1],
-                    ['create_time', '>=', date("Y-m-d H:i:s", strtotime("-1 year"))]
-                ])->sum('trans_money');
+            if ($money < 0  || $user->level >= 4) {
+                $level = $user->level;
+            } else {
                 $card = DB::table('card')->where([
                     ['is_delete', '=', 0],
                     ['card_id', '!=', 5],
-                    ['card_score', '<=', intval($total_money / 100)]
+                    ['card_score', '<=', intval($user->total_score + $money)]
                 ])->orderBy('card_level', 'desc')->select('card_level')->limit(1)->first();
                 if (!empty($card->card_level)) {
                     $level = $user->level > $card->card_level ? $user->level : $card->card_level;
                 }  else
                     $level = $user->level;
-            } else
-                $level = $user->level;
+
+                if ($level > $user->level && $level > 1) {
+                    $count = DB::table('user_levelup_coupon')->where([['uid', '=', $userid], ['type', '=', $level-1]])->count();
+                    if ($count < $level)
+                        for ($i = 0; $i < $level - $count; $i++)
+                            DB::table("user_levelup_coupon")->insert(['uid'=>$userid,
+                                'type'=>$level-1,
+                                'start_at' => date("Y-m-d"),
+                                'end_at' => date("Y-m-d", time() + 30 * 24 * 3600)]);
+                }
+
+            }
 
             if (empty($user->card_no)) {
                 $card_no = DB::table("user")->max("card_no");
@@ -209,6 +274,7 @@ class UserController extends Controller {
                 'money' => $user->money + $money * 100,
                 'level' => $level,
                 'score' => intval($money)<=0 ? $user->score : ($user->score + intval($money)),
+                'total_score' => intval($money) <= 0 ? $user->total_score : ($user->total_score + intval($money)),
                 'card_no' => $card_no
             ]);
             if (!$user_rs) {
@@ -225,6 +291,81 @@ class UserController extends Controller {
                 'trans_type' => 2
             ]);
             if (!empty($add_score = intval($money)) && intval($money) > 0) {
+                DB::table('scorechange')->insert([
+                    'type' => 3,
+                    'paytype' => 3,
+                    'score' => $add_score,
+                    'uid' => $userid
+                ]);
+            }
+            DB::commit();
+            return response()->json(['rs' => 1]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['rs' => 0]);
+        }
+    }
+
+    /**
+     * 增加积分
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addscore(Request $request) {
+        $userid = $request->input('userid');
+        $score = $request->input('score');
+        if (empty($userid) || empty($score) || $score <= 0) {
+            return response()->json(['rs' => 0, 'errmsg' => '缺少信息']);
+        }
+
+        DB::beginTransaction();
+        try {
+            $user = DB::table('user')->where("userid", $userid)->first();
+            if (empty($user)) {
+                throw new \Exception('用户不存在');
+            }
+
+            if ($user->level < 4) {
+                $card = DB::table('card')->where([
+                    ['is_delete', '=', 0],
+                    ['card_id', '!=', 5],
+                    ['card_score', '<=', intval($user->total_score + $score)]
+                ])->orderBy('card_level', 'desc')->select('card_level')->limit(1)->first();
+                if (!empty($card->card_level)) {
+                    $level = $user->level > $card->card_level ? $user->level : $card->card_level;
+                }  else
+                    $level = $user->level;
+            } else
+                $level = $user->level;
+            if ($level > $user->level && $level > 1) {
+                $count = DB::table('user_levelup_coupon')->where([['uid', '=', $userid], ['type', '=', $level-1]])->count();
+                if ($count < $level)
+                    for ($i = 0; $i < $level - $count; $i++)
+                        DB::table("user_levelup_coupon")->insert(['uid'=>$userid,
+                            'type'=>$level-1,
+                            'start_at' => date("Y-m-d"),
+                            'end_at' => date("Y-m-d", time() + 30 * 24 * 3600)]);
+            }
+
+            if (empty($user->card_no)) {
+                $card_no = DB::table("user")->max("card_no");
+                if (!empty($card_no)) {
+                    $card_no = str_pad(intval($card_no) + 1, 8, "0", STR_PAD_LEFT);
+                } else
+                    $card_no = '00000001';
+            } else {
+                $card_no = $user->card_no;
+            }
+            $user_rs = DB::table('user')->where("userid", $userid)->update([
+                'level' => $level,
+                'score' => intval($score)<=0 ? $user->score : ($user->score + intval($score)),
+                'total_score' => $user->total_score + $score,
+                'card_no' => $card_no
+            ]);
+            if (!$user_rs) {
+                throw new \Exception("修改用户金额失败");
+            }
+            if (!empty($add_score = intval($score)) && intval($score) > 0) {
                 DB::table('scorechange')->insert([
                     'type' => 3,
                     'paytype' => 3,
@@ -294,5 +435,76 @@ class UserController extends Controller {
             return response()->json(['rs' => 1]);
         }
         return response()->json(['rs' => 0]);
+    }
+
+    public function fit(Request $request) {
+        $data = DB::table('user_diamond_fit_info')->orderBy('create_time', 'desc')->paginate(20);
+        return view('admin.user.fit', ['data' => $data]);
+    }
+
+    public function consulation(Request $request) {
+        $data = DB::table('user_oversea_consulation')->orderBy('create_time', 'desc')->paginate(20);
+        return view('admin.user.consulation', ['data' => $data]);
+    }
+
+
+    public function addsinglemoney(Request $request) {
+        $money = $request->input('money');
+        $user_id = $request->input('userid');
+
+        if (empty($money) || empty($user_id)) {
+            return response(['rs' => 0]);
+        }
+        $user = DB::table("user")->where('userid', $user_id)->first();
+        if (empty($user))
+            return response(['rs' => 0]);
+        if ($money < 0 && abs($money) > $user->money / 100)
+            return response(['rs' => 0]);
+        $rs = DB::table('user')->where(['userid' => $user_id])->update(['money' => $user->money + 100 * $money]);
+
+        DB::table('add_money_log')->insert([
+            'money' => $money * 100,
+            'act_user' => $request->session()->get('sysuid'),
+            'userid' => $user_id
+        ]);
+        return response(['rs' => empty($rs) ? 0 : 1]);
+    }
+
+
+    public function secondSale(Request $request) {
+        $records = DB::table('user_luxury_sale')->orderBy('create_time', 'desc')->paginate(20);
+        return view('admin.user.secondsale', ['records' => $records]);
+    }
+
+    public function addCoupon(Request $request) {
+        $users = DB::table('user')->where([['level', '>=', 2], ['is_delete', '=', '0']])->get();
+        foreach ($users as $user) {
+            if ($user->level==2) {
+                $coupon = DB::table('user_levelup_coupon')->where([['uid', '=', $user->userid], ['type', '=', 0]])->first();
+                if (!empty($coupon))
+                    continue;
+                DB::table('user_levelup_coupon')->insert([
+                    'uid' => $user->userid,
+                    'type' => 0,
+                    'start_at' => date("Y-m-d"),
+                    'end_at' => date("Y-m-d", time() + 30 * 24 * 3600)
+                ]);
+            } else if($user->level > 2) {
+                for ($i = 2; $i <= $user->level; $i++) {
+                    $coupon = DB::table('user_levelup_coupon')->where([['uid', '=', $user->userid], ['type', '=', $user->level - 2]])->first();
+                    if(empty($coupon))
+                        DB::table('user_levelup_coupon')->insert([
+                            'uid' => $user->userid,
+                            'type' => 0,
+                            'start_at' => date("Y-m-d"),
+                            'end_at' => date("Y-m-d", time() + 30 * 24 * 3600)
+                        ]);
+                }
+            }
+        }
+    }
+
+    public function test(Request $request) {
+        return false;
     }
 }

@@ -56,12 +56,22 @@
                 <div class="order-item-content">
                     <div class="order-item-name">{{ $item->goodsname }}</div>
                     <div class="order-property">
-                        <div class="order-price">
+                        <div class="order-price" data-price="{{ $item->price }}" data-num="{{ $item->count }}">
+                            <input type="hidden" class="ordinary_discount" value="{{ $item->ordinary_discount }}" />
+                            <input type="hidden" class="golden_discount" value="{{ $item->golden_discount }}" />
+                            <input type="hidden" class="platinum_discount" value="{{ $item->platinum_discount }}" />
+                            <input type="hidden" class="diamond_discount" value="{{ $item->diamond_discount }}" />
+                            <input type="hidden" class="common_discount" value="{{ $item->common_discount }}" />
+                            <input type="hidden" class="brand_ordinary_discount" value="{{ $item->brands->ordinary_discount }}" />
+                            <input type="hidden" class="brand_golden_discount" value="{{ $item->brands->golden_discount }}" />
+                            <input type="hidden" class="brand_platinum_discount" value="{{ $item->brands->platinum_discount }}" />
+                            <input type="hidden" class="brand_diamond_discount" value="{{ $item->brands->diamond_discount }}" />
+                            <input type="hidden" class="brand_common_discount" value="{{ $item->brands->common_discount }}" />
                             @if ($item->real_price == $item->price)
-                            <span class="order-money">￥<?php echo $item->price / 100; ?>元</span>
+                            <span class="order-money true-money">￥<?php echo $item->price / 100; ?>元</span>
                             @else
                                 <span class="order-money" style="text-decoration:line-through">￥<?php echo $item->price / 100; ?>元</span>
-                                ￥<span class="order-money"><?php echo $item->real_price / 100; ?></span>元
+                                <span class="order-money true-money">￥<?php echo $item->real_price / 100; ?>元</span>
                             @endif
                         </div>
                     </div>
@@ -86,9 +96,10 @@
         </div>
         <input type="hidden" id="coupon_id" value="" />
         <input type="hidden" id="coupon_price" value="0" />
+        <input type="hidden" id="coupon_type" value="0" />
         <input type="hidden" id="old_wx_price" value="{{ $total>=$wx_total ? $wx_total - 0.01 : $total }}" />
         <input type="hidden" id="score" value="0"/>
-        @if ($user->level >= 1 || $wx_total >= 1000)
+        @if ($user->level > 1 || $wx_total >= 1000)
         <input type="hidden"  id="express_price" value="0" />
         <div class="order-express">
             <div style="width: 50%;">会员卡运费减免</div>
@@ -157,6 +168,15 @@
     <div class="order-coupons-sure-btn">确 认</div>
 </div>
 <style type="text/css">
+    .order-express-coupon {
+        background: #fff;
+        width: 100%;
+        padding: 0 5%;
+        line-height: 1.8rem;
+        height: 1.8rem;
+        border-bottom: solid 1px #C1C1C1;
+    }
+    .order-express-coupon div:first-child { float:left; }
     .order-total div {
         float:right;
         padding-right: 10%;
@@ -341,11 +361,11 @@
     }
     .order-score-discount div:first-child {
         float:left;
-        width: 50%;
+        width: 30%;
     }
     .order-score-discount div:last-child {
         float:right;
-        width:50%;
+        width:70%;
         text-align: right;
     }
     .bg,.order-select-type {
@@ -468,7 +488,6 @@
             data: {'brand_ids': '<?php echo implode(",", array_keys($coupons)); ?>', 'price': '<?php echo implode(',', array_values($coupons)); ?>'},
             dataType: 'json',
             success: function (data) {
-                console.log(data);
                 if (data.coupons == '') {
                     $("#select_coupon").hide();
                     $("#hide_coupon").append("暂无优惠券可用").show();
@@ -476,33 +495,69 @@
                     var html = '';
                     $(".order-coupons-select").empty();
                     var coupon_id = $("#coupon_id").val();
+                    var coupon_type = $("#coupon_type").val();
+                    console.log(coupon_type);
                     for (var i in data.coupons) {
                         var coupon = data.coupons[i];
                         console.log(coupon);
-                        html += '<div class="coupons-item ';
-                            if (coupon_id != 0 && coupon.coupon_id == coupon_id) {
+                        if (typeof(coupon.cname) == 'undefined') {
+
+                            html += '<div data-type="0" class="coupons-item ';
+                            if (coupon_id != 0 && coupon.coupon_id == coupon_id && coupon_type == 0) {
                                 html += 'coupons-item-active"';
                             }
-                        html += '" data-id="'+coupon.coupon_id+'">' +
-                            '<div class="coupons-left">' +
-                            '                    <div class="coupons-discount-price"><span>￥</span><span class="coupons-price">'+coupon.discount_price/100+'</span></div>' +
-                            '                    <div class="coupons-goods-price">满￥' + coupon.goods_price/100 +'元可用</div>' +
-                            '                </div>' +
-                            '                <div class="coupons-right">' +
-                            '                    <div class="coupons-right-1">' +
-                            '                        <div>使用范围:</div>' +
-                            '                        <div>仅限'+ coupon.brand_names +'使用</div>' +
-                            '                    </div>' +
-                            '                    <div class="coupons-right-2">' +
-                            '                        <div>使用期限: </div>';
-                        if (coupon.is_sub == 1)
-                            html += '                        <div class="coupons-date">无限期</div>';
-                        else
-                            html += '                        <div class="coupons-date">'+coupon.start_date+'-'+coupon.end_date+'</div>';
+                            html += '" data-id="' + coupon.coupon_id + '">' +
+                                '<div class="coupons-left">' +
+                                '                    <div class="coupons-discount-price"><span>￥</span><span class="coupons-price">' + coupon.discount_price / 100 + '</span></div>' +
+                                '                    <div class="coupons-goods-price">满￥' + coupon.goods_price / 100 + '元可用</div>' +
+                                '                </div>' +
+                                '                <div class="coupons-right">' +
+                                '                    <div class="coupons-right-1">' +
+                                '                        <div>使用范围:</div>' +
+                                '                        <div>仅限' + coupon.brand_names + '使用</div>' +
+                                '                    </div>' +
+                                '                    <div class="coupons-right-2">' +
+                                '                        <div>使用期限: </div>';
+                            if (coupon.is_sub == 1)
+                                html += '                        <div class="coupons-date">无限期</div>';
+                            else
+                                html += '                        <div class="coupons-date">' + coupon.start_date + '-' + coupon.end_date + '</div>';
 
-                        html += '                    </div>' +
-                            '                </div>' +
-                            '</div>';
+                            html += '                    </div>' +
+                                '                </div>' +
+                                '</div>';
+                        } else {
+                            html += '<div data-type="1" data-value="' + coupon.type + '" class="coupons-item ';
+                            if (coupon_id != 0 && coupon.id == coupon_id && coupon_type == 1) {
+                                html += 'coupons-item-active"';
+                            }
+                            var name = coupon.type == 0 ? '普通福利券' : (coupon.type == 1 ? '黄金福利券' : (coupon.type == 2 ? '铂金福利券' : '钻石福利券'));
+
+                            html += '" data-id="' + coupon.id + '">' +
+                                '<div class="coupons-left">' +
+                                '                    <div class="coupons-discount-price" style="margin-top:0.4rem;"><span class="coupons-price" style="font-size:1rem;">' + name + '</span></div>' +
+                                '                </div>' +
+                                '                <div class="coupons-right">' +
+                                '                    <div class="coupons-right-1">' +
+                                '                        <div>使用范围:</div>';
+                            if (coupon.type == 0) {
+                                html += '                        <div>使用该券可享受普通会员同等折扣1次</div>';
+                            } else if (coupon.type == 1) {
+                                html += '                        <div>使用该券可享受黄金会员同等折扣1次</div>';
+                            } else if (coupon.type == 2) {
+                                html += '                        <div>使用该券可享受铂金会员同等折扣1次</div>';
+                            } else if (coupon.type == 3) {
+                                html += '                        <div>使用该券可享受钻石会员同等折扣1次</div>';
+                            }
+                                html += '                    </div>';
+                            html += '                    <div class="coupons-right-2">' +
+                                '                        <div>使用期限: </div>';
+                                html += '                        <div class="coupons-date">' + coupon.start_at + '-' + coupon.end_at + '</div>';
+
+                            html += '                    </div>' +
+                                '                </div>' +
+                                '</div>';
+                        }
                     }
                     $(".order-coupons-select").append(html);
                     $(".order-coupons-area").show();
@@ -513,6 +568,52 @@
     });
     $(".order-coupons-sure-btn").on("click", function () {
         var price = $.trim($(".coupons-item-active").find(".coupons-price").text());
+        var data_type = $(".coupons-item-active").attr('data-type');
+        var data_value = $(".coupons-item-active").attr('data-value');
+        if (data_type == 1) {
+            var coupon_name = data_value == 0 ? '黄金优惠券' : (data_value == 1 ? '铂金优惠券' : '钻石优惠券');
+            $("#select_coupon").text(coupon_name);
+            $(".order-coupons-area").hide();
+            $(".order-score-show").empty();
+            $("#coupon_type").val(1);
+            $("#score").val('');
+            var wx_total_price = real_total_price = 0.00;
+            $(".order-item").each(function () {
+                var price = parseFloat($(this).find(".order-price").attr('data-price'));
+                var goods_num = parseInt($(this).find(".order-price").attr('data-num'));
+                var discount, wx_discount;
+                if (data_value == 0) {
+                    discount = parseFloat($(this).find(".ordinary_discount").val());
+                    wx_discount = parseFloat($(this).find(".brand_ordinary_discount").val());
+                } else if (data_value == 1){
+                    discount = parseFloat($(this).find(".golden_discount").val());
+                    wx_discount = parseFloat($(this).find(".brand_golden_discount").val());
+                } else if (data_value == 2) {
+                    discount = parseFloat($(this).find(".platinum_discount").val());
+                    wx_discount = parseFloat($(this).find(".brand_platinum_discount").val());
+                } else if (data_value == 3) {
+                    discount = parseFloat($(this).find(".diamond_discount").val());
+                    wx_discount = parseFloat($(this).find(".brand_diamond_discount").val());
+                }
+                var per_price = (price * discount / 100);
+                var wx_per_price = (price * wx_discount / 100);
+                $(this).find(".true-money").text("￥" + per_price / 100 +"元");
+                var real_price = per_price * goods_num;
+                var wx_price = wx_per_price * goods_num;
+                wx_total_price += wx_price/ 100;
+                real_total_price += real_price / 100;
+            });
+            if ($("#express_price").val() > 0) {
+                $("<div class='order-express-coupon'><div style='width: 50%;'>会员卡运费减免</div><div style='float: right;text-align: right;width:50%;'>-￥10元</div></div>").insertBefore(".order-coupon");
+                $("#express_price").val(0);
+            }
+            $("#total_money").attr("data-value", real_total_price).text(real_total_price);
+            $("#price").val(real_total_price);
+            $("#wx_real_price").val(wx_total_price);
+            $("#coupon_id").val($(".coupons-item-active").attr('data-id'));
+            return ;
+        }
+        $("#coupon_type").val(0);
         if (price == '') {
             $(".order-coupons-area").hide();
             $("#coupon_id").val(0);
@@ -522,6 +623,9 @@
             $("#price").val($("#real_total").val());
             $("#wx_real_price").val($("#real_wx_total").val());
             return false;
+        }
+        if ($(".order-express-coupon")) {
+            $(".order-express-coupon").remove();
         }
         $(".order-coupons-area").hide();
         $(".order-score-show").empty();
@@ -533,7 +637,6 @@
         $("#total_money").attr("data-value", card_price).text(card_price);
         $("#price").val(card_price);
         $("#wx_real_price").val(($("#real_wx_total").val() - price).toFixed(2));
-        console.log($.trim($(".coupons-item-active").find(".coupons-price").text()));
     });
     $(".order-score-discount").on("click", function () {
         var score = (parseFloat($("#old_wx_price").val()) - parseFloat($("#coupon_price").val())).toFixed(2);
@@ -549,7 +652,6 @@
     $(".order-score-sure-btn").on("click", function () {
         if ($(".order-score-select-type").hasClass('is_active')) {
             var score = parseFloat($("#exchange_score").text());
-            console.log($("#price").val() - score / 100);
             var price = ($("#price").val() - score / 100).toFixed(2);
             $("#score").val(score);
             $("#total_money").attr("data-value", price).text(price);
@@ -557,7 +659,6 @@
             $(".order-score-show").text(score + '积分抵扣'+ score / 100 +'元');
             $("#wx_real_price").val(($("#wx_real_price").val() - score / 100).toFixed(2));
         } else {
-            console.log($("#score"));
             var coupon_money = parseFloat($("#coupon_price").val());
             var card_price = (parseFloat($("#real_total").val()) - coupon_money).toFixed(2);
             $("#total_money").attr("data-value", card_price).text(card_price);
@@ -600,7 +701,7 @@
                 url:'/order/freepay',
                 data:{'address_id':address_id, 'score':score, 'express_price': express_price,
                        'price':price, 'order_no':{{ $orderno }},
-                        'coupon_id': $("#coupon_id").val()},
+                        'coupon_id': $("#coupon_id").val(),'coupon_type': $("#coupon_type").val()},
                 dataType:'json',
                 type:'post',
                 success: function (data) {
@@ -613,7 +714,6 @@
                 }
             })
         } else {
-            console.log(price);
             var user_money = {{$user->money / 100}};
             if (price > user_money) {
                 $(".card-no-pay").show();
@@ -679,7 +779,8 @@
                 url:'/order/pay',
                 data:{'address_id':address_id, 'score':score, 'express_price': express_price,
                     'price':wx_price, 'order_no':{{ $orderno }},
-                    'coupon_id': $("#coupon_id").val(), 'coupon_discount': $("#discount_price").val()
+                    'coupon_id': $("#coupon_id").val(), 'coupon_discount': $("#discount_price").val(),
+                    'coupon_type': $("#coupon_type").val()
                     },
                 dataType:'json',
                 type:'post',
@@ -700,7 +801,8 @@
                 url:'/order/cardpay',
                 data:{'address_id':address_id, 'score':score, 'express_price': express_price,
                     'price': price, 'order_no':{{ $orderno }},
-                    'coupon_id': $("#coupon_id").val(), 'coupon_discount': $("#discount_price").val()},
+                    'coupon_id': $("#coupon_id").val(), 'coupon_discount': $("#discount_price").val(),
+                    'coupon_type': $("#coupon_type").val()},
                 dataType:'json',
                 type:'post',
                 success:function(data) {

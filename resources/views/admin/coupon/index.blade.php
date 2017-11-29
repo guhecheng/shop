@@ -128,10 +128,18 @@
                             <option value="0">普通优惠券</option>
                             <option value="1">活动优惠券</option>
                             <option value="2">待领优惠券</option>
+                            <option value="3">回复优惠券</option>
                         </select>
                         <div id="num_area" style="display: none;float:right;margin-right:100px;">
                             <input type="text" id="add_num" value="" name="add_num" placeholder="输入发券数目"/>
                         </div>
+                    </div>
+                    <br clear="all" />
+                </div>
+                <div class="form-group send-content-div" style="display: none;">
+                    <label for="content" class="col-sm-2 control-label">回复内容</label>
+                    <div class="col-sm-10">
+                        <input type="text" name="send_content" value="" placeholder="回复内容" id="send_content" />
                     </div>
                     <br clear="all" />
                 </div>
@@ -245,8 +253,6 @@
         $(".add-goods-btn").on("click", function() {
             $('#brand_type').show();
             $("#type").val(0);
-            $(".goods_coupon").show();
-            $(".card_coupon").hide();
             $("#goods_price").val('');
             $("#discount_price").val('');
             $("#add-modal").modal('show');
@@ -254,8 +260,6 @@
         $(".add-card-btn").on('click', function () {
             $('#brand_type').hide();
             $('#type').val(1);
-            $(".goods_coupon").hide();
-            $(".card_coupon").show();
             $("#goods_price").val('');
             $("#discount_price").val('');
             $("#add-modal").modal('show');
@@ -275,7 +279,15 @@
         console.log(type);
         if (type == 2) {
             $("#num_area").show();
+            $(".send-content-div").hide();
+            $("#send_content").val('');
+        } else if (type == 3) {
+            $(".send-content-div").show();
+            $("#num_area").hide();
+            $("#add_num").val(0);
         } else {
+            $("#send_content").val('');
+            $(".send-content-div").hide();
             $("#num_area").hide();
             $("#add_num").val(0);
         }

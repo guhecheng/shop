@@ -16,6 +16,9 @@ class VerifyCsrfToken extends BaseVerifier
         '/admin/card',
         '/card/notify',
         '/order/wxnotify',
-        '/wx'
+        '/wx',
+        '/purchase/notify',
+        '/purchase/wxnotify',
+        '/user/recvcoupon'
     ];
 }

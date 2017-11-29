@@ -4,10 +4,10 @@
 @section('card-active', 'active')
 @section('content')
     <div class="customer">
-        <div>T100客服</div>
-        <div>江南布衣jnby by JNBY客服</div>
-        <div>小云朵Moimoln客服</div>
-        <div>太平鸟客服</div>
+        <a href="/customer/qrcode?type=1"><div>T100</div></a>
+        <a href="/customer/qrcode?type=2"><div>江南布衣 jnby by JNBY</div></a>
+        <div>小云朵 Moimoln</div>
+        <a href="/customer/qrcode?type=4"><div>太平鸟 Mini Peace</div></a>
     </div>
     <style type="text/css">
         .customer div {

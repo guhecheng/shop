@@ -76,9 +76,13 @@
     </div>
     @include('layouts.footer')
     <style type="text/css">
-        .type_header { width:100%; background: #fff; }
+        .goods-slide{height:10px}
+        .goods-container .swiper-slide-active { height:auto}
+        .goods-slide { margin-bottom:2.4rem; }
+        .type_header { width:100%; background: #fff;padding:0.4rem 0; margin-bottom:0.5rem;}
         .search_goods  { display: none; }
-        .search_area { width: 90%; margin: 0.2rem 5%;border-radius: 0.3rem;
+        .search_area { width: 90%;
+            margin: 0 5%;border-radius: 0.3rem;
             background: #ffffff;
             border:solid 1px #c0c0c0;
         }
@@ -144,9 +148,13 @@
             color: #ffffff;
         }
         .goods-name {
-            margin-bttom:0.2rem;
+            margin-bottom:0.2rem;
             text-align: left;
             font-size: 0.8rem;
+            font-weight: 700;
+            line-height: 1rem;
+            height: 2rem;
+            overflow: hidden;
         }
         .goods-price {
             margin-top:0.2rem;
@@ -249,7 +257,6 @@
         .is_act_price { border:solid 1px red; width: 3rem; line-height: 1.5rem;
             text-align: center; float:right;
             background: red; color:#fff; border-radius: 0.1rem; }
-        .goods-item-content { width: 80%; }
     </style>
     <script type="text/javascript">
         $.ajaxSettings = $.extend($.ajaxSettings, {

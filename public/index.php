@@ -46,12 +46,16 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 | and wonderful application we have prepared for them.
 |
 */
+$xml = file_get_contents("php://input");;
+if (!empty($xml))
+    file_put_contents('test.txt', $xml, FILE_APPEND);
 
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
 $response = $kernel->handle(
     $request = Illuminate\Http\Request::capture()
 );
+
 
 $response->send();
 

@@ -18,11 +18,13 @@ CREATE TABLE IF NOT EXISTS user (
   location varchar(255) not null default '' comment '详细地址',
   ip varchar(50) not null default '' comment 'ip地址',
   level tinyint not null default 0 comment '会员等级',
+  growth int not null default 0 comment '成长值',
   score double not null default '0.0' comment '积分',
   card_no varchar(20) not null default '' comment '会员卡号',
   is_delete tinyint not null default 0 comment '状态, 0: 正常, 1:禁用',
   is_old tinyint not null default 0 comment '老会员, 0:否，1:是',
   child_id int not null default 0 comment '对应孩子表id',
+
   create_time TIMESTAMP DEFAULT current_timestamp comment '创建时间',
   update_time datetime comment '更新时间',
   last_login_time datetime comment '最后登陆时间',
@@ -248,7 +250,9 @@ CREATE TABLE `orderinfo` (
   `pay_time` datetime DEFAULT NULL COMMENT '支付时间',
   `send_time` datetime DEFAULT NULL COMMENT '发货时间',
   `pay_type` tinyint(4) DEFAULT '0' COMMENT '支付方式,0:微信，1:支付宝， 2:其他',
+  transaction_id varchar(50) not null default '' comment '微信订单号',
   `cancel_time` datetime DEFAULT NULL COMMENT '取消时间',
+  is_comm TINYINT DEFAULT 0 COMMENT '是否普通订单,0:是,1:代购订单',
   PRIMARY KEY (`info_id`),
   UNIQUE KEY `order_no` (`order_no`),
   INDEX uid(uid)
@@ -334,6 +338,7 @@ create table if not exists cardrecharge (
   uid int not null DEFAULT 0 COMMENT '用户id',
   money int not null default 0 COMMENT '支付金额,分为单位',
   status tinyint(1) not null default 0 comment '订单状态, 0:创建待支付, 1:支付成功, 2:支付失败》。。',
+  transaction_id varchar(50) not null default '' comment '微信订单号',
   pay_type TINYINT(1) not null DEFAULT 0 COMMENT '支付方式, 0:微信支付',
   create_time TIMESTAMP DEFAULT current_timestamp comment '创建时间',
   pay_time timestamp COMMENT '支付时间',
@@ -439,4 +444,92 @@ create table if not exists del_coupon_log (
   admin_id int not null default 0 comment '操作者id',
   create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP comment '创建时间',
   primary key(id)
+) engine=innodb charset=utf8;
+
+
+/*用户代购记录*/
+drop table if exists user_purchase;
+create table if not exists user_purchase (
+  id int not null auto_increment,
+  uid int not null default 0 comment '用户id',
+  phone varchar(20) not null default '' comment '电话号码',
+  goods_name varchar(100) not null default '' comment '商品名称',
+  goods_desc varchar(255) not null default '' comment '商品描述',
+  goods_pic varchar(255) not null default '' comment '图片url,用,隔开',
+  is_pay tinyint default 0 comment '是否支付押金',
+  pay_money int not null default 0 comment '支付金额，分为单位',
+  transaction_id varchar(50) not null default '' comment '微信支付单号',
+  pay_time timestamp comment '支付时间',
+  is_create tinyint default 0 comment '是否创建订单',
+  goods_id int not null default 0 COMMENT '对应的商品表的id',
+  create_time timestamp default CURRENT_TIMESTAMP comment '创建时间',
+  primary key(id)
+) engine=innodb charset=utf8;
+
+
+drop table if exists user_oversea_consulation;
+create table if not exists user_oversea_consulation (
+  id int not null auto_increment,
+  uid int not null default 0 comment '用户id',
+  uname varchar(50) not null default '' comment '用户名',
+  age  tinyint not null default 0 comment '年龄',
+  concat_phone varchar(50) not null default '' comment '联系电话',
+  concat_desc varchar(255) not null default '' comment '咨询内容',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP comment '创建时间',
+  primary key(id) 
+) engine=innodb charset=utf8 comment '用户留学咨询表';
+
+
+drop table if exists user_diamond_fit_info;
+create table if not exists user_diamond_fit_info (
+	id int not null auto_increment,
+	uid int not null default 0 comment '用户id',
+	age int not null default 0 comment '宝贝年龄',
+	gender tinyint not null default 0 comment '年龄，0:未知，1:男,2:女',
+	size varchar(20) not null default '' comment '参考尺码',
+	detail varchar(255) not null default '' comment '用户填写详情',
+	primary key(id)
+) engine=innodb charset=utf8 comment '用户钻石试衣特权表';
+
+
+drop table if exists user_luxury_sale;
+create table if not exists user_luxury_sale (
+	id int not null auto_increment,
+	uid int not null default 0 comment '用户id',
+	goods_name varchar(50) not null default '' comment '商品价格',
+	goods_price int not null default 0 comment '物品价格',
+	goods_image varchar(255) not null default '' comment '物品图片',
+	create_time TIMESTAMP default CURRENT_TIMESTAMP comment '创建时间',
+	detail varchar(255) not null default '' comment '用户填写详情',
+	primary key(id)
+) engine=innodb charset=utf8 comment '用户奢饰品寄售记录';
+
+
+drop table if exists user_levelup_coupon;
+create table if NOT exists user_levelup_coupon (
+  id int not null auto_increment,
+  uid int not null default 0 comment '用户id',
+  cname varchar(50) not null default '' comment '优惠券名',
+  is_recv tinyint default 0 comment '是否领取',
+  type tinyint default 0 comment '优惠券类型,0:黄金优惠券,1铂金，2钻石',
+  openid varchar(50) not null default 0 comment '用户openid',
+  recv_uname varchar(50) not null default '' comment '用户名',
+  recv_uid int not null default 0 comment '用户id',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP comment '获取时间',
+  start_at datetime comment '开始时间',
+  end_at datetime comment '结束时间',
+  recv_time datetime comment '领取时间',
+  PRIMARY KEY (id)
+) engine=innodb charset=utf8;
+insert into user_levelup_coupon(uid, cname, is_recv, type, start_at, end_at) values(1, '', 0, 0, '2017-11-12 22:00', '2017-11-12 23:00');
+
+
+drop table if exists user_levelup_coupon_record;
+create table if not exists user_levelup_coupon_record (
+  id int not null auto_increment,
+  lc_id int not null default 0 comment '优惠券id',
+  openid varchar(50) not null default 0 comment '用户openid',
+  uid int not null default 0 comment '用户id',
+  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP comment '创建时间',
+  PRIMARY KEY (id)
 ) engine=innodb charset=utf8;

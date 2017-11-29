@@ -21,11 +21,13 @@ class GoodsController extends Controller {
 
     public function index(Request $request) {
         $brand_id = empty($request->input('brand_id')) ? '' : $request->input('brand_id');
+        $goods_name = empty($request->input('goods_name')) ? '' : $request->input('goods_name');
         $brand = DB::table('brands')->where('is_del', 0)->orderBy('sort', 'desc')->get();
-        empty($brand_id) ? '' : $where['brand_id'] = $brand_id;
-        $where['is_delete'] = 0;
-        $goods = DB::table('goods')->where($where)->get();
-        return view('admin.goods.index', [ 'goods' => $goods, 'brand' => $brand, 'brand_id' => $brand_id]);
+        empty($brand_id) ? '' : $where[] = ['brand_id', '=', $brand_id];
+        $where[] =['is_delete', '=', 0];
+        if (!empty($goods_name)) $where[] = ['goodsname', 'like', "%{$goods_name}%"];
+        $goods = DB::table('goods')->where($where)->paginate(20);
+        return view('admin.goods.index', [ 'goods' => $goods, 'brand' => $brand, 'brand_id' => $brand_id, 'goods_name' => $goods_name]);
     }
 
     public function add() {
@@ -71,7 +73,7 @@ class GoodsController extends Controller {
             $ext = $file->getClientOriginalExtension(); // 文件扩展
             $type = $file->getClientMimeType();
             $realPath = $file->getRealPath();
-            $fileName = 'goods/' . date('Y-m-d-H-i-s').'-'.uniqid().'.'.$ext;
+            $fileName = 'luxury/' . date('Y-m-d-H-i-s').'-'.uniqid().'.'.$ext;
             $bool = Storage::disk('uploads')->put($fileName, file_get_contents($realPath));
             if ($bool)
                 return response()->json(['imgurl' => '/uploads/' . $fileName]);
@@ -96,8 +98,10 @@ class GoodsController extends Controller {
         $platinum_discount = $request->input('platinum_discount');
         $diamond_discount = $request->input('diamond_discount');
         if (empty($goodsname) || empty($goodsprice) || empty($goodstype) || empty($logo)
-            || empty($imglist) || empty($content) || empty($request->input('price')))
-            return redirect('admin/goods')->with('error', '缺少信息');
+            || empty($imglist) || empty($content) || empty($request->input('price'))) {
+            echo "<script>alert('缺少信息,添加失败'); history.go(-1)</script>";exit;
+        }
+            //return redirect('admin/goods')->with('error', '缺少信息');
 
         DB::beginTransaction();
         $goodsid = DB::table('goods')->insertGetId([
@@ -113,11 +117,11 @@ class GoodsController extends Controller {
             'score_award' => empty($score_award) ? 0 : $score_award,
             'discount' => empty($discount_num) ? 0 : $discount_num,
             'act_price' => empty($act_price) ? 0 : $act_price * 100,
-            'common_discount' => empty($common_discount) ? 0 : $common_discount,
-            'ordinary_discount' => empty($ordinary_discount) ? 0 : $ordinary_discount,
-            'golden_discount' => empty($golden_discount) ? 0 : $golden_discount,
-            'platinum_discount' => empty($platinum_discount) ? 0 : $platinum_discount,
-            'diamond_discount' => empty($diamond_discount) ? 0 : $diamond_discount
+            'common_discount' => empty($common_discount) ? 0 : $common_discount * 10,
+            'ordinary_discount' => empty($ordinary_discount) ? 0 : $ordinary_discount * 10,
+            'golden_discount' => empty($golden_discount) ? 0 : $golden_discount * 10,
+            'platinum_discount' => empty($platinum_discount) ? 0 : $platinum_discount * 10,
+            'diamond_discount' => empty($diamond_discount) ? 0 : $diamond_discount * 10
         ]);
         if ($goodsid) {
             if (!empty($request->input('common_attr'))) {
@@ -169,10 +173,12 @@ class GoodsController extends Controller {
                 }
             }
 
-        } else
+        } else {
             DB::rollback();
+            echo "<script>alert('添加失败'); history.go(-1)</script>";exit;
+        }
         DB::commit();
-        return redirect('admin/goods');
+        echo "<script>alert('添加成功'); location.href='/admin/goods'</script>";exit;
     }
 
     public function delete(Request $request) {
@@ -246,44 +252,50 @@ class GoodsController extends Controller {
         $logo = $request->input('logo');
         $imglist = $request->input('imglist');
         $is_hot = $request->input('is_hot');
-        $score_award = $request->input('score_award');
         $content = $request->input('content');
-        $discount_num = $request->input('discount_num');
         $act_price = $request->input('act_price');
-        $brand_id = $request->input('brand_id');
+        $brand_id = $request->input('goodsbrand');
         $common_discount = $request->input('common_discount');
         $ordinary_discount = $request->input('ordinary_discount');
         $golden_discount = $request->input('golden_discount');
         $platinum_discount = $request->input('platinum_discount');
         $diamond_discount = $request->input('diamond_discount');
-        if (empty($goodsname) || empty($goodsprice) || empty($goodstype) || empty($logo)
-            || empty($imglist) || empty($content) || empty($request->input('price')))
-            return redirect('admin/goods')->with();
+        if (empty($goodsname) || empty($goodsprice) || empty($content))
+            return redirect('admin/goods')->with('error', '数据不全');
 
+        if ($common_discount < 0 || $common_discount > 10)
+            return redirect('admin/goods')->with('error', '折扣数据不能小于0不能大于10');
         DB::beginTransaction();
         try {
-            if (!DB::table('goods')->where('goodsid', $goods_id)->update([
+            $update_data = [
                 'goodsname' => trim($goodsname),
-                'goodsicon' => $logo,
-                'goodspic' => $imglist,
-                'is_hot' => empty($is_hot) ? 0 : $is_hot,
-                'typeid' => $goodstype,
+
                 'price' => $goodsprice * 100,
                 'goodsdesc' => $content,
-                'brand_id' => $brand_id,
                 'is_discount' => empty($request->input('is_discount')) ? 0 : $request->input('is_discount'),
-                'score_award' => empty($score_award) ? 0 : $score_award,
-                'discount' => empty($discount_num) ? 0 : $discount_num,
                 'act_price' => empty($act_price) ? 0 : $act_price * 100,
-                'common_discount' => empty($common_discount) ? 0 : $common_discount,
-                'ordinary_discount' => empty($ordinary_discount) ? 0 : $ordinary_discount,
-                'golden_discount' => empty($golden_discount) ? 0 : $golden_discount,
-                'platinum_discount' => empty($platinum_discount) ? 0 : $platinum_discount,
-                'diamond_discount' => empty($diamond_discount) ? 0 : $diamond_discount
-            ]))
+                'common_discount' => empty($common_discount) ? 0 : $common_discount * 10,
+                'ordinary_discount' => empty($ordinary_discount) ? 0 : $ordinary_discount * 10,
+                'golden_discount' => empty($golden_discount) ? 0 : $golden_discount * 10,
+                'platinum_discount' => empty($platinum_discount) ? 0 : $platinum_discount * 10,
+                'diamond_discount' => empty($diamond_discount) ? 0 : $diamond_discount * 10
+            ];
+            if (!empty($logo))
+                $update_data['goodsicon'] = $logo;
+            if (!empty($imglist))
+                $update_data['goodspic'] = $imglist;
+            if (!empty($brand_id)) {
+                $update_data['brand_id'] = $brand_id;
+            }
+            if (!empty($goodstype)) {
+                $update_data['typeid'] = $goodstype;
+            }
+            if (!empty($is_hot))
+                $update_data['is_hot'] = $is_hot;
+            if (!DB::table('goods')->where('goodsid', $goods_id)->update($update_data))
                 throw new \Exception('更新商品失败');
 
-            if (!empty($request->input('common_attr'))) {
+            /*if (!empty($request->input('common_attr'))) {
                 foreach ($request->input('common_attr') as $key => $value) {
                     $value_id = DB::table('propertyvalue')->insertGetId([
                         'value_name' => $value[0],
@@ -331,14 +343,26 @@ class GoodsController extends Controller {
                     ]))
                         throw new Exception('属性插入失败');
                 }
-            }
+            }*/
             DB::commit();
         } catch (Exception $e) {
             Log::error($e);
             DB::rollback();
-            return redirect()->with();
         }
 
         return redirect('admin/goods');
+    }
+
+    /**
+     * 批量修改商品上架状态
+     * @param Request $request
+     */
+    public function batchAct(Request $request) {
+        $goods_ids = $request->input('goods_ids');
+        $act_type = $request->input('act_type');
+        if (empty($goods_ids)) return response()->json(['rs' => 1, 'errmsg' => "缺少数据"]);
+        $goods_ids = rtrim($goods_ids, ',');
+        DB::update("update goods set is_sale={$act_type} where goodsid in ({$goods_ids})");
+        return response()->json(['rs' => 0]);
     }
 }
