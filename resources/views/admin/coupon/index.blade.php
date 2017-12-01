@@ -41,7 +41,13 @@
                                     <tr data-id="{{ $coupon->id }}">
                                         <td>{{ $coupon->id }}</td>
                                         <td>{{ $coupon->create_time }}</td>
-                                        <td>满{{ $coupon->goods_price/100 }}减{{ $coupon->discount_price/100 }}</td>
+                                        <td>
+                                            @if (empty($coupon->discount_type))
+                                            满{{ $coupon->goods_price/100 }}减{{ $coupon->discount_price/100 }}
+                                            @else
+                                                {{ $coupon->coupon_discount / 10 }} 折
+                                            @endif
+                                        </td>
                                         <td>
                                             <?php
                                                 if (!empty($coupon->brand)) {
@@ -101,14 +107,22 @@
                 <h4 class="modal-title">添加优惠券</h4>
             </div>
             <div class="modal-body">
+                <span style="color:red;">注:折扣券和满减只有一个生效,如果既填写折扣又填写满减已满减为主</span><br/>
                 <form action="/admin/coupon/add" method="post">
                 <div class="form-group goods_coupon">
-                    <label for="cardname" class="col-sm-2 control-label">类型</label>
+                    <label for="cardname" class="col-sm-2 control-label">类型1(满减)</label>
                     <div class="col-sm-10">
                         满
                         <input type="text" class="form-control" name="goods_price" id="goods_price" placeholder="请输入金额" style="display: inline;width:150px;">
                         减
                         <input type="text" class="form-control" name="discount_price" id="discount_price" placeholder="请输入金额" style="display: inline;width:150px;">
+                    </div>
+                    <br clear="all" />
+                </div>
+                <div class="form-group goods_coupon">
+                    <label for="cardname" class="col-sm-2 control-label">类型2(折扣)</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" name="coupon_discount" placeholder="输入折扣" id="discount" style="display: inline;width:250px;"/>
                     </div>
                     <br clear="all" />
                 </div>

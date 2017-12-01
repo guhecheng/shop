@@ -175,36 +175,67 @@
                         var coupon = data.coupons[i];
                         console.log(typeof(coupon.cname));
                         if (typeof(coupon.cname) === 'undefined') {
+                            if (coupon.discount_type == 0) {
+                                html += '<div class="coupons-item" data-type="' + coupon.coupon_type + '" data-id="' + coupon.id + '"';
+                                if (index == 2) {
+                                    html += ' style="background-image:url(' + '/images/coupon_has_userd.png' + ')">';
+                                } else if (index == 3) {
+                                    html += ' style="background-image:url(' + '/images/coupon_invalid.png' + ')">';
+                                } else {
+                                    html += ' style="background-image:url(' + '/images/coupon.png' + ')">';
+                                }
+                                html += '<div class="coupons-left">' +
+                                    '                    <div class="coupons-discount-price"><span>￥</span><span>' + coupon.discount_price / 100 + '</span></div>';
+                                if (coupon.goods_price > 0)
+                                    html += '<div class="coupons-goods-price">满￥' + coupon.goods_price / 100 + '元可用</div>';
 
-                            html += '<div class="coupons-item" data-type="'+coupon.coupon_type+'" data-id="'+coupon.id+'"';
-                            if (index == 2) {
-                                html += ' style="background-image:url('+'/images/coupon_has_userd.png'+')">';
-                            } else if (index == 3) {
-                                html += ' style="background-image:url('+'/images/coupon_invalid.png'+')">';
-                            } else {
-                                html += ' style="background-image:url('+'/images/coupon.png'+')">';
-                            }
-                            html += '<div class="coupons-left">' +
-                                '                    <div class="coupons-discount-price"><span>￥</span><span>'+coupon.discount_price/100+'</span></div>';
-                            if (coupon.goods_price > 0)
-                                html += '<div class="coupons-goods-price">满￥' + coupon.goods_price/100 +'元可用</div>';
+                                html += '                </div>' +
+                                    '                <div class="coupons-right">' +
+                                    '                    <div class="coupons-right-1">' +
+                                    '                        <div>使用范围:</div>';
+                                if (coupon.type == 1) {
+                                    html += '                        <div>仅限充值使用</div>';
+                                } else {
+                                    html += '                        <div>仅限' + coupon.brand_names + '使用</div>';
+                                }
+                                html += '                    </div>' +
+                                    '                    <div class="coupons-right-2">' +
+                                    '                        <div>使用期限: </div>' +
+                                    '                        <div class="coupons-date">' + (coupon.is_sub == 1 ? '无限期' : coupon.start_date + '-' + coupon.end_date) + '</div>' +
+                                    '                    </div>';
+                                html += '                </div>' +
+                                    '</div>';
+                            } else if (coupon.discount_type == 1) {
+                                html += '<div class="coupons-item" data-type="' + coupon.coupon_type + '" data-id="' + coupon.id + '"';
+                                if (index == 2) {
+                                    html += ' style="background-image:url(' + '/images/coupon_has_userd.png' + ')">';
+                                } else if (index == 3) {
+                                    html += ' style="background-image:url(' + '/images/coupon_invalid.png' + ')">';
+                                } else {
+                                    html += ' style="background-image:url(' + '/images/coupon.png' + ')">';
+                                }
+                                html += 
+                                    '<div class="coupons-left">' +
+                                    '                    <div class="coupons-discount-price"><span class="coupons-price" style="font-size:1.2rem;">' + coupon.coupon_discount / 10 + '折</span></div>';
+                                if (coupon.goods_price > 0)
+                                    html += '                    <div class="coupons-goods-price">满￥' + coupon.goods_price / 100 + '元可用</div>';
+                                html += '                </div>' +
+                                    '                <div class="coupons-right">' +
+                                    '                    <div class="coupons-right-1">' +
+                                    '                        <div>使用范围:</div>' +
+                                    '                        <div>仅限' + coupon.brand_names + '使用</div>' +
+                                    '                    </div>' +
+                                    '                    <div class="coupons-right-2">' +
+                                    '                        <div>使用期限: </div>';
+                                if (coupon.is_sub == 1)
+                                    html += '                        <div class="coupons-date">无限期</div>';
+                                else
+                                    html += '                        <div class="coupons-date">' + coupon.start_date + '-' + coupon.end_date + '</div>';
 
-                            html += '                </div>' +
-                                '                <div class="coupons-right">' +
-                                '                    <div class="coupons-right-1">' +
-                                '                        <div>使用范围:</div>';
-                            if (coupon.type == 1) {
-                                html += '                        <div>仅限充值使用</div>';
-                            } else {
-                                html += '                        <div>仅限'+ coupon.brand_names +'使用</div>';
+                                html += '                    </div>' +
+                                    '                </div>' +
+                                    '<br clear="all" /></div>';
                             }
-                            html += '                    </div>' +
-                                '                    <div class="coupons-right-2">' +
-                                '                        <div>使用期限: </div>' +
-                                '                        <div class="coupons-date">'+(coupon.is_sub==1 ? '无限期' : coupon.start_date+'-'+coupon.end_date)+'</div>' +
-                                '                    </div>';
-                            html += '                </div>' +
-                                '</div>';
                         } else {
                             html += '<div class="coupons-item" ';
                             if (index == 2) {
@@ -219,7 +250,7 @@
                             html += '                <div class="coupons-right">' +
                                 '                    <div class="coupons-right-1">' +
                                 '                        <div>使用范围:</div>';
-                            if (coupon.type == 0)
+                            if (coupon.type == 0) {
                                 html += '                        <div>使用该券可享受普通会员同等折扣1次</div>';
                             } else if (coupon.type == 1) {
                                 html += '                        <div>使用该券可享受黄金会员同等折扣1次</div>';

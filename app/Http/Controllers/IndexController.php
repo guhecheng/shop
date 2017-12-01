@@ -100,7 +100,7 @@ class IndexController extends Controller {
                         'openid' => $message->FromUserName,
                         'content' => $message->Content,
                     ]);
-                    /*$day = date("Y-m-d");
+                    $day = date("Y-m-d");
                     $data = DB::select("SELECT * FROM coupon WHERE send_content LIKE '%{$message->Content}%' and start_date<='{$day}' and end_date>='{$day}' limit 1");
                     if (!empty($data)) {
                         $coupon = $data[0];
@@ -113,7 +113,7 @@ class IndexController extends Controller {
                             return '满' . ($coupon->goods_price/100) . '减'. ($coupon->discount_price) . '优惠券已领取，请点击【童马会员】-【我的信息】查看。';
                         }
                     }
-                    Log::info($coupon);*/
+                    Log::info($coupon);
                     /*$coupon = DB::table('user_coupon')->where(['coupon_id'=>23, 'user_id'=>$user->userid])->first();
                     if (empty($coupon)) {
                         DB::table('user_coupon')->insert([

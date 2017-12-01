@@ -423,6 +423,7 @@
         border-bottom:solid 2px yellow;
     }
     .coupons-date { font-size:0.6rem; }
+    .coupons-item:after {             display:block;clear:both;content:"";visibility:hidden;height:0     }
 </style>
 <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
 <script type="text/javascript">
@@ -501,31 +502,59 @@
                         var coupon = data.coupons[i];
                         console.log(coupon);
                         if (typeof(coupon.cname) == 'undefined') {
+                            if (coupon.discount_type == 0) {
+                                html += '<div data-type="0" class="coupons-item ';
+                                if (coupon_id != 0 && coupon.coupon_id == coupon_id && coupon_type == 0) {
+                                    html += 'coupons-item-active"';
+                                }
+                                html += '" data-id="' + coupon.coupon_id + '">' +
+                                    '<div class="coupons-left">' +
+                                    '                    <div class="coupons-discount-price"><span>￥</span><span class="coupons-price">' + coupon.discount_price / 100 + '</span></div>' +
+                                    '                    <div class="coupons-goods-price">满￥' + coupon.goods_price / 100 + '元可用</div>' +
+                                    '                </div>' +
+                                    '                <div class="coupons-right">' +
+                                    '                    <div class="coupons-right-1">' +
+                                    '                        <div>使用范围:</div>' +
+                                    '                        <div>仅限' + coupon.brand_names + '使用</div>' +
+                                    '                    </div>' +
+                                    '                    <div class="coupons-right-2">' +
+                                    '                        <div>使用期限: </div>';
+                                if (coupon.is_sub == 1)
+                                    html += '                        <div class="coupons-date">无限期</div>';
+                                else
+                                    html += '                        <div class="coupons-date">' + coupon.start_date + '-' + coupon.end_date + '</div>';
 
-                            html += '<div data-type="0" class="coupons-item ';
-                            if (coupon_id != 0 && coupon.coupon_id == coupon_id && coupon_type == 0) {
-                                html += 'coupons-item-active"';
+                                html += '                    </div>' +
+                                    '                </div>' +
+                                    '<br clear="all" /></div>';
+                            } else if (coupon.discount_type == 1) {
+                                html += '<div data-type="2" data-value="'+coupon.coupon_discount/10+'"  class="coupons-item ';
+                                if (coupon_id != 0 && coupon.coupon_id == coupon_id && coupon_type == 0) {
+                                    html += 'coupons-item-active"';
+                                }
+                                html += '" data-id="' + coupon.coupon_id + '">' +
+                                    '<div class="coupons-left">' +
+                                    '                    <div class="coupons-discount-price"><span class="coupons-price" style="font-size:1.2rem;">' + coupon.coupon_discount / 10 + '折</span></div>';
+                                if (coupon.goods_price > 0)
+                                    html += '                    <div class="coupons-goods-price">满￥' + coupon.goods_price / 100 + '元可用</div>';
+                                html += '                </div>' +
+                                    '                <div class="coupons-right">' +
+                                    '                    <div class="coupons-right-1">' +
+                                    '                        <div>使用范围:</div>' +
+                                    '                        <div>仅限' + coupon.brand_names + '使用</div>' +
+                                    '                    </div>' +
+                                    '                    <div class="coupons-right-2">' +
+                                    '                        <div>使用期限: </div>';
+                                if (coupon.is_sub == 1)
+                                    html += '                        <div class="coupons-date">无限期</div>';
+                                else
+                                    html += '                        <div class="coupons-date">' + coupon.start_date + '-' + coupon.end_date + '</div>';
+
+                                html += '                    </div>' +
+                                    '                </div>' +
+                                    '<br clear="all" /></div>';
                             }
-                            html += '" data-id="' + coupon.coupon_id + '">' +
-                                '<div class="coupons-left">' +
-                                '                    <div class="coupons-discount-price"><span>￥</span><span class="coupons-price">' + coupon.discount_price / 100 + '</span></div>' +
-                                '                    <div class="coupons-goods-price">满￥' + coupon.goods_price / 100 + '元可用</div>' +
-                                '                </div>' +
-                                '                <div class="coupons-right">' +
-                                '                    <div class="coupons-right-1">' +
-                                '                        <div>使用范围:</div>' +
-                                '                        <div>仅限' + coupon.brand_names + '使用</div>' +
-                                '                    </div>' +
-                                '                    <div class="coupons-right-2">' +
-                                '                        <div>使用期限: </div>';
-                            if (coupon.is_sub == 1)
-                                html += '                        <div class="coupons-date">无限期</div>';
-                            else
-                                html += '                        <div class="coupons-date">' + coupon.start_date + '-' + coupon.end_date + '</div>';
 
-                            html += '                    </div>' +
-                                '                </div>' +
-                                '</div>';
                         } else {
                             html += '<div data-type="1" data-value="' + coupon.type + '" class="coupons-item ';
                             if (coupon_id != 0 && coupon.id == coupon_id && coupon_type == 1) {
@@ -556,7 +585,7 @@
 
                             html += '                    </div>' +
                                 '                </div>' +
-                                '</div>';
+                                '<br clear="all" /></div>';
                         }
                     }
                     $(".order-coupons-select").append(html);
@@ -612,6 +641,34 @@
             $("#wx_real_price").val(wx_total_price);
             $("#coupon_id").val($(".coupons-item-active").attr('data-id'));
             return ;
+        } else if (data_type == 2) {
+            var active_coupon = $(".coupons-item-active");
+            var coupon_name = active_coupon.find(".coupons-price").text() + '优惠券';
+            $("#select_coupon").text(coupon_name);
+            $(".order-coupons-area").hide();
+            $(".order-score-show").empty();
+            $("#coupon_type").val(0);
+            $("#score").val('');
+            var wx_total_price = real_total_price = 0.00;
+            $(".order-item").each(function () {
+                var price = parseFloat($(this).find(".order-price").attr('data-price'));
+                var goods_num = parseInt($(this).find(".order-price").attr('data-num'));
+                var discount, wx_discount;
+                discount = wx_discount = parseInt(data_value);
+                var per_price = (price * discount / 10);
+                console.log(discount);
+                var wx_per_price = (price * wx_discount / 10);
+                $(this).find(".true-money").text("￥" + per_price/100 +"元");
+                var real_price = per_price * goods_num;
+                var wx_price = wx_per_price * goods_num;
+                wx_total_price += wx_price/ 100;
+                real_total_price += real_price / 100;
+            });
+            $("#total_money").attr("data-value", real_total_price).text(real_total_price);
+            $("#price").val(real_total_price);
+            $("#wx_real_price").val(wx_total_price);
+            $("#coupon_id").val($(".coupons-item-active").attr('data-id'));
+            return;
         }
         $("#coupon_type").val(0);
         if (price == '') {
@@ -639,7 +696,8 @@
         $("#wx_real_price").val(($("#real_wx_total").val() - price).toFixed(2));
     });
     $(".order-score-discount").on("click", function () {
-        var score = (parseFloat($("#old_wx_price").val()) - parseFloat($("#coupon_price").val())).toFixed(2);
+        //var score = (parseFloat($("#old_wx_price").val()) - parseFloat($("#coupon_price").val())).toFixed(2);
+        var score = $("#price").val();
         if (score >= {{ $user->score / 100 }} ) {
             $("#exchange_score").text({{ $user->score }});
             $("#exchange_score_money").text({{ $user->score / 100 }});

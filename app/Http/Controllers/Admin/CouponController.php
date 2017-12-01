@@ -8,10 +8,9 @@
 
 namespace App\Http\Controllers\Admin;
 
-use DB;
+use DB,Log;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Log;
 
 class CouponController extends Controller
 {
@@ -54,25 +53,33 @@ class CouponController extends Controller
 
     public function add(Request $request) {
         $goods_price = empty($request->input('goods_price')) ? 0 : $request->input('goods_price');
-        $discount_price = $request->input('discount_price');
+        $discount_price = $request->input('discount_price') ?? 0;
         $brands = $request->input('brands');
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
+        $coupon_discount = $request->input('coupon_discount') ?? 0;
         $user_type = $request->input('user_type');
         $name = $request->input('name');
         $type = $request->input('type');
         $coupon_type = $request->input('coupon_type');
         $send_content = $request->input('send_content');
         $add_num = $request->input('add_num');
-        if (empty($discount_price) || empty($start_date) || empty($end_date))
+        if (empty($start_date) || empty($end_date))
             return back()->with('coupon_info', '信息填写不完整');
-
+        if ((empty($discount_price) && empty($goods_price)) && empty($coupon_discount))
+            return back()->with('coupon_info', '信息填写不完整');
         if (empty($coupon_type) && empty($user_type) && empty($name))
             return back()->with('coupon_info', '必须选择优惠券发送者');
 
         if ($type!=1 && $discount_price > $goods_price) {
             return back()->with('coupon_info', '商品价小于优惠价');
         }
+        if (!empty($discount_price) && !empty($goods_price)) {
+            $coupon_discount = 0;
+            $discount_type = 0;
+        } else
+            $discount_type = 1;
+
         if (strtotime($start_date) >= strtotime($end_date))
             return back()->with('coupon_info', '日期选择错误');
         if ($coupon_type == 3 && empty($send_content))
@@ -89,7 +96,9 @@ class CouponController extends Controller
                 'coupon_type' => $coupon_type,
                 'type' => $type,
                 'num' => $coupon_type == 2 ? $add_num : 0,
-                'send_content' => $coupon_type == 3 ? $send_content : ''
+                'send_content' => $coupon_type == 3 ? $send_content : '',
+                'discount_type' => $discount_type,
+                'coupon_discount' => $coupon_discount * 10
             ];
             $id = DB::table('coupon')->insertGetId($data);
             if (empty($id))
